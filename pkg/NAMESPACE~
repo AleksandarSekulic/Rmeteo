@@ -1,0 +1,15 @@
+#
+#import(methods)
+importFrom("methods", "as")
+importFrom("stats", "as.formula", "reshape", "spline")
+importFrom("utils", "setTxtProgressBar", "txtProgressBar")
+import(sp,
+  spacetime,
+  rgdal,
+  raster,
+  snowfall,
+  gstat,
+  plyr,
+  nabor)
+export(meteo2STFDF,  pred.strk, pred.strk1, rm.dupl, tgeom2STFDF , tiling, rfillspgaps, rfilltimegaps, near.obs)
+
