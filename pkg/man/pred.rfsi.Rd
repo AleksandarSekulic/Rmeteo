@@ -71,6 +71,8 @@ library(spacetime)
 library(gstat)
 library(plyr)
 library(CAST)
+library(doParallel)
+library(ranger)
 # prepare data
 # load observation - data.frame of mean temperatures
 data(dtempc)
