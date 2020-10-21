@@ -1,5 +1,6 @@
 Package: meteo
 Type: Package
+Encoding: UTF-8
 Title: Spatio-Temporal Analysis and Mapping of Meteorological Observations
 Version: 1.0-1
 Date: 2015-09-22

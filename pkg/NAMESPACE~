@@ -10,6 +10,8 @@ import(sp,
   snowfall,
   gstat,
   plyr,
-  nabor)
-export(meteo2STFDF,  pred.strk, pred.strk1, rm.dupl, tgeom2STFDF , tiling, rfillspgaps, rfilltimegaps, near.obs)
+  nabor,
+  CAST,
+  ranger)
+export(meteo2STFDF, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk.old, pred.strk, pred.strk1, cv.strk, acc.metric.fun, near.obs, rfsi, pred.rfsi, tune.rfsi, cv.rfsi)
 

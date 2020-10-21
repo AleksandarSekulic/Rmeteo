@@ -12,6 +12,7 @@ import(sp,
   plyr,
   nabor,
   CAST,
-  ranger)
+  ranger,
+  caret)
 export(meteo2STFDF, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk.old, pred.strk, pred.strk1, cv.strk, acc.metric.fun, near.obs, rfsi, pred.rfsi, tune.rfsi, cv.rfsi)
 

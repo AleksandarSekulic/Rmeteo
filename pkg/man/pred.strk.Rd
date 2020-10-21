@@ -19,12 +19,12 @@ pred.strk(data,
           zero.tol=0,
           reg.coef,
           vgm.model,
-          sp.nmax,
-          time.nmax,
+          sp.nmax=20,
+          time.nmax=2,
           by = 'time',
           tiling= FALSE,
           ntiles=64,
-          output.format = "stfdf",
+          output.format = "STFDF",
           parallel.processing = FALSE,
           pp.type = "snowfall",
           cpus=detectCores()-1,
@@ -123,8 +123,8 @@ results <- pred.strk(data = stfdf,
 )
 
 # plot prediction
-stplot(results[,,"pred", drop=F], col.regions=bpy.colors())
-# stplot(results[,,"var", drop=F], col.regions=bpy.colors())
+stplot(results[,,"pred", drop=FALSE], col.regions=bpy.colors())
+# stplot(results[,,"var", drop=FALSE], col.regions=bpy.colors())
 
 # Example with data.frames and parallel processing
 library(snowfall)
@@ -155,8 +155,8 @@ results <- pred.strk(data = stfdf.df,
 )
 
 # plot prediction
-stplot(results[,,"pred", drop=F], col.regions=bpy.colors())
-# stplot(results[,,"var", drop=F], col.regions=bpy.colors())
+stplot(results[,,"pred", drop=FALSE], col.regions=bpy.colors())
+# stplot(results[,,"var", drop=FALSE], col.regions=bpy.colors())
 
 }
 

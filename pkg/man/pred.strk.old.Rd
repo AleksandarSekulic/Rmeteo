@@ -4,7 +4,7 @@
 \description{ Function for spatio-temporal regression kriging prediction based on \link[gstat]{krigeST}. The prediction is made for raster objects, i.e. for \link[spacetime]{STFDF-class} objects.
 It is depricated! Use new pred.strk function.}
 \usage{
-pred.strk(temp,zcol = 1, newdata, pred.id = "tempPred", zero.tol = 0, 
+pred.strk.old(temp,zcol = 1, newdata, pred.id = "tempPred", zero.tol = 0, 
   dynamic.cov = c(1, 2), static.cov = c(1, 2),
 reg.coef=list(
 tmean=c(-0.126504415,0.4051734447,0.4943247727,0.0001837527,-0.0189207588),  
@@ -107,7 +107,7 @@ regdata@sp@proj4string <- CRS('+proj=longlat +datum=WGS84')
 # load precalculated variograms
 data(tvgms)
 data(tregcoef)
-res= pred.strk(temp,zcol=1, newdata= regdata[,1,drop=FALSE], 
+res= pred.strk.old(temp,zcol=1, newdata= regdata[,1,drop=FALSE], 
               reg.coef=tregcoef[[1]] ,vgm.model=tvgms[[1]], progress=FALSE )
 
 ## plot prediction
@@ -119,7 +119,7 @@ res= pred.strk(temp,zcol=1, newdata= regdata[,1,drop=FALSE],
 # t1@data$tempc[seq(1,120,by=8)] =35
 # 
 # 
-# res= pred.strk(t1,zcol=1, newdata= regdata[,1:2], 
+# res= pred.strk.old(t1,zcol=1, newdata= regdata[,1:2], 
 #                reg.coef=tregcoef[[1]], vgm.model=tvgms[[1]] , 
 #                threshold.res=5, do.cv=T, out.remove = T)
 # # plot cross validation residuals 
@@ -141,7 +141,7 @@ res= pred.strk(temp,zcol=1, newdata= regdata[,1,drop=FALSE],
 #                                           stAni=583)
 # attr(modisVGM,"temporal unit") = "days"                                           
 
-# rkmod <-  pred.strk(temp,zcol=1, newdata= STFDF(regdata@sp,
+# rkmod <-  pred.strk.old(temp,zcol=1, newdata= STFDF(regdata@sp,
 #                time=as.POSIXct("2011-07-05"), endTime=as.POSIXct("2011-07-06"), 
 #                data=regdata[,1]@data) , threshold.res=10, 
 #              dynamic.cov='modis', static.cov=NULL,
@@ -154,7 +154,7 @@ res= pred.strk(temp,zcol=1, newdata= regdata[,1,drop=FALSE],
 
 ## parallel processing
 # library(snowfall)
-# rkmod <-  pred.strk(temp,zcol=1, 
+# rkmod <-  pred.strk.old(temp,zcol=1, 
 #                   newdata= STFDF(regdata@sp,
 #                    time=as.POSIXct("2011-07-05"), endTime=as.POSIXct("2011-07-06"), 
 #                    data=regdata[,1]@data) ,

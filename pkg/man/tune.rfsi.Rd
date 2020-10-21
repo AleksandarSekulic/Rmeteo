@@ -135,11 +135,11 @@ for (covar in names_covar){
 for (covar in names_covar){
   # count NAs per stations
   numNA <- apply(matrix(stfdf@data[,covar],
-                        nrow=nrowsp,byrow=F), MARGIN=1,
+                        nrow=nrowsp,byrow=FALSE), MARGIN=1,
                  FUN=function(x) sum(is.na(x)))
   # Remove stations out of covariates
   rem <- numNA != length(time)
-  stfdf <-  stfdf[rem,drop=F]
+  stfdf <-  stfdf[rem,drop=FALSE]
 }
 
 # Remove dates out of covariates

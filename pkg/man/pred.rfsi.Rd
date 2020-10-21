@@ -19,9 +19,8 @@ pred.rfsi(model,
           newdata.staid.x.y.time = c(1,2,3),
           zero.tol = 0,
           s.crs = NA,
-          t.crs = NA,
           newdata.s.crs=NA,
-          newdata.t.crs=NA,
+          t.crs = NA,
           output.format = "data.frame",
           cpus = detectCores()-1,
           progress = TRUE,
@@ -50,7 +49,7 @@ pred.rfsi(model,
 }
 
 \value{
-A \code{data.frame}, \link[spacetime]{SpatialPointsDataFrame}, \link[spacetime]{SpatialPixelsDataFrame}, \link[spacetime]{STFDF-class} or \link[spacetime]{STSDF-class} object (depends on \code{output.format} argument) with prediction (\code{pred} column).
+A \code{data.frame}, \link[sp]{SpatialPointsDataFrame}, \link[sp]{SpatialPixelsDataFrame}, \link[spacetime]{STFDF-class} or \link[spacetime]{STSDF-class} object (depends on \code{output.format} argument) with prediction (\code{pred} column).
 }
 
 \author{Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
@@ -123,11 +122,11 @@ for (covar in names_covar){
 for (covar in names_covar){
   # count NAs per stations
   numNA <- apply(matrix(stfdf@data[,covar],
-                        nrow=nrowsp,byrow=F), MARGIN=1,
+                        nrow=nrowsp,byrow=FALSE), MARGIN=1,
                  FUN=function(x) sum(is.na(x)))
   # Remove stations out of covariates
   rem <- numNA != length(time)
-  stfdf <-  stfdf[rem,drop=F]
+  stfdf <-  stfdf[rem,drop=FALSE]
 }
 
 # Remove dates out of covariates
