@@ -1,0 +1,21 @@
+citHeader("To cite package meteo in publications use:")
+
+citEntry(entry="Article",
+  title = "Spatio-temporal interpolation of daily temperatures for global land areas at 1 km resolution",
+	author = personList(as.person("Milan Kilibarda"),as.person("Tomislav Hengl"), as.person("Gerard B. M. Heuvelink"), as.person("Benedikt Graeler"),as.person("Edzer Pebesma"),as.person("Melita Percec Tadic"), as.person("Branislav Bajat")),
+	journal = "J. Geophys. Res. Atmos.",
+	year	 = 2014,
+	volume = 119,
+	pages	= "2294-2313",
+	textVersion = paste("Kilibarda, M., T. Hengl, G. B. M. Heuvelink, B. Graeler, E. Pebesma, M. Percec Tadic, and B. Bajat (2014), Spatio-temporal interpolation of daily temperatures for global land areas at 1 km resolution, J. Geophys. Res. Atmos., 119, 2294-2313, doi:10.1002/2013JD020803.")
+)
+
+citEntry(entry="Article",
+  title = "Random Forest Spatial Interpolation",
+	author = personList(as.person("Aleksandar Sekulić"), as.person("Milan Kilibarda"), as.person("Gerard B. M. Heuvelink"), as.person("Mladen Nikolić"), as.person("Branislav Bajat")),
+	journal = "Remote. Sens.",
+	year	 = 2020,
+	volume = 12,
+	pages	= "1687",
+	textVersion = paste("Sekulić, A., Kilibarda, M., Heuvelink, G. B., Nikolić, M. & Bajat, B. Random Forest Spatial Interpolation.Remote. Sens. 12, 1687, https://doi.org/10.3390/rs12101687 (2020).")
+)
