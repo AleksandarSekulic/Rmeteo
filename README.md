@@ -8,7 +8,7 @@
 Install development versions (the most recent version) from github with
 ```
 library(devtools)
-install_github("r-spatial/sf")
+install_github("https://github.com/AleksandarSekulic/Rmeteo")
 ```
 
 ## Overview
