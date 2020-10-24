@@ -10,6 +10,10 @@ Install development versions (the most recent version) from github with
 library(devtools)
 install_github("https://github.com/AleksandarSekulic/Rmeteo")
 ```
+or from R-forge
+```
+install.packages("meteo", repos="http://R-Forge.R-project.org")
+```
 
 ## Overview
 meteo is an R package for RFSI ang spacetime geostatistical interpolations for meteorological and other enviromental varialbles.
