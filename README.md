@@ -20,7 +20,7 @@ Main functions:
 * [Github](https://github.com/AleksandarSekulic/Rmeteo)
 * [CRAN](https://cran.r-project.org/package=meteo)
 
-*Note that the latest version are on R-forge and Github repository. CRAN repository will updated only with stabile versions.*
+*Note that the latest version is on R-forge and Github repository. CRAN repository will updated only with stabile version.*
 
 ## Citation
 
