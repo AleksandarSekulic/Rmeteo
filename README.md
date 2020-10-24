@@ -1,4 +1,4 @@
-# meteo: RFSI and spacetime geostatistical interpolations for meteorological and other envilomental varialbles
+# meteo: RFSI and spacetime geostatistical interpolations for meteorological and other enviromental varialbles
 [![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
 [![CRAN](http://www.r-pkg.org/badges/version/meteo)](https://cran.r-project.org/package=meteo)
 [![cran checks](https://cranchecks.info/badges/worst/meteo)](https://cran.r-project.org/web/checks/check_results_meteo.html)
@@ -12,7 +12,7 @@ install_github("https://github.com/AleksandarSekulic/Rmeteo")
 ```
 
 ## Overview
-meteo is an R package for RFSI ang spacetime geostatistical interpolations for meteorological and other envilomental varialbles.
+meteo is an R package for RFSI ang spacetime geostatistical interpolations for meteorological and other enviromental varialbles.
 Main functions:
 * `pred.strk` - spatio-temporal regression kriging prediction (Kilibarda et al. 2014)
 * `cv.strk` - k-fold cross-validation for spatio-temporal regression kriging (Kilibarda et al. 2014)
