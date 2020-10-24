@@ -182,7 +182,7 @@ rfsi_cv <- cv.rfsi(formula=formula, # without nearest obs
                    seed = 42,
                    acc.metric = "RMSE",
                    output.format = "data.frame", # "STFDF",
-                   cpus=detectCores()-1,
+                   cpus = 2,# detectCores()-1,
                    progress=FALSE,
                    # ranger parameters
                    importance = "impurity")

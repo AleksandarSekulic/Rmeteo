@@ -7,8 +7,8 @@ near.obs <- function(
   n.obs = 10,
   rm.dupl = TRUE,
   avg = FALSE,
-  increment, # avg(nearest point dist)
-  range, # bbox smaller(a, b) / 2
+  increment = 10000, # avg(nearest point dist)
+  range = 50000, # bbox smaller(a, b) / 2
   direct = FALSE,
   idw=FALSE,
   idw.p=2

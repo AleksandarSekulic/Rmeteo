@@ -69,6 +69,7 @@ data(stations)
 library(sp)
 library(spacetime)
 library(gstat)
+library(plyr)
 
 #str(stations)
 ## lonmin,lonmax,lonmax, lonmin   latmin, latnmin,latmax,latmax

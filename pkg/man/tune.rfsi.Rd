@@ -181,7 +181,7 @@ rfsi_tuned <- tune.rfsi(formula=formula,
                    k = 5,
                    acc.metric = "RMSE",
                    fit.final.model=TRUE,
-                   cpus=detectCores()-1,
+                   cpus=2, # detectCores()-1,
                    progress=TRUE,
                    # ranger parameters
                    importance = "impurity",

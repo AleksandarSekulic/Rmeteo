@@ -186,7 +186,7 @@ rfsi_model <- rfsi(formula=formula,
                 n.obs=5, # nearest obs
                 s.crs=s.crs,
                 t.crs=t.crs,
-                cpus=detectCores()-1,
+                cpus=2, # detectCores()-1,
                 progress=TRUE,
                 # ranger parameters
                 importance = "impurity",

@@ -3,16 +3,19 @@
 importFrom("methods", "as")
 importFrom("stats", "as.formula", "reshape", "spline")
 importFrom("utils", "setTxtProgressBar", "txtProgressBar")
+importFrom("stats", "coefficients", "complete.cases", "lm")
 import(sp,
   spacetime,
   rgdal,
   raster,
   snowfall,
+  doParallel,
   gstat,
   plyr,
   nabor,
   CAST,
   ranger,
-  caret)
+  caret,
+  DescTools)
 export(meteo2STFDF, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk.old, pred.strk, pred.strk1, cv.strk, acc.metric.fun, near.obs, rfsi, pred.rfsi, tune.rfsi, cv.rfsi)
 

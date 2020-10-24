@@ -34,6 +34,8 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
     range <- as.numeric(substr(avgs[length(avgs)], 4, nchar(avgs[length(avgs)])))
   } else {
     avg = FALSE
+    increment <- NULL
+    range <- NULL
   }
   
   if("dir" %in% substr(model$forest$independent.variable.names, 1, 3)){

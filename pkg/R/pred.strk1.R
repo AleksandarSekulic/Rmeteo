@@ -162,7 +162,7 @@ pred.strk1 <- function (obs,
  
   
   gg <- newdata
-  time <- as.POSIXlt(gg[1,3],"GMT")
+  time <- as.POSIXlt(gg[1,3],"GMT") # different times?
     
   df=gg[,4:ncol]
   df <- df[,colSums(is.na(df))<nrow(df)]
@@ -183,7 +183,7 @@ pred.strk1 <- function (obs,
   res= krigeST(as.formula("tres~1"),
                data=temp[,,'tres', drop=F], # [,1:6] # in this case I must to limit for the fist few days
                newdata=STF(as(gg,"SpatialPoints"),
-                           time,    # [3]    
+                           as.Date(time),    # [3]    
                            #srb@data,  # [3,1]
                            time+86400),    # [3]    
                modelList=vgm.model,

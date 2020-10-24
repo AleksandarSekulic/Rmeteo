@@ -187,7 +187,7 @@ summary(results)
 # accuracy
 acc.metric.fun(results@data$obs, results@data$pred, "RMSE")
 
-# Cross-validatiin example with data.frames, parallel processing, and refit
+# Cross-validation example with data.frames, parallel processing, and refit
 # global model is used for regression, variogram, and refit
 
 library(snowfall)

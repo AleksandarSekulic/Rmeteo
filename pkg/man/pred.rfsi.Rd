@@ -152,7 +152,7 @@ rfsi_model <- rfsi(formula=formula,
                    n.obs=5, # nearest obs
                    s.crs=NA, # read from data
                    t.crs=t.crs,
-                   cpus=detectCores()-1,
+                   cpus=2, #detectCores()-1,
                    progress=TRUE,
                    # ranger parameters
                    importance = "impurity",
@@ -175,7 +175,6 @@ zcol=1
 model = rfsi_model
 newdata.s.crs=NA
 
-source('~/meteo/packageWV/pkg/R/pred.rfsi.R')
 rfsi_prediction <- pred.rfsi(model = rfsi_model,
                              data = stfdf,
                              zcol=1,
@@ -186,7 +185,7 @@ rfsi_prediction <- pred.rfsi(model = rfsi_model,
                              s.crs=s.crs,
                              newdata.s.crs=newdata.s.crs,
                              t.crs=t.crs,
-                             cpus=detectCores()-1,
+                             cpus=2, # detectCores()-1,
                              progress=TRUE
 )
 

@@ -167,8 +167,8 @@ results <- cv.strk(data = stfdf.df,
                    progress=TRUE
 )
 
-stplot(results)
-summary(results)
+# stplot(results)
+# summary(results)
 # accuracy metric calculation
 acc.metric.fun(results@data$obs, results@data$pred, "RMSE")
 

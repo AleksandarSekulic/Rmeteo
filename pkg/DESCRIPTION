@@ -11,4 +11,4 @@ License: GPL (>= 2.0) | file LICENCE
 URL: http://meteo.r-forge.r-project.org/
 LazyLoad: yes
 Depends: R (>= 3.0.0)
-Imports: methods, utils, stats, sp, spacetime, rgdal, gstat, raster, snowfall, plyr, nabor, CAST, ranger, caret
+Imports: methods, utils, stats, sp, spacetime, rgdal, gstat, raster, snowfall, doParallel, plyr, nabor, CAST, ranger, caret, DescTools

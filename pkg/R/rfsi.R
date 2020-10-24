@@ -9,8 +9,8 @@ rfsi <- function (formula, # without nearest obs
                   n.obs = 10, # nearest obs
                   # time.nmax, # use all if not specified
                   avg = FALSE,
-                  increment, # avg(nearest point dist)
-                  range, # bbox smaller(a, b) / 2
+                  increment = 10000, # avg(nearest point dist)
+                  range = 50000, # bbox smaller(a, b) / 2
                   direct = FALSE,
                   use.idw = FALSE,
                   idw.p = 2,
