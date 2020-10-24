@@ -4,6 +4,13 @@
 [![cran checks](https://cranchecks.info/badges/worst/meteo)](https://cran.r-project.org/web/checks/check_results_meteo.html)
 [![Downloads](http://cranlogs.r-pkg.org/badges/meteo?color=brightgreen)](http://www.r-pkg.org/pkg/meteo)
 
+## Installing
+Install development versions (the most recent version) from github with
+```
+library(devtools)
+install_github("r-spatial/sf")
+```
+
 ## Overview
 meteo is an R package for spatio-temporal geostatistical mapping of meteorological data.
 Main functions:
