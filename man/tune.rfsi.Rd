@@ -42,8 +42,8 @@ tune.rfsi(formula,
   \item{stations.staid.x.y}{numeric or character vector; Positions or names of the station ID (staid), longitude (x) and latitude (y) columns in \code{stations}. Default is c(1,2,3).}
   \item{zero.tol}{numeric; A distance value below (or equal to) which locations are considered as duplicates. Default is 0. See \link{rm.dupl}.}
   \item{use.idw}{boolean; Will IDW predictions from \code{n.obs} nearest observations be calculated and used as covariate (see function \link{near.obs}). Default is FALSE.}
-  \item{s.crs}{Source \link[sp]{CRS} of observations (\code{data}). If NA, read from \code{data}}
-  \item{t.crs}{Target \link[sp]{CRS} for observations (\code{data}) reprojection. If NA, will be set to \code{s.crs}. Note that observations should be in projection for finding nearest observations based on Eucleadean distances (see function \link{near.obs}).}
+  \item{s.crs}{Source \link[sp]{CRS-class} of observations (\code{data}). If NA, read from \code{data}}
+  \item{t.crs}{Target \link[sp]{CRS-class} for observations (\code{data}) reprojection. If NA, will be set to \code{s.crs}. Note that observations should be in projection for finding nearest observations based on Eucleadean distances (see function \link{near.obs}).}
   \item{tgrid}{data.frame; Possible tuning parameters. The columns are named the same as the tuning parameters. Possible tuning parameters are: \code{n.obs}, \code{num.trees}, \code{mtry}, \code{min.node.size}, \code{sample.fraction}, \code{splirule}, and \code{idw.p}.}
   \item{tgrid.n}{numeric; number of randomly chosen \code{tgrid} combinations used for tuning of RFSI. If larger than \code{tgrid}, will be set to \code{length(tgrid)}}
   \item{tune.type}{character; Type of cross-validation: leave-location-out ("LLO"), leave-time-out ("LTO"), and leave-location-time-out ("LLTO"). Default is "LLO". "LTO" and "LLTO" are not implemented yet. Will be in the future.}

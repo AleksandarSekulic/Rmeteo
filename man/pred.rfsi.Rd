@@ -39,9 +39,9 @@ pred.rfsi(model,
   \item{newdata}{\link[spacetime]{STFDF-class}, \link[spacetime]{STSDF-class} or \code{data.frame}; Contains prediction locations and covariates. If \code{data.frame} object, it should have next columns: prediction location ID (staid), longitude (x), latitude (y), time of the prediction (time) and covariates (cov1, cov2, ...). Covariate names should be the same as in the \code{model}.}
   \item{newdata.staid.x.y.time}{numeric or character vector; Positions or names of the prediction location ID (staid), longitude (x), latitude (y) and time columns in \code{newdata}. Default is c(1,2,3).}
   \item{zero.tol}{numeric; A distance value below (or equal to) which locations are considered as duplicates. Default is 0. See \link{rm.dupl}.}
-  \item{s.crs}{Source \link[sp]{CRS} of observations (\code{data}). If NA, read from \code{data}}
-  \item{newdata.s.crs}{Source \link[sp]{CRS} of (\code{newdata}). If NA, read from \code{data}}
-  \item{t.crs}{Target \link[sp]{CRS} for observations (\code{data}) and (\code{newdata}) reprojection. Note that observations should be in projection for finding nearest observations based on Eucleadean distances (see function \link{near.obs}) and should be the same as one used for making an RFSI model.}
+  \item{s.crs}{Source \link[sp]{CRS-class} of observations (\code{data}). If NA, read from \code{data}}
+  \item{newdata.s.crs}{Source \link[sp]{CRS-class} of (\code{newdata}). If NA, read from \code{data}}
+  \item{t.crs}{Target \link[sp]{CRS-class} for observations (\code{data}) and (\code{newdata}) reprojection. Note that observations should be in projection for finding nearest observations based on Eucleadean distances (see function \link{near.obs}) and should be the same as one used for making an RFSI model.}
   \item{output.format}{character; Format of the output, "data.frame" (default), "SpatialPointsDataFrame", "SpatialPixelsDataFrame", "STFDF" or "STSDF".}
   \item{cpus}{numeric; Number of processing units. Default is detectCores()-1.}
   \item{progress}{logical; If progress bar is shown. Default is TRUE.}
@@ -49,7 +49,7 @@ pred.rfsi(model,
 }
 
 \value{
-A \code{data.frame}, \link[sp]{SpatialPointsDataFrame}, \link[sp]{SpatialPixelsDataFrame}, \link[spacetime]{STFDF-class} or \link[spacetime]{STSDF-class} object (depends on \code{output.format} argument) with prediction (\code{pred} column).
+A \code{data.frame}, \link[sp]{SpatialPointsDataFrame-class}, \link[sp]{SpatialPixelsDataFrame-class}, \link[spacetime]{STFDF-class} or \link[spacetime]{STSDF-class} object (depends on \code{output.format} argument) with prediction (\code{pred} column).
 }
 
 \author{Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}}

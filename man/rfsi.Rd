@@ -45,8 +45,8 @@ rfsi(formula,
   \item{direct}{boolean; Will nearest observation in quadrants be calculated and used as covariates (see function \link{near.obs}). Default is FALSE.}
   \item{use.idw}{boolean; Will IDW predictions from \code{n.obs} nearest observations be calculated and used as covariate (see function \link{near.obs}). Default is FALSE.}
   \item{idw.p}{numeric; Exponent for IDW weights (see function \link{near.obs}). Default is 2.}
-  \item{s.crs}{Source \link[sp]{CRS} of observations (\code{data}). If NA, read from \code{data}}
-  \item{t.crs}{Target \link[sp]{CRS} for observations (\code{data}) reprojection. If NA, will be set to \code{s.crs}. Note that observations should be in projection for finding nearest observations based on Eucleadean distances (see function \link{near.obs}).}
+  \item{s.crs}{Source \link[sp]{CRS-class} of observations (\code{data}). If NA, read from \code{data}}
+  \item{t.crs}{Target \link[sp]{CRS-class} for observations (\code{data}) reprojection. If NA, will be set to \code{s.crs}. Note that observations should be in projection for finding nearest observations based on Eucleadean distances (see function \link{near.obs}).}
   \item{cpus}{numeric; Number of processing units. Default is detectCores()-1.}
   \item{progress}{logical; If progress bar is shown. Default is TRUE.}
   \item{...}{Further arguments passed to \link[ranger]{ranger}.}

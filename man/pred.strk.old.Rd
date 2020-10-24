@@ -43,7 +43,7 @@ do.cv = FALSE, only.cv = FALSE, out.remove = FALSE, threshold.res = 15,progress=
   \item{vgm.model}{spatio-temporal variogram of regression residuals, see \link[gstat]{vgmST}. At the moment the function contains spatio-temporal variogram model on residuals for mean, minimum and maximum temperature calculated globally for GSOD and ECA&D data set. Regression residuals on geometrical temperature trend, MODIS LST-8 day, elevation and TWI, see \link{regdata}. Ranges are in km. Spatio-temporal variogram for mean temperatures is defined by default. User can specified own variogram model as \link[gstat]{vgmST} object.}
   \item{tiling}{for simplified local kriging. Area is divided in tiles and kriging calculation is done for each tile separately, number of observation used per tile is defined with \code{sp.nmax} and \code{time.nmax}. Default is TRUE. If \code{FALSE} just temporal local kriging will be applied defined with \code{time.nmax}, \code{sp.nmax} will be ignored.}
   \item{ntiles}{number of tiles. Default is 64. Each tile at minimum should contain less observations than \code{sp.nmax}, ideally each tile should contain observations falling in neighboring tiles.}
-  \item{parallel.processing}{if TRUE parallel processing is performed via  \link[snowfall]{sfLapply} }
+  \item{parallel.processing}{if TRUE parallel processing is performed via  \link[snowfall]{snowfall-calculation}, sfLapply function. }
   \item{cpus}{number of processing units}
   \item{sp.nmax}{number of nearest spatial observations that should be used for a kriging prediction for each tile}
   \item{time.nmax}{number of nearest time observations that should be used for a kriging prediction}

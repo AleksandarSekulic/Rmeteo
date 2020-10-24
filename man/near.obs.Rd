@@ -23,9 +23,9 @@ near.obs(locations,
 }
 
 \arguments{
-  \item{locations}{data.frame with x and y coordinates columns, or \link[sp]{SpatialPoints}, \link[sp]{SpatialPointsDataFrame} or \link[sp]{SpatialPixelsDataFrame} object. Locations from which distances to observations are calculated.}
+  \item{locations}{data.frame with x and y coordinates columns, or \link[sp]{SpatialPoints-class}, \link[sp]{SpatialPointsDataFrame-class} or \link[sp]{SpatialPixelsDataFrame-class} object. Locations from which distances to observations are calculated.}
     \item{locations.x.y}{numeric or character vector; Positions or names of the x and y columns in \code{locations} if data.frame. Default is c(1,2).}
-  \item{observations}{data.frame with x, y and observation columns, or \link[sp]{SpatialPoints} or \link[sp]{SpatialPointsDataFrame} object with observation column. Observations to which distances to locations are calculated.}
+  \item{observations}{data.frame with x, y and observation columns, or \link[sp]{SpatialPoints-class} or \link[sp]{SpatialPointsDataFrame-class} object with observation column. Observations to which distances to locations are calculated.}
   \item{observations.x.y}{numeric or character vector; positions or names of the x and y columns in \code{observations} if data.frame. Default is c(1,2).}
   \item{zcol}{numeric or character; Column name or number showing the position of observations in \code{observations}. Default is 3.}
   \item{n.obs}{numeric; Number of nearest observations to be found. Note that it cannot be larger than number of obsevrations. Default is 10.}

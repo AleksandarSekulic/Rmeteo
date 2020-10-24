@@ -18,8 +18,7 @@ tiling(filename,tilesize=500,overlapping=50, aspoints= FALSE,
   \item{tilename}{prefix given to file names}
   \item{format}{file format, see \link[raster]{writeRaster} }
   \item{tiles_folder}{folder to be created for tiles storage}
-  \item{parallel.processing}{if TRUE parralel processing is performed via  \link[snowfall]{sfLapply}
-}
+  \item{parallel.processing}{if TRUE parralel processing is performed via  \link[snowfall]{snowfall-calculation}, sfLapply function. }
   \item{cpus}{number of proccesing units}
 }
 \value{ The list of tiles in raster format or in \code{SpatialPointsDataFrame} format if \code{aspoints=TRUE}

@@ -14,7 +14,7 @@ tgeom2STFDF(grid, time, variable = "mean",ab=NULL)
   \item{variable}{ character;\code{'mean'}, \code{'min'} or \code{'max'} ; geometrical temperature trend is calculated for mean, minimum or maximum; \code{'mean'} is default. }
     \item{ab}{Predefined coefficients to be used instead of incorporated.}
 }
-\value{ \link[spacetime]{STFDF} object with calculated \code{temp_geo} geometrical temperature trend. The calculated values are stored in \code{obj@data} slot.
+\value{ \link[spacetime]{STFDF-class} object with calculated \code{temp_geo} geometrical temperature trend. The calculated values are stored in \code{obj@data} slot.
 }
 \references{
 Kilibarda, M., T. Hengl, G. B. M. Heuvelink, B. Graeler, E. Pebesma, M. Percec Tadic, and B. Bajat (2014), Spatio-temporal interpolation of daily temperatures for global land areas at 1 km resolution, J. Geophys. Res. Atmos., 119, 2294-2313, doi:10.1002/2013JD020803.

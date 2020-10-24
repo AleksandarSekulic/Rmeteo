@@ -7,9 +7,9 @@
 \arguments{
 \item{rasterLayer}{raster Layer or SpatiaGrid(Pixels)DF containing NAs}
 \item{maskPol}{SpatialPolygons or SpatialPolygonsDataFrame}
-\item{nmax}{see \link[gstat]{idw} }
+\item{nmax}{see \link[gstat]{krige}, idw function }
 \item{zcol}{variable column name or number showing position of variable in \code{rasterLayer} to be interpolated}
-\item{...}{ arguments passed to \link[gstat]{idw} }
+\item{...}{ arguments passed to \link[gstat]{krige}, idw function }
 }
 \value{ raster Layer or SpatiaGrid(Pixels)DF object with NA replaced using IDW}
 \author{Milan Kilibarda \email{kili@grf.bg.ac.rs}}
