@@ -1,5 +1,4 @@
 # meteo
-=====
 [![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
 [![CRAN](http://www.r-pkg.org/badges/version/meteo)](https://cran.r-project.org/package=meteo)
 [![cran checks](https://cranchecks.info/badges/worst/meteo)](https://cran.r-project.org/web/checks/check_results_meteo.html)
@@ -8,18 +7,19 @@
 ## Overview
 meteo is an R package for spatio-temporal geostatistical mapping of meteorological data.
 Main functions:
-* 'pred.strk' - spatio-temporal regression kriging prediction (Kilibarda et al. 2014)
-* 'cv.strk' - k-fold cross-validation for spatio-temporal regression kriging (Kilibarda et al. 2014)
-* 'rfsi' - Random Forest Spatial Interpolation (RFSI) model (Sekulić et al. 2020)
-* 'tune.rfsi' - tuning of RFSI model (Sekulić et al. 2020)
-* 'pred.rfsi' - RFSI prediction (Sekulić et al. 2020)
-* 'cv.rfsi' - nested k-fold cross-validation for RFSI (Sekulić et al. 2020)
+* `pred.strk` - spatio-temporal regression kriging prediction (Kilibarda et al. 2014)
+* `cv.strk` - k-fold cross-validation for spatio-temporal regression kriging (Kilibarda et al. 2014)
+* `rfsi` - Random Forest Spatial Interpolation (RFSI) model (Sekulić et al. 2020)
+* `tune.rfsi` - tuning of RFSI model (Sekulić et al. 2020)
+* `pred.rfsi` - RFSI prediction (Sekulić et al. 2020)
+* `cv.rfsi` - nested k-fold cross-validation for RFSI (Sekulić et al. 2020)
 
 
 ## Repositories
 * [R-forge](http://meteo.r-forge.r-project.org/)
 * [Github](https://github.com/AleksandarSekulic/Rmeteo)
 * [CRAN](https://cran.r-project.org/package=meteo)
+
 *Note that the latest version are on R-forge and Github repository. CRAN repository will updated only with stabile versions.*
 
 ## Citation
