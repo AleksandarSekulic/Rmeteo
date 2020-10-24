@@ -8,6 +8,7 @@ meteo
 Spatio-temporal geostatistical mapping of meteorological data.
 
 [R-forge repository](http://meteo.r-forge.r-project.org/)
+
 [CRAN repository](https://cran.r-project.org/package=meteo)
 
 To cite package meteo in publications use:
