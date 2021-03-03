@@ -40,7 +40,7 @@ cv.rfsi <- function (formula, # without nearest obs
     if (class(data) == "data.frame") {
       # if data.staid.x.y.time is character
       if (!is.numeric(data.staid.x.y.time)) {
-        data.staid.x.y.time <- sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
+        data.staid.x.y.time <- match(data.staid.x.y.time, names(data)) #sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
       }
       data.df = data
     } else if (class(data) == "STFDF" | class(data) == "STSDF") {
@@ -132,8 +132,8 @@ cv.rfsi <- function (formula, # without nearest obs
   for (val_fold in sort(unique(data.df[, fold.column]))) {
     print(paste('### Main fold ', val_fold, " ###", sep=""))
     # tune RFSI model
-    dev.df <- data.df[data.df$folds != val_fold, ]
-    val.df <- data.df[data.df$folds == val_fold, ]
+    dev.df <- data.df[data.df[, fold.column] != val_fold, ]
+    val.df <- data.df[data.df[, fold.column] == val_fold, ]
     if (progress) print('Tuning RFSI model ...')
     # tune.rfsi
     tuned_model <- tune.rfsi(formula, # without nearest obs
