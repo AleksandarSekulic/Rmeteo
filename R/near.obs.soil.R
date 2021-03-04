@@ -45,6 +45,10 @@ near.obs.soil <- function(
     ### find observations at location depth +-depth.range
     obs.depth.range <- obs.dupl[obs.dupl[, observations.x.y.md[3]] >= (loc[, locations.x.y.md[3]] - depth.range) &
                                 obs.dupl[, observations.x.y.md[3]] <= (loc[, locations.x.y.md[3]] + depth.range), ]
+    ### choose one observation per profile in case where multiple observations from one profile are in the depth range
+    obs.depth.range$v.dist <- obs.depth.range[, 3] - loc[, 3] # vertical distnaces from observation mid depth to location mid.depth
+    obs.depth.range <- obs.depth.range[order(abs(obs.depth.range$v.dist)), ] # sort in asceding order by v.dist because the first observation (closest one) will not be duplicate
+    obs.depth.range <- obs.depth.range[!duplicated(obs.depth.range[, 1:2]), ]
     
     ### find n nearest observations from +-depth.range
     if (nrow(obs.depth.range) < n.obs) {
