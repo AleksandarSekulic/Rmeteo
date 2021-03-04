@@ -18,6 +18,10 @@ rfsi <- function (formula, # without nearest obs
                   t.crs = NA,
                   cpus = detectCores()-1, # for near.obs
                   progress = TRUE,
+                  # soil3d = FALSE,
+                  # mid.depth = 4,
+                  # depth.range = 0.1, # in units of depth
+                  # no.obs = 'increase', # exactly
                   ...){ # ranger parameters + quantreg!!!
   # num.trees,
   # mtry,

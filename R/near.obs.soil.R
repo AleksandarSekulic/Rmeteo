@@ -6,7 +6,10 @@ near.obs.soil <- function(
   zcol = 4,
   n.obs = 5,
   depth.range = 0.1, # in units of depth
-  no.obs = 'increase' # exactly
+  no.obs = 'increase', # exactly
+  parallel.processing = TRUE,
+  pp.type = "doParallel", # "snowfall"
+  cpus = detectCores()-1
 )
 {
   ### input data preparation
@@ -34,17 +37,18 @@ near.obs.soil <- function(
   # or
   #### use only horizons that have obs in the specified depth.range!!!
   
-  near_o1 <- matrix(NA, nrow = nrow(locations), ncol = n.obs)
-  nn.dists <- matrix(NA, nrow = nrow(locations), ncol = n.obs)
-  ### loop through locations
-  # add foreach in parallel - add
-  for (l in 1:nrow(locations)) {
+  # near_o1 <- matrix(NA, nrow = nrow(locations), ncol = n.obs)
+  # nn.dists <- matrix(NA, nrow = nrow(locations), ncol = n.obs)
+  
+  near.obs_fun <- function(l) {
+    # nearest_obs <- foreach (l = 1:nrow(locations)) %dopar% { # , .export = c("near.obs")
+    # for (l in 1:nrow(locations)) {
     loc <- locations[l, ]
     ### remove observations at the same location as loc
     obs.dupl <- observations[which(observations[, 1] != loc[, 1] & observations[, 2] != loc[, 2]), ]
     ### find observations at location depth +-depth.range
     obs.depth.range <- obs.dupl[obs.dupl[, observations.x.y.md[3]] >= (loc[, locations.x.y.md[3]] - depth.range) &
-                                obs.dupl[, observations.x.y.md[3]] <= (loc[, locations.x.y.md[3]] + depth.range), ]
+                                  obs.dupl[, observations.x.y.md[3]] <= (loc[, locations.x.y.md[3]] + depth.range), ]
     ### choose one observation per profile in case where multiple observations from one profile are in the depth range
     obs.depth.range$v.dist <- obs.depth.range[, 3] - loc[, 3] # vertical distnaces from observation mid depth to location mid.depth
     obs.depth.range <- obs.depth.range[order(abs(obs.depth.range$v.dist)), ] # sort in asceding order by v.dist because the first observation (closest one) will not be duplicate
@@ -65,7 +69,7 @@ near.obs.soil <- function(
           depth.range2 <- depth.range*multi
           ### find observations at location depth +-depth.range
           obs.depth.range <- obs.dupl[obs.dupl[, observations.x.y.md[3]] >= (loc[, locations.x.y.md[3]] - depth.range2) &
-                                      obs.dupl[, observations.x.y.md[3]] <= (loc[, locations.x.y.md[3]] + depth.range2), ]
+                                        obs.dupl[, observations.x.y.md[3]] <= (loc[, locations.x.y.md[3]] + depth.range2), ]
           multi <- multi + 1
         }
         warning(paste('The depth.range for location:', 
@@ -78,11 +82,25 @@ near.obs.soil <- function(
     }
     ### find n.obs nearest observations and distances to them
     knn1 <- nabor::knn(obs.depth.range[, 1:2], loc[, 1:2], k=n.obs)
-    near_o1[l, ] <- obs.depth.range[knn1$nn.idx, 4]
-    nn.dists[l, ] <- knn1$nn.dists
+    # near_o1[l, ] <- obs.depth.range[knn1$nn.idx, 4]
+    # nn.dists[l, ] <- knn1$nn.dists
+    nl_df <- c(knn1$nn.dists, obs.depth.range[knn1$nn.idx, 4]) # rbind
+    
   }
+
+  ### loop through locations  
+  # add foreach in parallel - add
+  if (parallel.processing) {
+    if (pp.type == "doParallel") {
+      nl_df <- foreach(l = 1:nrow(locations), .packages = c("raster","spacetime","gstat")) %dopar% {near.obs_fun(l)}
+    } else {
+      nl_df <- sfLapply (1:nrow(locations), function(l) {near.obs_fun(l)})
+    }
+  } else {
+    nl_df <- lapply (1:nrow(locations), function(l) {near.obs_fun(l)})
+  }
+  nl_df <- do.call("rbind", nl_df)
   
-  nl_df <- cbind(nn.dists, near_o1) # rbind
   
   name1 <- c()
   name2 <- c()
