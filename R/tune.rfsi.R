@@ -13,7 +13,7 @@ tune.rfsi <- function (formula, # without nearest obs
                        use.idw = FALSE,
                        s.crs=NA,
                        t.crs=NA,
-                       tgrid, # caret tune grid (min.node.size, mtry, no, sample.fraction, ntree, splitrule, idw.p)
+                       tgrid, # caret tune grid (min.node.size, mtry, no, sample.fraction, ntree, splitrule, idw.p, depth.range)
                        tgrid.n=10,
                        tune.type = "LLO", # type of cv - LLO for now, after LTO, LLTO - CAST
                        k = 5, # number of folds
@@ -24,6 +24,8 @@ tune.rfsi <- function (formula, # without nearest obs
                        fit.final.model=TRUE,
                        cpus=detectCores()-1,
                        progress=TRUE,
+                       soil3d = FALSE, # soil RFSI
+                       no.obs = 'increase', # exactly
                        ...){ # ranger parameters
   
   # check the input
@@ -40,7 +42,7 @@ tune.rfsi <- function (formula, # without nearest obs
     if (class(data) == "data.frame") {
       # if data.staid.x.y.time is character
       if (!is.numeric(data.staid.x.y.time)) {
-        data.staid.x.y.time <- sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
+        data.staid.x.y.time <- match(data.staid.x.y.time, names(data))# sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
       }
       data.df = data
     } else if (class(data) == "STFDF" | class(data) == "STSDF") {
@@ -64,11 +66,11 @@ tune.rfsi <- function (formula, # without nearest obs
   } else { # obs, stations
     # if obs.staid.time is character
     if (!is.numeric(obs.staid.time)) {
-      obs.staid.time <- sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
+      obs.staid.time <- match(obs.staid.time, names(obs)) # sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
     }
     # if stations.staid.x.y is character
     if (!is.numeric(stations.staid.x.y)) {
-      stations.staid.x.y <- sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
+      stations.staid.x.y <- match(stations.staid.x.y, names(stations)) # sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
     }
     # to stfdf
     data.df <- join(obs, stations, by=names(obs)[obs.staid.time[1]], match="first")
@@ -133,6 +135,9 @@ tune.rfsi <- function (formula, # without nearest obs
   if (!use.idw) {
     params.diff <- params.diff[!(params.diff %in% "idw.p")]
   }
+  if (!soil3d) {
+    params.diff <- params.diff[!(params.diff %in% "depth.range")]
+  }
   if (!identical(params.diff, character(0))) {
     warning(paste('The paremeter(s) ', paste(params.diff, collapse = ", "), ' - missing from tgrid. Setting default values!', sep = ""))
     for (pd in params.diff) {
@@ -150,6 +155,8 @@ tune.rfsi <- function (formula, # without nearest obs
         tgrid$splirule <- NULL
       } else if (pd == "idw.p") {
         tgrid$idw.p <- 2
+      } else if (pd == "depth.range") {
+        tgrid$depth.range <- 0.1
       }
     }
   }
@@ -179,14 +186,15 @@ tune.rfsi <- function (formula, # without nearest obs
     sample.fraction=comb$sample.fraction
     splitrule=comb$splitrule
     idw.p=comb$idw.p
+    depth.range=comb$depth.range
     
     # fold_obs <- list()
     fold_pred <- c()
     for (val_fold in sort(unique(data.df[, fold.column]))) {
       print(paste('Fold ', val_fold, sep=""))
       # fit RF model
-      dev.df <- data.df[data.df$folds != val_fold, ]
-      val.df <- data.df[data.df$folds == val_fold, ]
+      dev.df <- data.df[data.df[, fold.column] != val_fold, ]
+      val.df <- data.df[data.df[, fold.column] == val_fold, ]
       if (progress) print('Fitting RFSI model ...')
       fold_model <- rfsi(formula, # without nearest obs
                          data=dev.df, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
@@ -203,6 +211,9 @@ tune.rfsi <- function (formula, # without nearest obs
                          # parallel.processing = FALSE, # doParallel - videti zbog ranger-a
                          cpus=cpus, # for near.obs
                          progress=progress,
+                         soil3d = soil3d,
+                         depth.range = depth.range,
+                         no.obs = no.obs,
                          num.trees = num.trees, mtry = mtry, splitrule = splitrule,
                          min.node.size = min.node.size,  sample.fraction = sample.fraction,
                          ...)
@@ -224,6 +235,9 @@ tune.rfsi <- function (formula, # without nearest obs
                                    # parallel.processing = FALSE, # doParallel - videti zbog ranger-a
                                    cpus=cpus,
                                    progress=progress,
+                                   soil3d = soil3d, # soil RFSI
+                                   depth.range = depth.range, # in units of depth
+                                   no.obs = no.obs, # exactly
                                    ...)
       
       # fold_obs <- c(fold_obs, val.df[, zcol.name])
@@ -270,6 +284,9 @@ tune.rfsi <- function (formula, # without nearest obs
                         # parallel.processing = FALSE, # doParallel - videti zbog ranger-a
                         cpus=cpus, # for near.obs
                         progress=progress,
+                        soil3d = soil3d,
+                        depth.range = dev_parameters$depth.range,
+                        no.obs = no.obs,
                         num.trees = dev_parameters$num.trees,
                         mtry = dev_parameters$mtry,
                         splitrule = dev_parameters$splitrule,

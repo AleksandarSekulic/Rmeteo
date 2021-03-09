@@ -1,8 +1,8 @@
 rfsi <- function (formula, # without nearest obs
                   data, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
-                  data.staid.x.y.time = c(1,2,3,4), # if data.frame
+                  data.staid.x.y.time = c(1,2,3,4), # if data.frame # time = mid.depth
                   obs, # data.frame(id,time,obs,cov)
-                  obs.staid.time = c(1,2),
+                  obs.staid.time = c(1,2), # time = mid.depth
                   stations, # data.frame(id,x,y)
                   stations.staid.x.y = c(1,2,3),
                   zero.tol = 0,
@@ -18,10 +18,9 @@ rfsi <- function (formula, # without nearest obs
                   t.crs = NA,
                   cpus = detectCores()-1, # for near.obs
                   progress = TRUE,
-                  # soil3d = FALSE,
-                  # mid.depth = 4,
-                  # depth.range = 0.1, # in units of depth
-                  # no.obs = 'increase', # exactly
+                  soil3d = FALSE, # soil RFSI
+                  depth.range = 0.1, # in units of depth
+                  no.obs = 'increase', # exactly
                   ...){ # ranger parameters + quantreg!!!
   # num.trees,
   # mtry,
@@ -42,7 +41,7 @@ rfsi <- function (formula, # without nearest obs
     if (class(data) == "data.frame") {
       # if data.staid.x.y.time is character
       if (!is.numeric(data.staid.x.y.time)) {
-        data.staid.x.y.time <- sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
+        data.staid.x.y.time <- match(data.staid.x.y.time, names(data)) # sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
       }
       data.df = data
     } else if (class(data) == "STFDF" | class(data) == "STSDF") {
@@ -66,11 +65,11 @@ rfsi <- function (formula, # without nearest obs
   } else { # obs, stations
     # if obs.staid.time is character
     if (!is.numeric(obs.staid.time)) {
-      obs.staid.time <- sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
+      obs.staid.time <- match(obs.staid.time, names(obs)) # sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
     }
     # if stations.staid.x.y is character
     if (!is.numeric(stations.staid.x.y)) {
-      stations.staid.x.y <- sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
+      stations.staid.x.y <- match(stations.staid.x.y, names(stations)) # sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
     }
     # to stfdf
     data.df <- join(obs, stations, by=names(obs)[obs.staid.time[1]], match="first")
@@ -108,9 +107,12 @@ rfsi <- function (formula, # without nearest obs
   
   x.y <- names(data.df)[data.staid.x.y.time[2:3]]
   data.df = data.df[complete.cases(data.df), ]
+  if (soil3d) {
+    depth.name <- names(data.df)[data.staid.x.y.time[4]]
+  }
   
   # if space-time
-  if (!is.na(data.staid.x.y.time[4])) {
+  if (!is.na(data.staid.x.y.time[4]) & !soil3d) {
     # sort data.df
     data.df <- data.df[order(data.df[, data.staid.x.y.time[4]],
                              data.df[, data.staid.x.y.time[1]]), ]
@@ -118,6 +120,7 @@ rfsi <- function (formula, # without nearest obs
     daysNum = length(time)
     
     # calculate obs and dist
+    if (progress) print('Space-time process ...')
     if (progress) print('Calculating distances to the nearest observations ...')
     registerDoParallel(cores=cpus)
     nearest_obs <- foreach (t = time, .export = c("near.obs")) %dopar% {
@@ -168,33 +171,53 @@ rfsi <- function (formula, # without nearest obs
     #   tps_fit <- unlist(tps_fit) #as.vector(do.call("rbind", tps_fit))
     # }
     
+  } else if (!is.na(data.staid.x.y.time[4]) & soil3d) { # soil 3D
+    # calculate obs and dist
+    day_df <- data.df[, c(x.y, depth.name, zcol.name)]
+    if (progress) print('Soil 3D process ...')
+    if (progress) print('Calculating distances to the nearest observations (profiles) ...')
+    nearest_obs <- near.obs.soil(
+      locations = day_df,
+      # locations.x.y.md = c(1,2,3),
+      observations = day_df,
+      # observations.x.y.md = c(1,2,3),
+      zcol = 4,
+      n.obs = n.obs,
+      depth.range = depth.range,
+      no.obs = no.obs,
+      parallel.processing = TRUE,
+      pp.type = "doParallel", # "snowfall"
+      cpus = cpus
+    )
+    
   } else { # if spatial
     # calculate obs and dist
-      day_df <- data.df[, c(x.y, zcol.name)]
-      if (progress) print('Calculating distances to the nearest observations ...')
-      nearest_obs <- near.obs(
-        locations = day_df,
-        # locations.x.y = c(1,2),
-        observations = day_df,
-        # observations.x.y = c(1,2),
-        zcol = zcol.name,
-        n.obs = n.obs,
-        avg = avg,
-        range = range,
-        increment = increment,
-        direct = direct,
-        idw=use.idw,
-        idw.p=idw.p
-      )
-      
-      # # calculate TPS
-      # if (use.tps) {
-      #   if (progress) print('Calculating TPS ...')
-      #   m <- Tps(day_df[, x.y], day_df[, zcol.name],# lon.lat = T,
-      #            # lambda = tps.lambda) #, GCV=F)
-      #            df=tps.df)
-      #   tps_fit <- as.vector(m$fitted.values)
-      # }
+    day_df <- data.df[, c(x.y, zcol.name)]
+    if (progress) print('Spatial process ...')
+    if (progress) print('Calculating distances to the nearest observations ...')
+    nearest_obs <- near.obs(
+      locations = day_df,
+      # locations.x.y = c(1,2),
+      observations = day_df,
+      # observations.x.y = c(1,2),
+      zcol = zcol.name,
+      n.obs = n.obs,
+      avg = avg,
+      range = range,
+      increment = increment,
+      direct = direct,
+      idw=use.idw,
+      idw.p=idw.p
+    )
+    
+    # # calculate TPS
+    # if (use.tps) {
+    #   if (progress) print('Calculating TPS ...')
+    #   m <- Tps(day_df[, x.y], day_df[, zcol.name],# lon.lat = T,
+    #            # lambda = tps.lambda) #, GCV=F)
+    #            df=tps.df)
+    #   tps_fit <- as.vector(m$fitted.values)
+    # }
   }
   
   data.df <- cbind(data.df, nearest_obs)
@@ -211,7 +234,7 @@ rfsi <- function (formula, # without nearest obs
   # if (use.tps) {
   #   formula = as.formula(paste(deparse(formula), paste(names(nearest_obs), collapse = " + "), tps.var, sep = " + "))
   # } else {
-  formula = as.formula(paste(deparse(formula), paste(names(nearest_obs), collapse = " + "), sep = " + "))
+  formula = as.formula(paste(paste((deparse(formula)), collapse=""), paste(names(nearest_obs), collapse = " + "), sep = " + "))
   # }
   
   # fit RF model

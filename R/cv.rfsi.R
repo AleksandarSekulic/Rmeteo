@@ -24,6 +24,8 @@ cv.rfsi <- function (formula, # without nearest obs
                      output.format = "data.frame", #"STFDF",
                      cpus=detectCores()-1,
                      progress=TRUE,
+                     soil3d = FALSE, # soil RFSI
+                     no.obs = 'increase', # exactly
                      ...){ # fixed ranger parameters
   
   # check the input
@@ -64,11 +66,11 @@ cv.rfsi <- function (formula, # without nearest obs
   } else { # obs, stations
     # if obs.staid.time is character
     if (!is.numeric(obs.staid.time)) {
-      obs.staid.time <- sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
+      obs.staid.time <- match(obs.staid.time, names(obs)) # sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
     }
     # if stations.staid.x.y is character
     if (!is.numeric(stations.staid.x.y)) {
-      stations.staid.x.y <- sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
+      stations.staid.x.y <- match(stations.staid.x.y, names(stations)) # sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
     }
     # to stfdf
     data.df <- join(obs, stations, by=names(obs)[obs.staid.time[1]], match="first")
@@ -158,6 +160,8 @@ cv.rfsi <- function (formula, # without nearest obs
                              cpus=cpus, # for near.obs
                              progress=progress,
                              fit.final.model=TRUE,
+                             soil3d = soil3d, # soil RFSI
+                             no.obs = no.obs, # exactly
                              # quantreg = quantreg,
                              # seed = seed,
                              ...)
@@ -179,6 +183,9 @@ cv.rfsi <- function (formula, # without nearest obs
                                  # parallel.processing = FALSE, # doParallel - videti zbog ranger-a
                                  cpus=cpus,
                                  progress=progress,
+                                 soil3d = soil3d, # soil RFSI
+                                 depth.range = tuned_model$tuned.parameters$depth.range, # in units of depth
+                                 no.obs = no.obs, # exactly
                                  ...)
     
     if (is.na(data.staid.x.y.time[4])) {

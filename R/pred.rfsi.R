@@ -16,6 +16,9 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
                        output.format = "data.frame",
                        cpus=detectCores()-1,
                        progress=TRUE,
+                       soil3d = FALSE, # soil RFSI
+                       depth.range = 0.1, # in units of depth
+                       no.obs = 'increase', # exactly
                        ...){ # ranger parameters + quantreg!!! - ovoga nema!!!
   
   # check the input
@@ -68,6 +71,9 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
       } else {
         zcol.name <- zcol
       }
+      if (!is.numeric(data.staid.x.y.time)) {
+        data.staid.x.y.time <- match(data.staid.x.y.time, names(data)) # sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
+      }
       data.df = data
     } else if (class(data) == "STFDF" | class(data) == "STSDF") {
       if (class(data) == "STSDF") {data <- as(data, "STFDF")}
@@ -98,6 +104,14 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
       stop('The argument data must be of STFDF, STSDF, data.frame,SpatialPointsDataFrame or SpatialPixelsDataFrame class!') # "STSDF"
     }
   } else { # obs, stations
+    # if obs.staid.time is character
+    if (!is.numeric(obs.staid.time)) {
+      obs.staid.time <- match(obs.staid.time, names(obs)) # sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
+    }
+    # if stations.staid.x.y is character
+    if (!is.numeric(stations.staid.x.y)) {
+      stations.staid.x.y <- match(stations.staid.x.y, names(stations)) # sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
+    }
     data.df <- join(obs, stations, by=names(obs)[obs.staid.time[1]], match="first")
     data.staid.x.y.time <- c(obs.staid.time[1],
                              stations.staid.x.y[2] + length(obs),
@@ -112,6 +126,9 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
   
   # newdata
   if (class(newdata) == "data.frame") {
+    if (!is.numeric(newdata.staid.x.y.time)) {
+      newdata.staid.x.y.time <- match(newdata.staid.x.y.time, names(newdata)) # sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
+    }
     newdata.df = newdata
   } else if (class(newdata) == "STFDF" | class(newdata) == "STSDF") {
     if (class(newdata) == "STSDF") {newdata <- as(newdata, "STFDF")}
@@ -134,24 +151,31 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
   
   # check data and new data domain
   st.class <- c("STFDF", "STSDF", "data.frame")
-  if (class(data) %in% st.class & !is.na(data.staid.x.y.time[4])) {
+  if (class(data) %in% st.class & !is.na(data.staid.x.y.time[4]) & !soil3d) { # space-time
+    if (progress) print('Space-time process ...')
     data.cl <- "st"
-  } else {
+  } else if (!(class(data) %in% st.class[1:2]) & !is.na(data.staid.x.y.time[4]) & soil3d) { # soil
+    if (progress) print('Soil 3D process ...')
+    data.cl <- "soil"
+  } else { # spatial
+    if (progress) print('Spatial process ...')
     data.cl <- "s"
     data.staid.x.y.time <- data.staid.x.y.time[1:3]
   }
-  if (class(newdata) %in% st.class & !is.na(newdata.staid.x.y.time[4])) {
+  if (class(newdata) %in% st.class & !is.na(newdata.staid.x.y.time[4]) & !soil3d) {
     newdata.cl <- "st"
+  } else if (!(class(newdata) %in% st.class[1:2]) & !is.na(newdata.staid.x.y.time[4]) & soil3d) { # soil
+    newdata.cl <- "soil"
   } else {
     newdata.cl <- "s"
     newdata.staid.x.y.time <- newdata.staid.x.y.time[1:3]
   }
   if (data.cl != newdata.cl) {
-    stop('Arguments data and newdata must cover the same domain, spatial or spatio-temporal!')
+    stop('Arguments data and newdata must cover the same domain: spatial, spatio-temporal or soil!')
   }
   # check format
-  if (newdata.cl == "s" & output.format %in% c("STFDF", "STSDF")) {
-    stop('Argument output.format cannot be STFDF or STSDF for interpolation in spatial domain!')
+  if (newdata.cl %in% c("s", "soil") & output.format %in% c("STFDF", "STSDF")) {
+    stop('Argument output.format cannot be STFDF or STSDF for interpolation in spatial or soil domain!')
   }
   
   # if vars exists
@@ -211,9 +235,14 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
   data.df = data.df[complete.cases(data.df), ]
   newdata.x.y <- names(newdata.df)[newdata.staid.x.y.time[2:3]]
   newdata.df = newdata.df[complete.cases(newdata.df), ]
+  if (soil3d) {
+    data.depth.name <- names(data.df)[data.staid.x.y.time[4]]
+    newdata.depth.name <- names(newdata.df)[newdata.staid.x.y.time[4]]
+  }
   
   # if space-time
-  if (!is.na(newdata.staid.x.y.time[4])) {
+  # if (!is.na(newdata.staid.x.y.time[4]) & !soil3d) {
+  if (data.cl == "st") {
     time=sort(unique(newdata.df[, newdata.staid.x.y.time[4]]))
     daysNum = length(time)
     
@@ -285,6 +314,24 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
     #   newdata.df <- join(newdata.df, tps_fit)# cbind(data.df, nearest_obs)
     # }
     
+  } else if (data.cl == "soil") { # soil 3D
+    if (progress) print('Calculating distances to the nearest observations ...')
+    dev_day_df <- data.df[, c(x.y, data.depth.name, zcol.name)]
+    day_df <- newdata.df[, c(newdata.x.y, newdata.depth.name)]
+    nearest_obs <- near.obs.soil(
+      locations = day_df,
+      # locations.x.y.md = c(1,2,3),
+      observations = dev_day_df,
+      # observations.x.y.md = c(1,2,3),
+      zcol = 4,
+      n.obs = n.obs,
+      depth.range = depth.range,
+      no.obs = no.obs,
+      parallel.processing = TRUE,
+      pp.type = "doParallel", # "snowfall"
+      cpus = cpus
+    )
+    newdata.df <- cbind(newdata.df, nearest_obs)
   } else { # if spatial
     # calculate obs and dist
     if (progress) print('Calculating distances to the nearest observations ...')
@@ -358,13 +405,17 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
   } else if (output.format == "SpatialPointsDataFrame") {
     spdf <- result
     coordinates(spdf) <- c(names(spdf)[2:3])
-    spdf@proj4string <- final.crs
+    if(!is.na(final.crs)){
+      spdf@proj4string <- final.crs
+    }
     if (progress) print("Done!")
     return(spdf)
   } else if (output.format == "SpatialPixelsDataFrame") {
     spdf <- result
     coordinates(spdf) <- c(names(spdf)[2:3])
-    spdf@proj4string <- final.crs
+    if(!is.na(final.crs)){
+      spdf@proj4string <- final.crs
+    }
     spdf <- as(spdf, "SpatialPixelsDataFrame")
     if (progress) print("Done!")
     return(spdf)

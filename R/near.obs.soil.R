@@ -16,17 +16,17 @@ near.obs.soil <- function(
   if (class(locations) == "SpatialPoints" ||
       class(locations) == "SpatialPointsDataFrame" ||
       class(locations) == "SpatialPixelsDataFrame") {
-    mid.depth <- locations[, locations.x.y.md[3]]
+    mid.depth <- locations[[locations.x.y.md[3]]]
     locations <- coordinates(locations)
-    locations <- cbind(locations, mid.depth)
+    locations <- as.data.frame(cbind(locations, mid.depth))
   } else {
     locations <- locations[, locations.x.y.md]
   }
   if (class(observations) == "SpatialPoints" || class(observations) == "SpatialPointsDataFrame") {
-    mid.depth <- observations[, locations.x.y.md[3]]
+    mid.depth <- observations[[observations.x.y.md[3]]]
     variable <- observations[[zcol]]
     observations <- coordinates(observations)
-    observations <- cbind(observations, mid.depth, variable)
+    observations <- as.data.frame(cbind(observations, mid.depth, variable))
   } else {
     observations <- observations[, c(observations.x.y.md, zcol)]
   }
@@ -47,8 +47,8 @@ near.obs.soil <- function(
     ### remove observations at the same location as loc
     obs.dupl <- observations[which(observations[, 1] != loc[, 1] & observations[, 2] != loc[, 2]), ]
     ### find observations at location depth +-depth.range
-    obs.depth.range <- obs.dupl[obs.dupl[, observations.x.y.md[3]] >= (loc[, locations.x.y.md[3]] - depth.range) &
-                                  obs.dupl[, observations.x.y.md[3]] <= (loc[, locations.x.y.md[3]] + depth.range), ]
+    obs.depth.range <- obs.dupl[obs.dupl[, 3] >= (loc[, 3] - depth.range) &
+                                  obs.dupl[, 3] <= (loc[, 3] + depth.range), ]
     ### choose one observation per profile in case where multiple observations from one profile are in the depth range
     obs.depth.range$v.dist <- obs.depth.range[, 3] - loc[, 3] # vertical distnaces from observation mid depth to location mid.depth
     obs.depth.range <- obs.depth.range[order(abs(obs.depth.range$v.dist)), ] # sort in asceding order by v.dist because the first observation (closest one) will not be duplicate
@@ -68,8 +68,8 @@ near.obs.soil <- function(
         while (nrow(obs.depth.range) < n.obs) {
           depth.range2 <- depth.range*multi
           ### find observations at location depth +-depth.range
-          obs.depth.range <- obs.dupl[obs.dupl[, observations.x.y.md[3]] >= (loc[, locations.x.y.md[3]] - depth.range2) &
-                                        obs.dupl[, observations.x.y.md[3]] <= (loc[, locations.x.y.md[3]] + depth.range2), ]
+          obs.depth.range <- obs.dupl[obs.dupl[, 3] >= (loc[, 3] - depth.range2) &
+                                        obs.dupl[, 3] <= (loc[, 3] + depth.range2), ]
           multi <- multi + 1
         }
         warning(paste('The depth.range for location:', 
@@ -93,6 +93,7 @@ near.obs.soil <- function(
   if (parallel.processing) {
     if (pp.type == "doParallel") {
       nl_df <- foreach(l = 1:nrow(locations), .packages = c("raster","spacetime","gstat")) %dopar% {near.obs_fun(l)}
+      stopImplicitCluster()
     } else {
       nl_df <- sfLapply (1:nrow(locations), function(l) {near.obs_fun(l)})
     }
