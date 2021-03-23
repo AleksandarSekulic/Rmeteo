@@ -232,9 +232,9 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
   }
   
   x.y <- names(data.df)[data.staid.x.y.time[2:3]]
-  data.df = data.df[complete.cases(data.df), ]
+  data.df = data.df[complete.cases(data.df[, (if(is.na(data.staid.x.y.time[4])) data.staid.x.y.time[-4] else data.staid.x.y.time))]), ]
   newdata.x.y <- names(newdata.df)[newdata.staid.x.y.time[2:3]]
-  newdata.df = newdata.df[complete.cases(newdata.df), ]
+  newdata.df = newdata.df[complete.cases(newdata.df[, names_covar]), ]
   if (soil3d) {
     data.depth.name <- names(data.df)[data.staid.x.y.time[4]]
     newdata.depth.name <- names(newdata.df)[newdata.staid.x.y.time[4]]
@@ -365,7 +365,7 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
     
   }
   
-  newdata.df = newdata.df[complete.cases(newdata.df), ]
+  newdata.df = newdata.df[complete.cases(newdata.df[, c(names_covar, names(nearest_obs))]), ]
   if (nrow(newdata.df) == 0) {
     stop("There is no complete cases in newdata.")
   }

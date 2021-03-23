@@ -55,6 +55,7 @@ rfsi <- function (formula, # without nearest obs
     } else if (class(data) == "SpatialPointsDataFrame" | class(data) == "SpatialPixelsDataFrame") {
       data.df <- as.data.frame(data)
       data.df$staid <- 1:nrow(data.df)
+      # len.sp <- ncol(data@coords)
       data.staid.x.y.time <- c(length(data.df),length(data.df)-2,length(data.df)-1,NA)
       if (!is.na(data@proj4string)) {
         s.crs <- data@proj4string
@@ -106,7 +107,7 @@ rfsi <- function (formula, # without nearest obs
   }
   
   x.y <- names(data.df)[data.staid.x.y.time[2:3]]
-  data.df = data.df[complete.cases(data.df), ]
+  data.df = data.df[complete.cases(data.df[, names_covar]), ]
   if (soil3d) {
     depth.name <- names(data.df)[data.staid.x.y.time[4]]
   }
@@ -226,7 +227,7 @@ rfsi <- function (formula, # without nearest obs
   #   data.df[, tps.var] <- tps_fit
   # }
 
-  data.df = data.df[complete.cases(data.df), ]
+  data.df = data.df[complete.cases(data.df[, c(names_covar, names(nearest_obs))]), ]
   if (nrow(data.df) == 0) {
     stop("There is no complete cases in data.")
   }
