@@ -57,7 +57,7 @@ cv.rfsi <- function (formula, # without nearest obs
       data.df <- as.data.frame(data)
       data.df$staid <- 1:nrow(data.df)
       data.staid.x.y.time <- c(length(data.df),length(data.df)-2,length(data.df)-1,NA)
-      if (!is.na(data@sp@proj4string)) {
+      if (!is.na(data@proj4string)) {
         s.crs <- data@proj4string
       }
     } else {
