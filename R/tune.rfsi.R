@@ -244,7 +244,12 @@ tune.rfsi <- function (formula, # without nearest obs
       # fold_pred <- c(fold_pred, fold_prediction$pred)
       # fold_obs[[val_fold]] <- val.df[, zcol.name]
       # fold_pred[[val_fold]] <- fold_prediction$pred
-      val.df <- join(val.df[, c(names(val.df)[data.staid.x.y.time], zcol.name)], fold_prediction[, c(names(val.df)[data.staid.x.y.time], "pred")])
+      if (is.na(data.staid.x.y.time[4])) {
+        val.df <- join(val.df[, c(names(val.df)[data.staid.x.y.time[1:3]], zcol.name)], fold_prediction[, c(names(val.df)[data.staid.x.y.time[1:3]], "pred")])
+      } else {
+        val.df <- join(val.df[, c(names(val.df)[data.staid.x.y.time], zcol.name)], fold_prediction[, c(names(val.df)[data.staid.x.y.time], "pred")])
+      }
+      
       val.df <- val.df[, c(zcol.name, "pred")]
       fold_pred <- rbind(fold_pred, val.df)
     }
