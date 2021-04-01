@@ -36,7 +36,7 @@ install.packages("meteo", repos="http://R-Forge.R-project.org")
 
 ## Examples
 ### RFSI example
-Complete examples RFSI (including tune.rfsi and cv.rfsi) can be found in the [demo](demo) folder.
+Complete RFSI examples (including tune.rfsi and cv.rfsi) can be found in the [demo](demo) folder.
 ```
 library(meteo)
 library(sp)
@@ -101,7 +101,7 @@ rfsi_prediction <- pred.rfsi(model = rfsi_model,
 spplot(rfsi_prediction['pred'])
 ```
 ### STRK example:
-Complete examples STRK (including strk.cv) can be found in the [demo](demo) folder.
+Complete STRK examples (including strk.cv) can be found in the [demo](demo) folder.
 ```
 library(meteo)
 library(sp)
