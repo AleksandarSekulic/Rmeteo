@@ -61,8 +61,8 @@ rfsi_model <- rfsi(formula = fm.RFSI,
                    data = meuse,
                    zero.tol = 0,
                    n.obs = 5, # number of nearest observations
-                   s.crs = NA, # or meuse@proj4string # nedded only if the coordinates are lon/lat (WGS84)
-                   t.crs = NA, # or meuse@proj4string # nedded only if the coordinates are lon/lat (WGS84)
+                   s.crs = NA, # or meuse@proj4string # nedded only if in lon/lat (WGS84)
+                   t.crs = NA, # or meuse@proj4string # nedded only if in lon/lat (WGS84)
                    cpus = detectCores()-1,
                    progress = TRUE,
                    # ranger parameters
