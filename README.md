@@ -14,14 +14,14 @@ Main functions:
 * `pred.rfsi` - RFSI prediction (Sekulić et al. 2020b)
 * `cv.rfsi` - nested k-fold cross-validation for RFSI (Sekulić et al. 2020b)
 
-**Note that Out-of-bag (OOB) error statistics from RFSI model are biased and should not be considered as accuracy metrics (they do not show spatial accuracy)! The proper way to assess accuaracy of the RFSI model is by using the nested k-fold cross-validation (`cv.rfsi` function, Sekulić et al. 2020b).**
+***Note that Out-of-bag (OOB) error statistics from RFSI model are biased and should not be considered as accuracy metrics (they do not show spatial accuracy)! The proper way to assess accuaracy of the RFSI model is by using the nested k-fold cross-validation (`cv.rfsi` function, Sekulić et al. 2020b).***
 
 ## Repositories
 * [Github](https://github.com/AleksandarSekulic/Rmeteo)
 * [R-forge](http://meteo.r-forge.r-project.org/)
 * [CRAN](https://cran.r-project.org/package=meteo)
 
-*Note that the latest version is on Github repository. R-forge and CRAN repository will updated only with a stabile version.*
+*Note that the latest version is in the Github repository. The R-forge and CRAN repository will updated only with a stabile version.*
 
 ## Installation
 Install development versions (the most recent version) from Github with
@@ -35,8 +35,8 @@ install.packages("meteo", repos="http://R-Forge.R-project.org")
 ```
 
 ## Examples
-Complete examples for STRK and RFSI (including tune.rfsi and cv.rfsi) can be found in the [demo](demo) folder.
-RFSI example:
+### RFSI example
+Complete examples RFSI (including tune.rfsi and cv.rfsi) can be found in the [demo](demo) folder.
 ```
 library(meteo)
 library(sp)
@@ -75,8 +75,12 @@ rfsi_model <- rfsi(formula = fm.RFSI,
                    sample.fraction = 0.95,
                    quantreg = FALSE)
 rfsi_model
-# Note that OOB error statistics are biased and should not be considered as accuracy metrics (they do not show spatial accuracy)!
-# The proper way to assess accuaracy of the RFSI model is by using the nested k-fold cross-validation (cv.rfsi function)
+
+# Note that OOB error statistics are biased and should not be considered as accuracy metrics
+# (they do not show spatial accuracy)!
+# The proper way to assess accuaracy of the RFSI model is by using the nested k-fold
+# cross-validation (cv.rfsi function)
+
 sort(rfsi_model$variable.importance)
 
 #################### pred.rfsi ####################
@@ -93,9 +97,11 @@ rfsi_prediction <- pred.rfsi(model = rfsi_model,
                              cpus = detectCores()-1,
                              progress = TRUE
 )
+
 spplot(rfsi_prediction['pred'])
 ```
-STRK prediction example:
+### STRK example:
+Complete examples STRK (including strk.cv) can be found in the [demo](demo) folder.
 ```
 library(meteo)
 library(sp)
