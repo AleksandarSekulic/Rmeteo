@@ -54,9 +54,10 @@ rfsi <- function (formula, # without nearest obs
       }
     } else if (class(data) == "SpatialPointsDataFrame" | class(data) == "SpatialPixelsDataFrame") {
       data.df <- as.data.frame(data)
+      x.y.loc <- match(dimnames(data@coords)[[2]], names(data.df))
       data.df$staid <- 1:nrow(data.df)
       # len.sp <- ncol(data@coords)
-      data.staid.x.y.time <- c(length(data.df),length(data.df)-2,length(data.df)-1,NA)
+      data.staid.x.y.time <- c(length(data.df),x.y.loc,NA) # 1,2
       if (!is.na(data@proj4string)) {
         s.crs <- data@proj4string
       }

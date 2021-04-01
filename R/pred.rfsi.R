@@ -90,8 +90,9 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
       }
     } else if (class(data) == "SpatialPointsDataFrame" | class(data) == "SpatialPixelsDataFrame") {
       data.df <- as.data.frame(data)
+      x.y.loc <- match(dimnames(data@coords)[[2]], names(data.df))
       data.df$staid <- 1:nrow(data.df)
-      data.staid.x.y.time <- c(length(data.df),length(data.df)-2,length(data.df)-1,NA)
+      data.staid.x.y.time <- c(length(data.df),x.y.loc,NA)
       if (!is.na(data@proj4string)) {
         s.crs <- data@proj4string
       }
@@ -140,8 +141,9 @@ pred.rfsi <- function (model, # RFSI model iz rfsi ili tune rfsi funkcije
     }
   } else if (class(newdata) == "SpatialPointsDataFrame" | class(newdata) == "SpatialPixelsDataFrame") {
     newdata.df <- as.data.frame(newdata)
+    x.y.loc <- match(dimnames(newdata@coords)[[2]], names(newdata.df))
     newdata.df$staid <- 1:nrow(newdata.df)
-    newdata.staid.x.y.time <- c(length(newdata.df),length(newdata.df)-2,length(newdata.df)-1,NA)
+    newdata.staid.x.y.time <- c(length(newdata.df),x.y.loc,NA)
     if (!is.na(newdata@proj4string)) {
       newdata.s.crs <- newdata@proj4string
     }
