@@ -7,17 +7,17 @@
 ## Overview
 `meteo` is an R package for RFSI ang spacetime geostatistical interpolations for meteorological and other enviromental varialbles.
 Main functions:
-* `pred.strk` - spatio-temporal regression kriging prediction (Kilibarda et al. 2014)
-* `cv.strk` - k-fold cross-validation for spatio-temporal regression kriging (Kilibarda et al. 2014)
 * `rfsi` - Random Forest Spatial Interpolation (RFSI) model (Sekulić et al. 2020b)
 * `tune.rfsi` - tuning of RFSI model (Sekulić et al. 2020b)
 * `pred.rfsi` - RFSI prediction (Sekulić et al. 2020b)
 * `cv.rfsi` - nested k-fold cross-validation for RFSI (Sekulić et al. 2020b)
+* `pred.strk` - spatio-temporal regression kriging prediction (Kilibarda et al. 2014)
+* `cv.strk` - k-fold cross-validation for spatio-temporal regression kriging (Kilibarda et al. 2014)
 
 ***Note that Out-of-bag (OOB) error statistics from RFSI model are biased and should not be considered as accuracy metrics (they do not show spatial accuracy)! The proper way to assess accuaracy of the RFSI model is by using the nested k-fold cross-validation (`cv.rfsi` function, Sekulić et al. 2020b).***
 
 ## Repositories
-* [Github](https://github.com/AleksandarSekulic/Rmeteo)
+* [Github](https://github.com/AleksandarSekulic/Rmeteo) - up to date!
 * [R-forge](http://meteo.r-forge.r-project.org/)
 * [CRAN](https://cran.r-project.org/package=meteo)
 
@@ -38,34 +38,28 @@ install.packages("meteo", repos="http://R-Forge.R-project.org")
 ### RFSI example
 Complete RFSI examples (including tune.rfsi and cv.rfsi) can be found in the [demo](demo) folder.
 ```
-library(meteo)
-library(sp)
-library(spacetime)
-library(gstat)
-library(plyr)
-library(xts)
-library(snowfall)
-library(doParallel)
-library(CAST)
 library(ranger)
+library(sp)
+library(sf)
+library(terra)
+library(meteo)
 
-# preparing data
+# prepare data
 demo(meuse, echo=FALSE)
 meuse <- meuse[complete.cases(meuse@data),]
+data = st_as_sf(meuse, coords = c("x", "y"), crs = 28992, agr = "constant")
 
 #################### rfsi ####################
 
 fm.RFSI <- as.formula("zinc ~ dist + soil + ffreq")
 
+# fit the RFSI model
 rfsi_model <- rfsi(formula = fm.RFSI,
-                   data = meuse,
+                   data = data, # meuse.df (use data.staid.x.y.z)
                    zero.tol = 0,
                    n.obs = 5, # number of nearest observations
-                   s.crs = NA, # or meuse@proj4string # nedded only if in lon/lat (WGS84)
-                   t.crs = NA, # or meuse@proj4string # nedded only if in lon/lat (WGS84)
                    cpus = detectCores()-1,
                    progress = TRUE,
-                   # ranger parameters
                    importance = "impurity",
                    seed = 42,
                    num.trees = 250,
@@ -74,7 +68,10 @@ rfsi_model <- rfsi(formula = fm.RFSI,
                    min.node.size = 5,
                    sample.fraction = 0.95,
                    quantreg = FALSE)
+
 rfsi_model
+# OOB prediction error (MSE):       47758.14 
+# R squared (OOB):                  0.6435869 
 
 # Note that OOB error statistics are biased and should not be considered as accuracy metrics
 # (they do not show spatial accuracy)!
@@ -82,23 +79,27 @@ rfsi_model
 # cross-validation (cv.rfsi function)
 
 sort(rfsi_model$variable.importance)
+sum("obs" == substr(rfsi_model$forest$independent.variable.names, 1, 3))
 
 #################### pred.rfsi ####################
 
-rfsi_prediction <- pred.rfsi(model = rfsi_model,
-                             data = meuse, # meuse.df (use data.staid.x.y.time)
-                             zcol = "zinc",
-                             newdata = meuse.grid, # meuse.grid.df (use newdata.staid.x.y.time)
-                             output.format = "SpatialPixelsDataFrame",
-                             zero.tol = 0,
-                             s.crs = meuse@proj4string, # NA
-                             newdata.s.crs = meuse@proj4string, # NA
-                             t.crs = meuse@proj4string, # NA
-                             cpus = detectCores()-1,
-                             progress = TRUE
-)
+newdata <- terra::rast(meuse.grid)
+class(newdata)
 
-spplot(rfsi_prediction['pred'])
+# prediction
+rfsi_prediction <- pred.rfsi(model = rfsi_model,
+                             data = data, # meuse.df (use data.staid.x.y.z)
+                             obs.col = "zinc",
+                             newdata = newdata, # meuse.grid.df (use newdata.staid.x.y.z)
+                             output.format = "SpatRaster", # "sf", # "SpatVector", 
+                             zero.tol = 0,
+                             cpus = 1, # detectCores()-1,
+                             progress = TRUE,
+)
+class(rfsi_prediction)
+names(rfsi_prediction)
+
+plot(rfsi_prediction)
 ```
 ### STRK example:
 Complete STRK examples (including strk.cv) can be found in the [demo](demo) folder.
@@ -157,4 +158,5 @@ stplot(results[,,"var", drop=F], col.regions=bpy.colors())
 * Kilibarda, M., Tadić, M. P., Hengl, T., Luković, J., & Bajat, B. (2015). Global geographic and feature space coverage of temperature data in the context of spatio-temporal interpolation. Spatial Statistics, 14, 22–38. https://doi.org/10.1016/j.spasta.2015.04.005
 * Sekulić, A., Kilibarda, M., Protić, D., Tadić, M. P., & Bajat, B. (2020a). Spatio-temporal regression kriging model of mean daily temperature for Croatia. Theoretical and Applied Climatology, 140(1–2), 101–114. https://doi.org/10.1007/s00704-019-03077-3
 * Sekulić, A., Kilibarda, M., Heuvelink, G. B., Nikolić, M. & Bajat, B. Random Forest Spatial Interpolation.Remote. Sens. 12, 1687, https://doi.org/10.3390/rs12101687 (2020b).
+* Sekulić, A., Kilibarda, M., Protić, D. et al. A high-resolution daily gridded meteorological dataset for Serbia made by Random Forest Spatial Interpolation. Sci Data 8, 123 (2021). https://doi.org/10.1038/s41597-021-00901-2
 

@@ -2,13 +2,13 @@ Package: meteo
 Type: Package
 Encoding: UTF-8
 Title: RFSI and spacetime geostatistical interpolations for meteorological and other enviromental varialbles
-Version: 1.0-1
+Version: 2.0-0
 Date: 2015-09-22
-Author: Milan Kilibarda, Aleksandar Sekulic, Tomislav Hengl, Edzer Pebesma, Benedikt Graeler
-Maintainer: Milan Kilibarda <kili@grf.bg.ac.rs>
+Author: Aleksandar Sekulić, Milan Kilibarda, Tomislav Hengl, Edzer Pebesma, Benedikt Graeler
+Maintainer: Aleksandar Sekulić <asekulic@grf.bg.ac.rs>, Milan Kilibarda <kili@grf.bg.ac.rs>
 Description: RFSI and spacetime geostatistical interpolations for meteorological and other enviromental varialbles. Global spatio-temporal models calculated using publicly available data are stored in package.
 License: GPL (>= 2.0) | file LICENCE
 URL: http://meteo.r-forge.r-project.org/
 LazyLoad: yes
-Depends: R (>= 3.0.0)
-Imports: methods, utils, stats, sp, spacetime, rgdal, gstat, raster, snowfall, doParallel, plyr, nabor, CAST, ranger, caret, DescTools
+Depends: R (>= 4.0.0)
+Imports: methods, utils, stats, sp, spacetime, rgdal, gstat, raster, snowfall, doParallel, plyr, nabor, CAST, ranger, caret, DescTools, sf, sftime, terra

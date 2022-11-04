@@ -4,7 +4,7 @@
 
 \title{Accuracy metrics calculation}
 
-\description{A function for calculation of classification and regression accuracy metrics.}
+\description{Calculates classification and regression accuracy metrics for given coresponding observation and prediction vectors.}
 
 \usage{
 acc.metric.fun(obs, pred, acc.m)
@@ -13,7 +13,7 @@ acc.metric.fun(obs, pred, acc.m)
 \arguments{
   \item{obs}{\code{numeric or factor vector;} Observations.}
   \item{pred}{\code{numeric or factor vector;} Predictions.}
-  \item{acc.m}{\code{character}; Accuracy metric. Possible values for regression: "ME", "MAE", "RMSE", "R2", "CCC". Possible values for classification: "Accuracy", "Kappa", "AccuracyLower", "AccuracyUpper", "AccuracyNull", "AccuracyPValue", "McnemarPValue".}
+  \item{acc.m}{\code{character}; Accuracy metric. Possible values for regression: "ME", "MAE", "NMAE", "RMSE", "NRMSE", "R2", "CCC". Possible values for classification: "Accuracy", "Kappa", "AccuracyLower", "AccuracyUpper", "AccuracyNull", "AccuracyPValue", "McnemarPValue".}
 }
 
 \value{
@@ -38,139 +38,50 @@ Sekulić, A., Kilibarda, M., Heuvelink, G. B., Nikolić, M. & Bajat, B. Random F
 
 \examples{
 library(sp)
-library(spacetime)
-library(gstat)
-library(plyr)
+library(sf)
 library(CAST)
-library(doParallel)
 library(ranger)
-# prepare data
-# load observation - data.frame of mean temperatures
-data(dtempc)
-data(stations)
+library(plyr)
+library(meteo)
 
-serbia= point.in.polygon(stations$lon, stations$lat, c(18,22.5,22.5,18), c(40,40,46,46))
-st= stations[ serbia!=0, ]
-dtempc <- dtempc[dtempc$staid \%in\% st$staid, ]
-dtempc <- dtempc[complete.cases(dtempc),]
+# preparing data
+demo(meuse, echo=FALSE)
+meuse <- meuse[complete.cases(meuse@data),]
+data = st_as_sf(meuse, coords = c("x", "y"), crs = 28992, agr = "constant")
+fm.RFSI <- as.formula("zinc ~ dist + soil + ffreq")
 
-# create STFDF
-stfdf <- meteo2STFDF(dtempc,st)
-# Adding CRS
-stfdf@sp@proj4string <- CRS('+proj=longlat +datum=WGS84')
+# making tgrid
+n.obs <- 1:3
+min.node.size <- 2:10
+sample.fraction <- seq(1, 0.632, -0.05) # 0.632 without / 1 with replacement
+splitrule <- "variance"
+ntree <- 250 # 500
+mtry <- 3:(2+2*max(n.obs))
+tgrid = expand.grid(min.node.size=min.node.size, num.trees=ntree,
+                    mtry=mtry, n.obs=n.obs, sample.fraction=sample.fraction)
 
-# load covariates for mean temperatures
-data(regdata)
-# str(regdata)
-regdata@sp@proj4string <- CRS('+proj=longlat +datum=WGS84')
-
-# load precalculated variograms
-data(tvgms)
-data(tregcoef)
-
-# Overlay observations with covariates
-time <- index(stfdf@time)
-covariates.df <- as.data.frame(regdata)
-names_covar <- names(tregcoef[[1]])[-1]
-for (covar in names_covar){
-  nrowsp <- length(stfdf@sp)
-  regdata@sp=as(regdata@sp,'SpatialPixelsDataFrame')
-  ov <- sapply(time, function(i) 
-    if (covar \%in\% names(regdata@data)) {
-      if (as.Date(i) \%in\% as.Date(index(regdata@time))) {
-        over(stfdf@sp, as(regdata[, i, covar], 'SpatialPixelsDataFrame'))[, covar]
-      } else {
-        rep(NA, length(stfdf@sp))
-      }
-    } else {
-      over(stfdf@sp, as(regdata@sp[covar], 'SpatialPixelsDataFrame'))[, covar]
-    }
-  )
-  # ov <- do.call('cbind', ov)
-  ov <- as.vector(ov)
-  if (all(is.na(ov))) {
-    stop(paste('There is no overlay of data with covariates!', sep = ""))
-  }
-  stfdf@data[covar] <- ov
-}
-
-# remove stations out of covariates
-for (covar in names_covar){
-  # count NAs per stations
-  numNA <- apply(matrix(stfdf@data[,covar],
-                        nrow=nrowsp,byrow=FALSE), MARGIN=1,
-                 FUN=function(x) sum(is.na(x)))
-  # Remove stations out of covariates
-  rem <- numNA != length(time)
-  stfdf <-  stfdf[rem,drop=FALSE]
-}
-
-# Remove dates out of covariates
-rm.days <- c()
-for (t in 1:length(time)) {
-  if(sum(complete.cases(stfdf[, t]@data)) == 0) {
-    rm.days <- c(rm.days, t)
-  }
-}
-if(!is.null(rm.days)){
-  stfdf <- stfdf[,-rm.days]
-}
-
-# Cross-validation for mean temperature for days "2011-07-05" and "2011-07-06" 
-# global model is used for regression and variogram
-
-results <- cv.strk(data = stfdf,
-                   zcol=1, # "tempc"
-                   reg.coef = tregcoef[[1]],
-                   vgm.model = tvgms[[1]],
-                   sp.nmax = 20,
-                   time.nmax = 2,
-                   type = "LLO",
-                   k = 5,
-                   seed = 42,
-                   refit = FALSE,
-                   progress=TRUE
-)
-
-stplot(results)
-summary(results)
-# accuracy
-acc.metric.fun(results@data$obs, results@data$pred, "RMSE")
-
-# Cross-validatiin example with data.frames, parallel processing, and refit
-# global model is used for regression, variogram, and refit
-
-library(snowfall)
-library(doParallel)
-# create data.frames
-stfdf.df <- as.data.frame(stfdf)
-
-results <- cv.strk(data = stfdf.df,
-                   zcol="tempc",
-                   data.staid.x.y.time = c("staid","lon","lat","time"),
-                   # obs = stfdf.df, # if used, comment data argument
-                   # obs.staid.time = c("staid","time"),
-                   # stations = stfdf.df,
-                   # stations.staid.x.y = c("staid","lon","lat"),
+# do cross-validation
+rfsi_cv <- cv.rfsi(formula=fm.RFSI, # without nearest obs
+                   data = data,
                    zero.tol=0,
-                   reg.coef = tregcoef[[1]],
-                   vgm.model = tvgms[[1]],
-                   sp.nmax = 20,
-                   time.nmax = 2,
-                   type = "LLO",
-                   k = 5,
+                   tgrid = tgrid, # combinations for tuning
+                   tgrid.n = 5, # number of randomly selected combinations from tgrid for tuning
+                   tune.type = "LLO", # Leave-Location-Out CV
+                   k = 5, # number of folds
                    seed = 42,
-                   refit = TRUE,
-                   parallel.processing = TRUE,
-                   pp.type = "snowfall", # "doParallel"
+                   acc.metric = "RMSE", # R2, CCC, MAE
+                   output.format = "data.frame",
                    cpus=detectCores()-1,
-                   progress=TRUE
-)
+                   progress=1,
+                   importance = "impurity")
+summary(rfsi_cv)
 
-# stplot(results)
-# summary(results)
 # accuracy metric calculation
-acc.metric.fun(results@data$obs, results@data$pred, "RMSE")
-
+acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "R2")
+acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "RMSE")
+acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "NRMSE")
+acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "MAE")
+acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "NMAE")
+acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "CCC")
 }
 

@@ -1,88 +1,47 @@
 cv.rfsi <- function (formula, # without nearest obs
                      data, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
-                     data.staid.x.y.time = c(1,2,3,4), # if data.frame
-                     obs, # data.frame(id,time,obs,cov)
-                     obs.staid.time = c(1,2),
-                     stations, # data.frame(id,x,y)
-                     stations.staid.x.y = c(1,2,3),
-                     zero.tol=0,
-                     use.idw=FALSE,
+                     data.staid.x.y.z = NULL, # if data.frame
+                     zero.tol = 0,
+                     use.idw = FALSE,
                      # avg = FALSE,
                      # increment, # avg(nearest point dist)
                      # range, # bbox smaller(a, b) / 2
                      # direct = FALSE,
-                     s.crs=NA,
-                     t.crs=NA,
+                     s.crs = NA,
+                     p.crs = NA,
                      tgrid, # caret tune grid - by default random (min.node.size, mtry, no, sample.fraction, ntree, splitrule)
-                     tgrid.n=10,
+                     tgrid.n = 10,
                      tune.type = "LLO", # type of cv - LLO for now, after LTO, LLTO - CAST
                      k = 5, # number of folds
-                     seed=42,
+                     seed = 42,
                      folds, # if user want to create folds
                      fold.column, # by which column
                      acc.metric, # for tuning on subfolds
                      output.format = "data.frame", #"STFDF",
                      cpus=detectCores()-1,
-                     progress=TRUE,
+                     progress = 1,
                      soil3d = FALSE, # soil RFSI
                      no.obs = 'increase', # exactly
                      ...){ # fixed ranger parameters
   
   # check the input
-  if (progress) print('Preparing data ...')
-  if ((missing(data) & missing(obs) & missing(stations)) | missing(formula) | missing(tgrid)) {
-    stop('The arguments data (or obs and stations), formula and tgrid must not be empty!')
+  if (progress %in% 1:3) print('Preparing data ...')
+  if ((missing(data)) | missing(formula) | missing(tgrid)) {
+    stop('The arguments data, formula and tgrid must not be empty!')
   }
   formula <- as.formula(formula)
   all_vars <- all.vars(formula)
-  zcol.name <- all_vars[1]
+  obs.col.name <- all_vars[1]
   names_covar <- all_vars[-1]
   
-  if (!missing(data)){
-    if (class(data) == "data.frame") {
-      # if data.staid.x.y.time is character
-      if (!is.numeric(data.staid.x.y.time)) {
-        data.staid.x.y.time <- match(data.staid.x.y.time, names(data)) #sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
-      }
-      data.df = data
-    } else if (class(data) == "STFDF" | class(data) == "STSDF") {
-      if (class(data) == "STSDF") {data <- as(data, "STFDF")}
-      data <- rm.dupl(data, zcol, zero.tol)
-      data.df <- as.data.frame(data)
-      data.staid.x.y.time <- c(3,1,2,4)
-      if (!is.na(data@sp@proj4string)) {
-        s.crs <- data@sp@proj4string
-      }
-    } else if (class(data) == "SpatialPointsDataFrame" | class(data) == "SpatialPixelsDataFrame") {
-      data.df <- as.data.frame(data)
-      x.y.loc <- match(dimnames(data@coords)[[2]], names(data.df))
-      data.df$staid <- 1:nrow(data.df)
-      data.staid.x.y.time <- c(length(data.df),x.y.loc,NA)
-      if (!is.na(data@proj4string)) {
-        s.crs <- data@proj4string
-      }
-    } else {
-      stop('The argument data must be of STFDF, STSDF, data.frame,SpatialPointsDataFrame or SpatialPixelsDataFrame class!') # "STSDF"
-    }
-  } else { # obs, stations
-    # if obs.staid.time is character
-    if (!is.numeric(obs.staid.time)) {
-      obs.staid.time <- match(obs.staid.time, names(obs)) # sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
-    }
-    # if stations.staid.x.y is character
-    if (!is.numeric(stations.staid.x.y)) {
-      stations.staid.x.y <- match(stations.staid.x.y, names(stations)) # sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
-    }
-    # to stfdf
-    data.df <- join(obs, stations, by=names(obs)[obs.staid.time[1]], match="first")
-    data.staid.x.y.time <- c(obs.staid.time[1],
-                             stations.staid.x.y[2] + length(obs),
-                             stations.staid.x.y[3] + length(obs),
-                             obs.staid.time[2])
-  }
+  # prepare data
+  data.prep <- data.prepare(data = data, data.staid.x.y.z)
+  data.df <- data.prep[["data.df"]]
+  data.staid.x.y.z <- data.prep[["data.staid.x.y.z"]]
+  s.crs <- data.prep[["s.crs"]]
   
   # Criteria accuracy parameter
-  if (is.factor(data.df[, zcol.name])) {
+  if (is.factor(data.df[, obs.col.name])) {
     # classification
     if (missing(acc.metric) || !(acc.metric %in% c("Accuracy","Kappa","AccuracyLower","AccuracyUpper","AccuracyNull","AccuracyPValue","McnemarPValue"))) {
       acc.metric <- "Kappa"
@@ -90,7 +49,7 @@ cv.rfsi <- function (formula, # without nearest obs
     }
   } else {
     # regression
-    if (missing(acc.metric) || !(acc.metric %in% c("RMSE","MAE","ME","R2","CCC"))) {
+    if (missing(acc.metric) || !(acc.metric %in% c("RMSE","NRMSE","MAE","NMAE","ME","R2","CCC"))) {
       acc.metric <- "RMSE"
       warning("Criteria accuracy parameter is missing or is not valid for regression task. Using RMSE acccuracy parameter!")
     }
@@ -107,7 +66,7 @@ cv.rfsi <- function (formula, # without nearest obs
       # time_id <- rep(1:length(time), each = length(data@sp))
       # st_df <- cbind(space_id, time_id)
       # if (type == "LLO") {
-      spacevar <- names(data.df)[data.staid.x.y.time[1]]# "space_id"
+      spacevar <- names(data.df)[data.staid.x.y.z[1]]# "space_id"
       timevar <- NA
       # TO DO LTO and LLTO
       # } else if (type == "LTO") {
@@ -129,24 +88,24 @@ cv.rfsi <- function (formula, # without nearest obs
   }
   
   # do CV
-  if (progress) print('Doing CV ...')
+  if (progress %in% 1:3) print('Doing CV ...')
   pred <- c()
   # for val_fold in main folds
   for (val_fold in sort(unique(data.df[, fold.column]))) {
-    print(paste('### Main fold ', val_fold, " ###", sep=""))
+    if (progress %in% 1:3) print(paste('### Main fold ', val_fold, " ###", sep=""))
     # tune RFSI model
     dev.df <- data.df[data.df[, fold.column] != val_fold, ]
     val.df <- data.df[data.df[, fold.column] == val_fold, ]
-    if (progress) print('Tuning RFSI model ...')
+    if (progress %in% 1:3) print('Tuning RFSI model ...')
     # tune.rfsi
     tuned_model <- tune.rfsi(formula, # without nearest obs
                              data=dev.df, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
-                             data.staid.x.y.time = data.staid.x.y.time, # if data.frame
+                             data.staid.x.y.z = data.staid.x.y.z, # if data.frame
                              zero.tol=zero.tol,
                              # n.obs=n.obs, # nearest obs
                              # time.nmax, # use all if not specified
                              s.crs=s.crs,
-                             t.crs=t.crs,
+                             p.crs=p.crs,
                              # use.tps=use.tps,
                              # tps.df=tps.df,
                              use.idw=use.idw,
@@ -159,7 +118,7 @@ cv.rfsi <- function (formula, # without nearest obs
                              # fold.column=fold.column, # by which column
                              acc.metric = acc.metric,
                              cpus=cpus, # for near.obs
-                             progress=progress,
+                             progress=ifelse(progress==2, T, F),
                              fit.final.model=TRUE,
                              soil3d = soil3d, # soil RFSI
                              no.obs = no.obs, # exactly
@@ -167,82 +126,64 @@ cv.rfsi <- function (formula, # without nearest obs
                              # seed = seed,
                              ...)
     # validate
-    if (progress) print('Validation ...')
+    if (progress %in% 1:3) print('Validation ...')
     fold_prediction <- pred.rfsi(tuned_model$final.model, # RFSI model iz rfsi ili tune rfsi funkcije
                                  data=dev.df, # data.frame(x,y,obs,time) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
-                                 zcol=zcol.name,
-                                 data.staid.x.y.time = data.staid.x.y.time, # if data.frame
+                                 obs.col=obs.col.name,
+                                 data.staid.x.y.z = data.staid.x.y.z, # if data.frame
                                  newdata=val.df, # data.frame(x,y,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
-                                 newdata.staid.x.y.time = data.staid.x.y.time, # if data.frame
+                                 newdata.staid.x.y.z = data.staid.x.y.z, # if data.frame
                                  output.format = "data.frame",
                                  zero.tol=zero.tol,
                                  # n.obs=10, # nearest obs 3 vidi iz modela
                                  # time.nmax, # use all if not specified
                                  s.crs=s.crs,
                                  newdata.s.crs = s.crs,
-                                 t.crs=t.crs,
+                                 p.crs=p.crs,
                                  # parallel.processing = FALSE, # doParallel - videti zbog ranger-a
                                  cpus=cpus,
-                                 progress=progress,
+                                 progress=ifelse(progress==3, T, F),
                                  soil3d = soil3d, # soil RFSI
                                  depth.range = tuned_model$tuned.parameters$depth.range, # in units of depth
                                  no.obs = no.obs, # exactly
                                  ...)
     
-    if (is.na(data.staid.x.y.time[4])) {
-      fold_prediction <- fold_prediction[, c(names(val.df)[data.staid.x.y.time[1:3]], "pred")]
-      val.df <- val.df[, c(names(val.df)[data.staid.x.y.time[1:3]], fold.column, zcol.name)]
+    if (is.na(data.staid.x.y.z[4])) {
+      fold_prediction <- fold_prediction[, c(names(val.df)[data.staid.x.y.z[1:3]], "pred")]
+      val.df <- val.df[, c(names(val.df)[data.staid.x.y.z[1:3]], fold.column, obs.col.name)]
     } else {
-      fold_prediction <- fold_prediction[, c(names(val.df)[data.staid.x.y.time], "pred")]
-      val.df <- val.df[, c(names(val.df)[data.staid.x.y.time], fold.column, zcol.name)]
+      fold_prediction <- fold_prediction[, c(names(val.df)[data.staid.x.y.z], "pred")]
+      val.df <- val.df[, c(names(val.df)[data.staid.x.y.z], fold.column, obs.col.name)]
     }
-    ### ovde radi join kao kod tune!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     val.df <- join(val.df, fold_prediction)
-    # val.df$pred <- fold_prediction$pred # ovo proveri za quantreg???
     pred <- rbind(pred, val.df)
-  
-    # fold_obs <- c(fold_obs, val.df[, zcol.name])
-    # fold_pred <- c(fold_pred, fold_prediction$pred)
+    if (progress %in% 1:3) print(paste(acc.metric, ": ", acc.metric.fun(val.df[, obs.col.name], val.df$pred, acc.metric), sep=""))
   }
-  names(pred)[names(pred) == zcol.name] <- "obs"
+  names(pred)[names(pred) == obs.col.name] <- "obs"
   pred <- pred[complete.cases(pred), ]
   
   # return
-  if (output.format == "STSDF" | output.format == "STFDF" ) {
-    sta <- pred[, 1:3]
-    sta <- sta[!duplicated(sta), ]
-    obs <- pred[, 4:length(pred)]
-    stfdf <- meteo2STFDF(obs      = obs,
-                         stations = sta,
-                         crs      = s.crs,
-                         obs.staid.time = c(1,2),
-                         stations.staid.lon.lat = c(1,2,3)
-    )
-    if (output.format == "STSDF") {
-      if (progress) print("Done!")
-      return(as(stfdf, "STSDF"))
-    } else { #  (output.format == "STFDF")
-      if (progress) print("Done!")
-      return(stfdf)
-    }
-  } else if (output.format == "SpatialPointsDataFrame") {
-    spdf <- pred
-    coordinates(spdf) <- c(names(spdf)[2:3])
-    spdf@proj4string <- s.crs
-    if (progress) print("Done!")
-    return(spdf)
-  } else if (output.format == "SpatialPixelsDataFrame") {
-    spdf <- pred
-    coordinates(spdf) <- c(names(spdf)[2:3])
-    spdf@proj4string <- s.crs
-    spdf <- as(spdf, "SpatialPixelsDataFrame")
-    if (progress) print("Done!")
-    return(spdf)
+  if (output.format == "sftime") {
+    sf <- pred
+    names(sf)[4] <- "time"
+    sf <- st_as_sf(sf, coords = names(sf)[2:3], crs = s.crs, agr = "constant")
+    # sf$time <- Sys.time()
+    sftime <- st_sftime(sf)
+    if (progress %in% 1:3) print("Done!")
+    return(sftime)
+  } else if (output.format == "sf") {
+    sf <- st_as_sf(pred, coords = names(pred)[2:3], crs = s.crs, agr = "constant")
+    if (progress %in% 1:3) print("Done!")
+    return(sf)
+  } else if (output.format == "SpatVector") {
+    if (!is.na(s.crs)) {s.crs <- s.crs$wkt}
+    sv <- terra::vect(pred, geom = names(pred)[2:3], crs = s.crs)
+    if (progress %in% 1:3) print("Done!")
+    return(sv)
   } else { #  (output.format == "df")
-    if (progress) print("Done!")
+    if (progress %in% 1:3) print("Done!")
     return(pred)
   }
-  
 }
 
 # list - final RF model, parameters - n.obs, mtry, min.node.size, splitrule

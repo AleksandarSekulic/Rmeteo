@@ -16,6 +16,9 @@ import(sp,
   CAST,
   ranger,
   caret,
-  DescTools)
-export(meteo2STFDF, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk.old, pred.strk, pred.strk1, cv.strk, acc.metric.fun, near.obs, near.obs.soil, rfsi, pred.rfsi, tune.rfsi, cv.rfsi)
+  DescTools,
+  sf,
+  sftime,
+  terra)
+export(meteo2STFDF, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk.old, pred.strk, pred.strk1, cv.strk, data.prepare, acc.metric.fun, near.obs, near.obs.soil, rfsi, pred.rfsi, tune.rfsi, cv.rfsi)
 

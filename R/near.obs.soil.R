@@ -3,7 +3,7 @@ near.obs.soil <- function(
   locations.x.y.md = c(1,2,3),
   observations,
   observations.x.y.md = c(1,2,3),
-  zcol = 4,
+  obs.col = 4,
   n.obs = 5,
   depth.range = 0.1, # in units of depth
   no.obs = 'increase', # exactly
@@ -12,25 +12,32 @@ near.obs.soil <- function(
   cpus = detectCores()-1
 )
 {
+  ### PREPARE DATA ###
   ### input data preparation
-  if (class(locations) == "SpatialPoints" ||
-      class(locations) == "SpatialPointsDataFrame" ||
-      class(locations) == "SpatialPixelsDataFrame") {
+  if (any(class(locations) == "SpatVector")) {
     mid.depth <- locations[[locations.x.y.md[3]]]
-    locations <- coordinates(locations)
-    locations <- as.data.frame(cbind(locations, mid.depth))
+    locations <- as.data.frame(cbind(crds(locations), mid.depth))
+  } else if (any(class(locations) == "SpatRaster")) {
+    mid.depth <- values(locations[[locations.x.y.md[3]]])
+    locations <- as.data.frame(cbind(crds(locations, na.rm=F), mid.depth))
+  } else if (any(class(locations) == "sf")) {
+    mid.depth <- locations[[locations.x.y.md[3]]]
+    locations <- as.data.frame(cbind(st_coordinates(locations), mid.depth))
   } else {
     locations <- locations[, locations.x.y.md]
   }
-  if (class(observations) == "SpatialPoints" || class(observations) == "SpatialPointsDataFrame") {
+  if (any(class(observations) == "SpatVector")) {
     mid.depth <- observations[[observations.x.y.md[3]]]
-    variable <- observations[[zcol]]
-    observations <- coordinates(observations)
-    observations <- as.data.frame(cbind(observations, mid.depth, variable))
+    variable <- observations[[obs.col]] # as.data.frame(observations)[, obs.col]
+    observations <- as.data.frame(cbind(crds(observations), mid.depth, variable))
+  } else if (any(class(observations) == "sf")) {
+    mid.depth <- observations[[observations.x.y.md[3]]]
+    variable <- observations[, obs.col, drop=T]
+    observations <- as.data.frame(cbind(st_coordinates(observations), mid.depth, variable))
   } else {
-    observations <- observations[, c(observations.x.y.md, zcol)]
+    observations <- observations[, c(observations.x.y.md, obs.col)]
   }
-  
+ 
   ############# probably the best solution - to find the obs in the profile in which horizon is the midpoint
   ############### i.e. the midpoint is in the lower-upper range of the obs in the profile ###
   #### if there is no obs -> error("")
@@ -40,7 +47,7 @@ near.obs.soil <- function(
   # near_o1 <- matrix(NA, nrow = nrow(locations), ncol = n.obs)
   # nn.dists <- matrix(NA, nrow = nrow(locations), ncol = n.obs)
   
-  near.obs_fun <- function(l) {
+  near.obs.soil_fun <- function(l) {
     # nearest_obs <- foreach (l = 1:nrow(locations)) %dopar% { # , .export = c("near.obs")
     # for (l in 1:nrow(locations)) {
     loc <- locations[l, ]
@@ -92,13 +99,13 @@ near.obs.soil <- function(
   # add foreach in parallel - add
   if (parallel.processing) {
     if (pp.type == "doParallel") {
-      nl_df <- foreach(l = 1:nrow(locations), .packages = c("raster","spacetime","gstat")) %dopar% {near.obs_fun(l)}
+      nl_df <- foreach(l = 1:nrow(locations), .packages = c("raster","spacetime","gstat")) %dopar% {near.obs.soil_fun(l)}
       stopImplicitCluster()
     } else {
-      nl_df <- sfLapply (1:nrow(locations), function(l) {near.obs_fun(l)})
+      nl_df <- sfLapply (1:nrow(locations), function(l) {near.obs.soil_fun(l)})
     }
   } else {
-    nl_df <- lapply (1:nrow(locations), function(l) {near.obs_fun(l)})
+    nl_df <- lapply (1:nrow(locations), function(l) {near.obs.soil_fun(l)})
   }
   nl_df <- do.call("rbind", nl_df)
   

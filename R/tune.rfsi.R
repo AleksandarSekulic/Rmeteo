@@ -1,88 +1,47 @@
 tune.rfsi <- function (formula, # without nearest obs
                        data, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
-                       data.staid.x.y.time = c(1,2,3,4), # if data.frame
-                       obs, # data.frame(id,time,obs,cov)
-                       obs.staid.time = c(1,2),
-                       stations, # data.frame(id,x,y)
-                       stations.staid.x.y = c(1,2,3),
+                       data.staid.x.y.z=  NULL, # if data.frame
                        zero.tol=0,
                        # avg = FALSE,
                        # increment, # avg(nearest point dist)
                        # range, # bbox smaller(a, b) / 2
                        # direct = FALSE,
                        use.idw = FALSE,
-                       s.crs=NA,
-                       t.crs=NA,
+                       s.crs = NA,
+                       p.crs = NA,
                        tgrid, # caret tune grid (min.node.size, mtry, no, sample.fraction, ntree, splitrule, idw.p, depth.range)
-                       tgrid.n=10,
+                       tgrid.n = 10,
                        tune.type = "LLO", # type of cv - LLO for now, after LTO, LLTO - CAST
                        k = 5, # number of folds
-                       seed=42,
+                       seed = 42,
                        folds, # if user want to create folds
                        fold.column, # by which column
                        acc.metric, # caret parameters - RMSE, MAE, R2, ...
-                       fit.final.model=TRUE,
+                       fit.final.model = TRUE,
                        cpus=detectCores()-1,
-                       progress=TRUE,
+                       progress = TRUE,
                        soil3d = FALSE, # soil RFSI
                        no.obs = 'increase', # exactly
                        ...){ # ranger parameters
   
   # check the input
   if (progress) print('Preparing data ...')
-  if ((missing(data) & missing(obs) & missing(stations)) | missing(formula) | missing(tgrid)) {
-    stop('The arguments data (or obs and stations), formula and tgrid must not be empty!')
+  if ((missing(data)) | missing(formula) | missing(tgrid)) {
+    stop('The arguments data, formula and tgrid must not be empty!')
   }
   formula <- as.formula(formula)
   all_vars <- all.vars(formula)
-  zcol.name <- all_vars[1]
+  obs.col.name <- all_vars[1]
   names_covar <- all_vars[-1]
   
-  if (!missing(data)){
-    if (class(data) == "data.frame") {
-      # if data.staid.x.y.time is character
-      if (!is.numeric(data.staid.x.y.time)) {
-        data.staid.x.y.time <- match(data.staid.x.y.time, names(data))# sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
-      }
-      data.df = data
-    } else if (class(data) == "STFDF" | class(data) == "STSDF") {
-      if (class(data) == "STSDF") {data <- as(data, "STFDF")}
-      data <- rm.dupl(data, zcol, zero.tol)
-      data.df <- as.data.frame(data)
-      data.staid.x.y.time <- c(3,1,2,4)
-      if (!is.na(data@sp@proj4string)) {
-        s.crs <- data@sp@proj4string
-      }
-    } else if (class(data) == "SpatialPointsDataFrame" | class(data) == "SpatialPixelsDataFrame") {
-      data.df <- as.data.frame(data)
-      x.y.loc <- match(dimnames(data@coords)[[2]], names(data.df))
-      data.df$staid <- 1:nrow(data.df)
-      data.staid.x.y.time <- c(length(data.df),x.y.loc,NA)
-      if (!is.na(data@proj4string)) {
-        s.crs <- data@proj4string
-      }
-    } else {
-      stop('The argument data must be of STFDF, STSDF, data.frame,SpatialPointsDataFrame or SpatialPixelsDataFrame class!') # "STSDF"
-    }
-  } else { # obs, stations
-    # if obs.staid.time is character
-    if (!is.numeric(obs.staid.time)) {
-      obs.staid.time <- match(obs.staid.time, names(obs)) # sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
-    }
-    # if stations.staid.x.y is character
-    if (!is.numeric(stations.staid.x.y)) {
-      stations.staid.x.y <- match(stations.staid.x.y, names(stations)) # sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
-    }
-    # to stfdf
-    data.df <- join(obs, stations, by=names(obs)[obs.staid.time[1]], match="first")
-    data.staid.x.y.time <- c(obs.staid.time[1],
-                             stations.staid.x.y[2] + length(obs),
-                             stations.staid.x.y[3] + length(obs),
-                             obs.staid.time[2])
-  }
+  # prepare data
+  data.prep <- data.prepare(data = data, data.staid.x.y.z)
+  data.df <- data.prep[["data.df"]]
+  data.staid.x.y.z <- data.prep[["data.staid.x.y.z"]]
+  s.crs <- data.prep[["s.crs"]]
   
   # Criteria accuracy parameter
-  if (is.factor(data.df[, zcol.name])) {
+  if (is.factor(data.df[, obs.col.name])) {
     # classification
     if (missing(acc.metric) || !(acc.metric %in% c("Accuracy","Kappa","AccuracyLower","AccuracyUpper","AccuracyNull","AccuracyPValue","McnemarPValue"))) {
       acc.metric <- "Kappa"
@@ -90,7 +49,7 @@ tune.rfsi <- function (formula, # without nearest obs
     }
   } else {
     # regression
-    if (missing(acc.metric) || !(acc.metric %in% c("RMSE","MAE","ME","R2","CCC"))) {
+    if (missing(acc.metric) || !(acc.metric %in% c("RMSE","NRMSE", "MAE", "NMAE","ME","R2","CCC"))) {
       acc.metric <- "RMSE"
       warning("Criteria accuracy parameter is missing or is not valid for regression task. Using RMSE acccuracy parameter!")
     }
@@ -107,7 +66,7 @@ tune.rfsi <- function (formula, # without nearest obs
       # time_id <- rep(1:length(time), each = length(data@sp))
       # st_df <- cbind(space_id, time_id)
       # if (type == "LLO") {
-      spacevar <- names(data.df)[data.staid.x.y.time[1]]# "space_id"
+      spacevar <- names(data.df)[data.staid.x.y.z[1]]# "space_id"
       timevar <- NA
       # TO DO LTO and LLTO
       # } else if (type == "LTO") {
@@ -176,8 +135,8 @@ tune.rfsi <- function (formula, # without nearest obs
   
   for (tg in 1:nrow(tgrid)) {
     comb <- tgrid[tg, ]
-    print(paste("combination ", tg, ": ", sep=""))
-    print(comb)
+    if (progress) print(paste("combination ", tg, ": ", sep=""))
+    if (progress) print(comb)
     
     # parameters
     min.node.size=comb$min.node.size
@@ -192,19 +151,19 @@ tune.rfsi <- function (formula, # without nearest obs
     # fold_obs <- list()
     fold_pred <- c()
     for (val_fold in sort(unique(data.df[, fold.column]))) {
-      print(paste('Fold ', val_fold, sep=""))
+      if (progress) print(paste('Fold ', val_fold, sep=""))
       # fit RF model
       dev.df <- data.df[data.df[, fold.column] != val_fold, ]
       val.df <- data.df[data.df[, fold.column] == val_fold, ]
       if (progress) print('Fitting RFSI model ...')
       fold_model <- rfsi(formula, # without nearest obs
                          data=dev.df, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
-                         data.staid.x.y.time = data.staid.x.y.time, # if data.frame
+                         data.staid.x.y.z = data.staid.x.y.z, # if data.frame
                          zero.tol=zero.tol,
                          n.obs=n.obs, # nearest obs
                          # time.nmax, # use all if not specified
                          s.crs=s.crs,
-                         t.crs=t.crs,
+                         p.crs=p.crs,
                          # use.tps=use.tps,
                          # tps.df=tps.df,
                          use.idw=use.idw,
@@ -222,17 +181,17 @@ tune.rfsi <- function (formula, # without nearest obs
       if (progress) print('Prediction ...')
       fold_prediction <- pred.rfsi(model=fold_model, # RFSI model iz rfsi ili tune rfsi funkcije
                                    data=dev.df, # data.frame(x,y,obs,time) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
-                                   zcol=zcol.name,
-                                   data.staid.x.y.time = data.staid.x.y.time, # if data.frame
+                                   obs.col=obs.col.name,
+                                   data.staid.x.y.z = data.staid.x.y.z, # if data.frame
                                    newdata=val.df, # data.frame(x,y,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
-                                   newdata.staid.x.y.time = data.staid.x.y.time, # if data.frame
+                                   newdata.staid.x.y.z = data.staid.x.y.z, # if data.frame
                                    output.format = "data.frame",
                                    zero.tol=zero.tol,
                                    # n.obs=10, # nearest obs 3 vidi iz modela
                                    # time.nmax, # use all if not specified
                                    s.crs=s.crs,
                                    newdata.s.crs=s.crs,
-                                   t.crs=t.crs,
+                                   p.crs=p.crs,
                                    # parallel.processing = FALSE, # doParallel - videti zbog ranger-a
                                    cpus=cpus,
                                    progress=progress,
@@ -241,23 +200,23 @@ tune.rfsi <- function (formula, # without nearest obs
                                    no.obs = no.obs, # exactly
                                    ...)
       
-      # fold_obs <- c(fold_obs, val.df[, zcol.name])
+      # fold_obs <- c(fold_obs, val.df[, obs.col.name])
       # fold_pred <- c(fold_pred, fold_prediction$pred)
-      # fold_obs[[val_fold]] <- val.df[, zcol.name]
+      # fold_obs[[val_fold]] <- val.df[, obs.col.name]
       # fold_pred[[val_fold]] <- fold_prediction$pred
-      if (is.na(data.staid.x.y.time[4])) {
-        val.df <- join(val.df[, c(names(val.df)[data.staid.x.y.time[1:3]], zcol.name)], fold_prediction[, c(names(val.df)[data.staid.x.y.time[1:3]], "pred")])
+      if (is.na(data.staid.x.y.z[4])) {
+        val.df <- join(val.df[, c(names(val.df)[data.staid.x.y.z[1:3]], obs.col.name)], fold_prediction[, c(names(val.df)[data.staid.x.y.z[1:3]], "pred")])
       } else {
-        val.df <- join(val.df[, c(names(val.df)[data.staid.x.y.time], zcol.name)], fold_prediction[, c(names(val.df)[data.staid.x.y.time], "pred")])
+        val.df <- join(val.df[, c(names(val.df)[data.staid.x.y.z], obs.col.name)], fold_prediction[, c(names(val.df)[data.staid.x.y.z], "pred")])
       }
       
-      val.df <- val.df[, c(zcol.name, "pred")]
+      val.df <- val.df[, c(obs.col.name, "pred")]
       fold_pred <- rbind(fold_pred, val.df)
     }
     fold_pred <- fold_pred[complete.cases(fold_pred), ]
-    acc.metric.vector[tg] <- acc.metric.fun(fold_pred[, zcol.name], fold_pred[, "pred"], acc.metric)
-    print(paste(acc.metric, ": ", acc.metric.vector[tg], sep=""))
-    print("")
+    acc.metric.vector[tg] <- acc.metric.fun(fold_pred[, obs.col.name], fold_pred[, "pred"], acc.metric)
+    if (progress) print(paste(acc.metric, ": ", acc.metric.vector[tg], sep=""))
+    if (progress) print("")
     gc(); gc()
   }
   tgrid <- cbind(tgrid, acc.metric.vector)
@@ -265,24 +224,24 @@ tune.rfsi <- function (formula, # without nearest obs
   
   if (progress) print('Done!')
   
-  if (acc.metric %in% c("RMSE", "MAE", "ME", "AccuracyPValue", "McnemarPValue")) {
+  if (acc.metric %in% c("RMSE", "NRMSE", "MAE", "NMAE", "ME", "AccuracyPValue", "McnemarPValue")) {
     dev_parameters <- tgrid[which.min(acc.metric.vector), ]
   } else {
     dev_parameters <- tgrid[which.max(acc.metric.vector), ]
   }
-  print('Final parameters: ')
-  print(dev_parameters)
+  if (progress) print('Final parameters: ')
+  if (progress) print(dev_parameters)
   
   results <- list(combinations=tgrid, tuned.parameters=dev_parameters)
   if (fit.final.model) {
     final.model <- rfsi(formula, # without nearest obs
                         data=data.df, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
-                        data.staid.x.y.time = data.staid.x.y.time, # if data.frame
+                        data.staid.x.y.z = data.staid.x.y.z, # if data.frame
                         zero.tol=zero.tol,
                         n.obs=dev_parameters$n.obs, # nearest obs
                         # time.nmax, # use all if not specified
                         s.crs=s.crs,
-                        t.crs=t.crs,
+                        p.crs=p.crs,
                         # use.tps=use.tps,
                         # tps.df=tps.df,
                         use.idw=use.idw,
