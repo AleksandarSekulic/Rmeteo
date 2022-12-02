@@ -1,4 +1,5 @@
 library(meteo)
+library(sp)
 library(sf)
 library(sftime)
 library(terra)
@@ -150,7 +151,7 @@ rfsi_cv <- cv.rfsi(formula=fm.RFSI, # without nearest obs
                    # data.staid.x.y.z = c("id", "x", "y", NA), # only if class(data) == data.frame
                    zero.tol=0,
                    # s.crs=NA,
-                   # t.crs=NA,
+                   # p.crs=NA,
                    tgrid = tgrid, # combinations for tuning
                    tgrid.n = 5, # number of randomly selected combinations from tgrid for tuning
                    tune.type = "LLO", # Leave-Location-Out CV
@@ -166,8 +167,7 @@ rfsi_cv <- cv.rfsi(formula=fm.RFSI, # without nearest obs
 summary(rfsi_cv)
 rfsi_cv$dif <- rfsi_cv$obs - rfsi_cv$pred
 plot(rfsi_cv["dif"])
-# spplot(rfsi_cv[, , "obs"])
-acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "R2")
-acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "RMSE")
-acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "MAE")
-acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "CCC")
+acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "R2") # 0.5948994
+acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "RMSE") # 232.2175
+acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "MAE") # 0.3328514
+acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "CCC") # 0.7484076

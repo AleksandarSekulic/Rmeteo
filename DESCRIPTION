@@ -2,9 +2,9 @@ Package: meteo
 Type: Package
 Encoding: UTF-8
 Title: RFSI and spacetime geostatistical interpolations for meteorological and other enviromental varialbles
-Version: 2.0-0
+Version: 2.0-1
 Date: 2015-09-22
-Author: Aleksandar Sekulić, Milan Kilibarda, Tomislav Hengl, Edzer Pebesma, Benedikt Graeler
+Author: Milan Kilibarda, Aleksandar Sekulić, Tomislav Hengl, Edzer Pebesma, Benedikt Graeler
 Maintainer: Aleksandar Sekulić <asekulic@grf.bg.ac.rs>, Milan Kilibarda <kili@grf.bg.ac.rs>
 Description: RFSI and spacetime geostatistical interpolations for meteorological and other enviromental varialbles. Global spatio-temporal models calculated using publicly available data are stored in package.
 License: GPL (>= 2.0) | file LICENCE

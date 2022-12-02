@@ -35,7 +35,7 @@ rfsi <- function (formula, # without nearest obs
   names_covar <- all_vars[-1]
   
   # prepare data
-  data.prep <- data.prepare(data, data.staid.x.y.z)
+  data.prep <- data.prepare(data=data, data.staid.x.y.z=data.staid.x.y.z, s.crs=s.crs)
   data.df <- data.prep[["data.df"]]
   data.staid.x.y.z <- data.prep[["data.staid.x.y.z"]]
   s.crs <- data.prep[["s.crs"]]
@@ -50,14 +50,12 @@ rfsi <- function (formula, # without nearest obs
     warning('Source CRS is NULL! Using given coordinates for Euclidean distances calculation.')
   } else if (is.na(p.crs)) {
     if (progress) print('Projection CRS is NULL. Using source CRS for Euclidean distances calculation:')
-    if (progress) print(s.crs)
+    if (progress) print(s.crs$input)
   } else if (s.crs==p.crs) {
     if (progress) print('s.crs==p.crs')
   } else {
-    if (progress) print('Using projection CRS for Euclidean distances calculation. Do reprojection from:')
-    if (progress) print(s.crs)
-    if (progress) print('to:')
-    if (progress) print(p.crs)
+    if (progress) print('Using projection CRS for Euclidean distances calculation.')
+    if (progress) print(paste('Do reprojection from: ', s.crs$input, ' to ', p.crs$input, sep=""))
     # reproject data coordinates
     data.coord <- data.df[, data.staid.x.y.z[2:3]]
     data.coord <- st_as_sf(data.coord, coords = names(data.coord), crs = s.crs, agr = "constant")

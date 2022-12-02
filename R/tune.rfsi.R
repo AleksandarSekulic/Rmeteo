@@ -35,7 +35,7 @@ tune.rfsi <- function (formula, # without nearest obs
   names_covar <- all_vars[-1]
   
   # prepare data
-  data.prep <- data.prepare(data = data, data.staid.x.y.z)
+  data.prep <- data.prepare(data=data, data.staid.x.y.z=data.staid.x.y.z, s.crs=s.crs)
   data.df <- data.prep[["data.df"]]
   data.staid.x.y.z <- data.prep[["data.staid.x.y.z"]]
   s.crs <- data.prep[["s.crs"]]
