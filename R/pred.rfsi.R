@@ -1,16 +1,16 @@
 pred.rfsi <- function (model, # RFSI model
                        data, # sf | sftime | SpatVector | data.frame(x,y,z,obs)
-                       obs.col=1,
+                       obs.col=1, # ne treba - ako dodam formulu u model
                        data.staid.x.y.z = NULL, # if data.frame
-                       newdata, # sf | sftime | SpatVector | SpatRaster | data.frame(x,y,z,ec1,ec2,...)
+                       newdata, # sf | sftime | SpatVector | SpatRaster | data.frame(x,y,z,ec1,ec2,...)      dodaj stars
                        newdata.staid.x.y.z = NULL, # if data.frame
                        z.value = NULL,
                        zero.tol=0,
                        # time.nmax, # use all if not specified
-                       s.crs = NA,
-                       newdata.s.crs = NA,
-                       p.crs = NA,
-                       output.format = "data.frame",
+                       s.crs = NA, # brisi
+                       newdata.s.crs = NA, # brisi
+                       p.crs = NA, # brisi
+                       output.format = "data.frame", # smakni i ovo. Vrati isto kao input!!!
                        cpus=detectCores()-1,
                        progress = TRUE,
                        soil3d = FALSE, # soil3D RFSI
@@ -196,7 +196,7 @@ pred.rfsi <- function (model, # RFSI model
   } else {
     old.newdata.x.y <- newdata.staid.x.y.z[2:3]
     if (progress) print('Using newdata projection CRS for Euclidean distances calculation.')
-    if (progress) print(paste('Do reprojection from: ', s.crs$input, ' to ', p.crs$input, sep=""))
+    if (progress) print(paste('Do reprojection from: ', newdata.s.crs$input, ' to ', p.crs$input, sep=""))
     # reproject data coordinates
     newdata.coord <- newdata.df[, newdata.staid.x.y.z[2:3]]
     newdata.coord <- st_as_sf(newdata.coord, coords = names(newdata.coord), crs = newdata.s.crs, agr = "constant")

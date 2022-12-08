@@ -10,8 +10,8 @@ rfsi <- function (formula, # without nearest obs
                   quadrant = FALSE,
                   use.idw = FALSE,
                   idw.p = 2,
-                  s.crs = NA,
-                  p.crs = NA,
+                  s.crs = NA, # to ce da leti - ...
+                  p.crs = NA, # to ce da leti - ...
                   cpus = detectCores()-1, # for near.obs
                   progress = TRUE,
                   soil3d = FALSE, # soil RFSI
@@ -208,5 +208,8 @@ rfsi <- function (formula, # without nearest obs
   if (progress) print('Done!')
   
   return(rfsi_model)
+  # dodaj formulu
+  # dodaj n.obs
+  # avg ...
   
 }

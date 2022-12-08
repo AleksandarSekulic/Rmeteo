@@ -7,8 +7,8 @@ tune.rfsi <- function (formula, # without nearest obs
                        # range, # bbox smaller(a, b) / 2
                        # direct = FALSE,
                        use.idw = FALSE,
-                       s.crs = NA,
-                       p.crs = NA,
+                       s.crs = NA, # brisi
+                       p.crs = NA, # brisi
                        tgrid, # caret tune grid (min.node.size, mtry, no, sample.fraction, ntree, splitrule, idw.p, depth.range)
                        tgrid.n = 10,
                        tune.type = "LLO", # type of cv - LLO for now, after LTO, LLTO - CAST

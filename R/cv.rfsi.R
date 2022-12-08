@@ -7,8 +7,8 @@ cv.rfsi <- function (formula, # without nearest obs
                      # increment, # avg(nearest point dist)
                      # range, # bbox smaller(a, b) / 2
                      # direct = FALSE,
-                     s.crs = NA,
-                     p.crs = NA,
+                     s.crs = NA, # brisi
+                     p.crs = NA, # brisi
                      tgrid, # caret tune grid - by default random (min.node.size, mtry, no, sample.fraction, ntree, splitrule)
                      tgrid.n = 10,
                      tune.type = "LLO", # type of cv - LLO for now, after LTO, LLTO - CAST
@@ -17,7 +17,7 @@ cv.rfsi <- function (formula, # without nearest obs
                      folds, # if user want to create folds
                      fold.column, # by which column
                      acc.metric, # for tuning on subfolds
-                     output.format = "data.frame", #"STFDF",
+                     output.format = "data.frame", #"STFDF", # brisi - koristi kao data
                      cpus=detectCores()-1,
                      progress = 1,
                      soil3d = FALSE, # soil RFSI

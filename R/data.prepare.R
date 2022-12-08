@@ -105,4 +105,5 @@ data.prepare <- function (data,
       obs.col <- names(data)[obs.col]
   }
   return(list(data.df=data.df, data.staid.x.y.z=data.staid.x.y.z, s.crs=s.crs, obs.col=obs.col))
+  # vidi tibble
 }
