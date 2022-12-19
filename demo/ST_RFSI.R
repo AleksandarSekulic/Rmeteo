@@ -103,7 +103,7 @@ class(data)
 # Tune an RFSI model
 rfsi_tuned <- tune.rfsi(formula = fm.RFSI,
                         data = data, # meuse.df (use data.staid.x.y.z)
-                        # data.staid.x.y.z = data.staid.x.y.z, # only if class(data) == data.frame
+                        data.staid.x.y.z = data.staid.x.y.z, # only if class(data) == data.frame
                         zero.tol = 0,
                         s.crs = st_crs(4326), # NA
                         p.crs = st_crs(32634), # NA

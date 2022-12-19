@@ -40,6 +40,8 @@ tune.rfsi <- function (formula, # without nearest obs
   data.staid.x.y.z <- data.prep[["data.staid.x.y.z"]]
   s.crs <- data.prep[["s.crs"]]
   
+  # do transformation once, not in rfsi and pred.rfsi - same for cv.rfsi !!!!!!!!!!!!!!!!!!!!!!!!
+  
   # Criteria accuracy parameter
   if (is.factor(data.df[, obs.col.name])) {
     # classification
@@ -110,7 +112,7 @@ tune.rfsi <- function (formula, # without nearest obs
       } else if (pd == "n.obs") {
         tgrid$n.obs <- 10
       } else if (pd == "sample.fraction") {
-        tgrid$sample.fraction <- 1
+        tgrid$sample.fraction <- 1 # if classification - stavi 0.6
       } else if (pd == "splirule") {
         tgrid$splirule <- NULL
       } else if (pd == "idw.p") {

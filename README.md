@@ -1,7 +1,7 @@
 # `meteo`: RFSI and spacetime geostatistical interpolations for meteorological and other enviromental varialbles
 [![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
 [![CRAN](http://www.r-pkg.org/badges/version/meteo)](https://cran.r-project.org/package=meteo)
-[![cran checks](https://cranchecks.info/badges/worst/meteo)](https://cran.r-project.org/web/checks/check_results_meteo.html)
+[![cran checks](https://badges.cranchecks.info/worst/meteo.svg)](https://cran.r-project.org/web/checks/check_results_meteo.html)
 [![Downloads](http://cranlogs.r-pkg.org/badges/meteo?color=brightgreen)](http://www.r-pkg.org/pkg/meteo)
 
 ## Overview

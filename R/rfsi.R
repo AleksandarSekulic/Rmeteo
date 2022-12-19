@@ -197,6 +197,7 @@ rfsi <- function (formula, # without nearest obs
   # } else {
   formula = as.formula(paste(paste((deparse(formula)), collapse=""), paste(names(nearest_obs), collapse = " + "), sep = " + "))
   # }
+  rm(nearest_obs)
   
   # fit RF model
   if (progress) print('Fitting RFSI model ...')
