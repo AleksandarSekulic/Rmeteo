@@ -45,7 +45,7 @@ tgeom2STFDF <- function(grid,
   time <- as.POSIXlt(sort(time))
   day<- as.numeric( strftime(time, format = "%j") )
   
-  tg<-lapply(day, function(i) temp_geom(i,grid1@coords[,2],ab) )
+  tg<-lapply(day, function(i) temp_geom(i,grid1@coords[,2],variable,ab) )
   tg=do.call('cbind',tg)
   tg=as.vector(tg)
   tg=data.frame(temp_geo=tg)
