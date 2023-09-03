@@ -15,7 +15,7 @@ get_meteo(loc = c(21, 45),
 \item{source}{\code{character}; Data source. Possible values are: \code{"MeteoEurope1km"} (default).}
 }
 
-\value{\code{matrix} object with daily meteorological values for specific locations (rows) and specific dates (columns). First column is location ID.}
+\value{\code{data.frame} object with daily meteorological values for specific locations (rows) and specific dates (columns). First column is location ID.}
 \author{Aleksandar Sekulić \email{asekulic@grf.bg.ac.rs}}
 
 \seealso{
