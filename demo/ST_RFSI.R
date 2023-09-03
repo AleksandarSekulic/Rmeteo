@@ -18,6 +18,8 @@ library(ranger)
 # saveRDS(dtempc, file="/home/sekulic/Projects/Rmeteo/data/dtempc.rds")
 # dtempc <- readRDS("/home/sekulic/Projects/Rmeteo/data/dtempc.rds")
 # save(dtempc, file = "/home/sekulic/Projects/Rmeteo/data/dtempc.rda")
+# stations <- unique(dtempc[, c(1,4,3,5,2,8,9)])
+# save(stations, file = "/home/sekulic/Projects/Rmeteo/data/stations.rda")
 data(dtempc)
 # data(stations)
 

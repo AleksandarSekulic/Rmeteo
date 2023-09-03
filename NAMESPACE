@@ -6,8 +6,6 @@ importFrom("utils", "setTxtProgressBar", "txtProgressBar")
 importFrom("stats", "coefficients", "complete.cases", "lm")
 import(sp,
   spacetime,
-  rgdal,
-  raster,
   snowfall,
   doParallel,
   gstat,
@@ -20,5 +18,5 @@ import(sp,
   sf,
   sftime,
   terra)
-export(meteo2STFDF, temp_geom, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk.old, pred.strk, pred.strk1, cv.strk, data.prepare, acc.metric.fun, near.obs, near.obs.soil, rfsi, pred.rfsi, tune.rfsi, cv.rfsi)
+export(meteo2STFDF, temp_geom, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk.old, pred.strk, pred.strk1, cv.strk, data.prepare, acc.metric.fun, near.obs, near.obs.soil, rfsi, pred.rfsi, tune.rfsi, cv.rfsi, get_meteo)
 

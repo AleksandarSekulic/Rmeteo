@@ -35,6 +35,24 @@ install.packages("meteo", repos="http://R-Forge.R-project.org")
 ```
 
 ## Examples
+### Get daily meteorological data for specific locations and dates
+```
+library(terra)
+
+loc <- c(21, 45)
+# loc <- as.data.frame(rbind(c(21, 45),
+#                            c(21,45.5),
+#                            c(21.5,45),
+#                            c(21.5,45.5)))
+
+dates <- as.Date("2020-12-25")
+# dates <- seq(as.Date("2020-12-25"), as.Date("2020-12-31"), by="day")
+
+tmean <- get_meteo(loc,
+                   dates,
+                   var = "tmean", # "tmax" "tmin" "prcp" "slp"
+                   source = "MeteoEurope1km")
+```
 ### RFSI example
 Complete RFSI examples (including tune.rfsi and cv.rfsi) can be found in the [demo](demo) folder.
 ```

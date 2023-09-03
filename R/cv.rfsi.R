@@ -14,9 +14,10 @@ cv.rfsi <- function (formula, # without nearest obs
                      tune.type = "LLO", # type of cv - LLO for now, after LTO, LLTO - CAST
                      k = 5, # number of folds
                      seed = 42,
-                     folds, # if user want to create folds
-                     fold.column, # by which column
-                     acc.metric, # for tuning on subfolds
+                     out.folds, # if user want to create outer folds or column name
+                     in.folds, # if user want to create innner folds or column name
+                     # fold.column, # columns of outer folds and inner folds
+                     acc.metric, # for tuning on inner folds
                      output.format = "data.frame", #"STFDF", # brisi - koristi kao data
                      cpus=detectCores()-1,
                      progress = 1,
@@ -55,47 +56,89 @@ cv.rfsi <- function (formula, # without nearest obs
     }
   }
   
-  # set folds
-  if (missing(fold.column)){
-    if (missing(folds)) {
-      # create folds
-      
-      # check if time?
-      
-      # space_id <- rep(1:length(data@sp), length(time))
-      # time_id <- rep(1:length(time), each = length(data@sp))
-      # st_df <- cbind(space_id, time_id)
-      # if (type == "LLO") {
-      spacevar <- names(data.df)[data.staid.x.y.z[1]]# "space_id"
-      timevar <- NA
-      # TO DO LTO and LLTO
-      # } else if (type == "LTO") {
-      #   spacevar <- NA
-      #   timevar <- "time_id"
-      # } else if (type == "LLTO") {
-      #   spacevar <- "space_id"
-      #   timevar <- "time_id"
-      # }
-      indices <- CreateSpacetimeFolds(data.df, spacevar = spacevar, timevar = timevar,
-                                      k=k, seed = seed)
-      folds <- c()
-      for (f in 1:length(indices$indexOut)) {
-        folds[indices$indexOut[[f]]] <- f
-      }
+  # set out.folds and in.folds
+  if (missing(out.folds)) {
+    # create out.folds
+    
+    # check if time?
+    
+    # space_id <- rep(1:length(data@sp), length(time))
+    # time_id <- rep(1:length(time), each = length(data@sp))
+    # st_df <- cbind(space_id, time_id)
+    # if (type == "LLO") {
+    spacevar <- names(data.df)[data.staid.x.y.z[1]]# "space_id"
+    timevar <- NA
+    # TO DO LTO and LLTO
+    # } else if (type == "LTO") {
+    #   spacevar <- NA
+    #   timevar <- "time_id"
+    # } else if (type == "LLTO") {
+    #   spacevar <- "space_id"
+    #   timevar <- "time_id"
+    # }
+    indices <- CreateSpacetimeFolds(data.df, spacevar = spacevar, timevar = timevar,
+                                    k=k, seed = seed)
+    out.folds <- c()
+    for (f in 1:length(indices$indexOut)) {
+      out.folds[indices$indexOut[[f]]] <- f
     }
-    data.df$folds <- folds
-    fold.column <- "folds"
+    data.df$out.folds <- out.folds
+    out.fold.column <- "out.folds"
+  } else if (class(out.folds) %in% c("numeric", "character", "integer")) {
+    # outer folds
+    if (length(out.folds) == 1) { # column
+      out.fold.column <- out.folds
+      if (class(out.fold.column) %in% c("numeric", "integer")) {
+        out.fold.column <- names(data)[out.fold.column]
+      } else if (class(out.fold.column) == "character") {
+        if (!out.fold.column %in% names(data)){
+          stop(paste0('Colum with name "', out.fold.column, '" does not exist in data'))
+        }
+      }
+      print(paste0("Outer fold column: ", out.fold.column))
+    } else if (length(out.folds) == nrow(data.df)){ # vector
+      data.df$out.folds <- out.folds
+      out.fold.column <- "out.folds"
+    } else {
+      stop('length(out.folds) != nrow(data).')
+    }
+    # inner folds
+    if (missing(in.folds)) {
+      in.fold.column <- NA
+    } else if (class(in.folds) %in% c("numeric", "character", "integer")) {
+      if (length(in.folds) == 1) { # column
+        in.fold.column <- in.folds
+        if (class(in.fold.column) %in% c("numeric", "integer")) {
+          in.fold.column <- names(data)[in.fold.column]
+        } else if (class(in.fold.column) == "character") {
+          if (!in.fold.column %in% names(data)){
+            stop(paste0('Colum with name "', in.fold.column, '" does not exist in data'))
+          }
+        }
+        print(paste0("Inner fold column: ", out.fold.column))
+      } else if (length(in.folds) == nrow(data.df)){ # vector
+        data.df$in.folds <- in.folds
+        in.fold.column <- "in.folds"
+      } else {
+        stop('length(in.folds) != nrow(data).')
+      }
+    } else {
+      stop('The argument in.folds must numeric, integer or character.')
+    }
+    
+  } else {
+    stop('The argument out.folds must numeric, integer or character.')
   }
   
   # do CV
   if (progress %in% 1:3) print('Doing CV ...')
   pred <- c()
-  # for val_fold in main folds
-  for (val_fold in sort(unique(data.df[, fold.column]))) {
+  # for val_fold in outer folds
+  for (val_fold in sort(unique(data.df[, out.fold.column]))) {
     if (progress %in% 1:3) print(paste('### Main fold ', val_fold, " ###", sep=""))
     # tune RFSI model
-    dev.df <- data.df[data.df[, fold.column] != val_fold, ]
-    val.df <- data.df[data.df[, fold.column] == val_fold, ]
+    dev.df <- data.df[data.df[, out.fold.column] != val_fold, ]
+    val.df <- data.df[data.df[, out.fold.column] == val_fold, ]
     if (progress %in% 1:3) print('Tuning RFSI model ...')
     # tune.rfsi
     tuned_model <- tune.rfsi(formula, # without nearest obs
@@ -114,8 +157,8 @@ cv.rfsi <- function (formula, # without nearest obs
                              tgrid.n=tgrid.n,
                              tune.type = tune.type, # type of cv - LLO for now, after LTO, LLTO - CAST
                              k = k, # number of folds
-                             # folds=folds, # if user wants to create folds
-                             # fold.column=fold.column, # by which column
+                             # folds=in.folds, # if user wants to create folds
+                             fold.column=in.fold.column, # by which column
                              acc.metric = acc.metric,
                              cpus=cpus, # for near.obs
                              progress=ifelse(progress==2, T, F),
@@ -150,10 +193,10 @@ cv.rfsi <- function (formula, # without nearest obs
     
     if (is.na(data.staid.x.y.z[4])) {
       fold_prediction <- fold_prediction[, c(names(val.df)[data.staid.x.y.z[1:3]], "pred")]
-      val.df <- val.df[, c(names(val.df)[data.staid.x.y.z[1:3]], fold.column, obs.col.name)]
+      val.df <- val.df[, c(names(val.df)[data.staid.x.y.z[1:3]], out.fold.column, obs.col.name)]
     } else {
       fold_prediction <- fold_prediction[, c(names(val.df)[data.staid.x.y.z], "pred")]
-      val.df <- val.df[, c(names(val.df)[data.staid.x.y.z], fold.column, obs.col.name)]
+      val.df <- val.df[, c(names(val.df)[data.staid.x.y.z], out.fold.column, obs.col.name)]
     }
     val.df <- join(val.df, fold_prediction)
     pred <- rbind(pred, val.df)

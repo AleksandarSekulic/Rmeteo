@@ -14,8 +14,8 @@ tune.rfsi <- function (formula, # without nearest obs
                        tune.type = "LLO", # type of cv - LLO for now, after LTO, LLTO - CAST
                        k = 5, # number of folds
                        seed = 42,
-                       folds, # if user want to create folds
-                       fold.column, # by which column
+                       folds, # if user want to create folds or column name
+                       # fold.column, # by which column
                        acc.metric, # caret parameters - RMSE, MAE, R2, ...
                        fit.final.model = TRUE,
                        cpus=detectCores()-1,
@@ -58,35 +58,59 @@ tune.rfsi <- function (formula, # without nearest obs
   }
   
   # set folds
-  if (missing(fold.column)){
-    if (missing(folds)) {
-      # create folds
-      
-      # check if time?
-      
-      # space_id <- rep(1:length(data@sp), length(time))
-      # time_id <- rep(1:length(time), each = length(data@sp))
-      # st_df <- cbind(space_id, time_id)
-      # if (type == "LLO") {
-      spacevar <- names(data.df)[data.staid.x.y.z[1]]# "space_id"
-      timevar <- NA
-      # TO DO LTO and LLTO
-      # } else if (type == "LTO") {
-      #   spacevar <- NA
-      #   timevar <- "time_id"
-      # } else if (type == "LLTO") {
-      #   spacevar <- "space_id"
-      #   timevar <- "time_id"
-      # }
-      indices <- CreateSpacetimeFolds(data.df, spacevar = spacevar, timevar = timevar,
-                                      k=k, seed = seed)
-      folds <- c()
-      for (f in 1:length(indices$indexOut)) {
-        folds[indices$indexOut[[f]]] <- f
-      }
+  if (missing(folds)){
+    f_miss = TRUE
+  } else if (is.na(folds)) { # for CV
+    f_miss = TRUE
+  } else {
+    f_miss = FALSE
+  }
+  if(f_miss){
+    # create folds
+    
+    # check if time?
+    
+    # space_id <- rep(1:length(data@sp), length(time))
+    # time_id <- rep(1:length(time), each = length(data@sp))
+    # st_df <- cbind(space_id, time_id)
+    # if (type == "LLO") {
+    spacevar <- names(data.df)[data.staid.x.y.z[1]]# "space_id"
+    timevar <- NA
+    # TO DO LTO and LLTO
+    # } else if (type == "LTO") {
+    #   spacevar <- NA
+    #   timevar <- "time_id"
+    # } else if (type == "LLTO") {
+    #   spacevar <- "space_id"
+    #   timevar <- "time_id"
+    # }
+    indices <- CreateSpacetimeFolds(data.df, spacevar = spacevar, timevar = timevar,
+                                    k=k, seed = seed)
+    folds <- c()
+    for (f in 1:length(indices$indexOut)) {
+      folds[indices$indexOut[[f]]] <- f
     }
     data.df$folds <- folds
     fold.column <- "folds"
+  } else if (class(folds) %in% c("numeric", "character", "integer")) {
+    if (length(folds) == 1) { # column
+      fold.column <- folds
+      if (class(folds) %in% c("numeric", "integer")) {
+        fold.column <- names(data)[fold.column]
+      } else if (class(fold.column) == "character") {
+        if (!fold.column %in% names(data)){
+          stop(paste0('Colum with name "', fold.column, '" does not exist in data'))
+        }
+      }
+      print(paste0("Fold column: ", fold.column))
+    } else if (length(folds) == nrow(data.df)){ # vector
+      data.df$folds <- folds
+      fold.column <- "folds"
+    } else {
+      stop('length(folds) != nrow(data).')
+    }
+  } else {
+    stop('The argument folds must numeric, integer or character.')
   }
   
   if (length(tgrid) == 0) {

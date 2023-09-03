@@ -4,24 +4,31 @@
 \description{Tiling \link[raster]{raster} or \link[sp]{Spatial-class} Grid or Pixels (data frame) object to smaller parts with optional overlap.
 }
 \usage{
-tiling(filename,tilesize=500,overlapping=50, aspoints= FALSE, 
-       asfiles=FALSE,tilename="tile", format="GTiff", 
-       tiles_folder=paste(getwd(),'tiles',sep='/'), parallel.processing=FALSE, cpus=6)
+tiling(rast,
+       tilesize=500,
+       overlapping=50,
+       aspoints= FALSE, 
+       asfiles=FALSE,
+       tilename="tile",
+       tiles_folder=paste(getwd(),'tiles',sep='/'),
+       parallel.processing=FALSE,
+       cpus=6,
+       ...)
 }
 \arguments{
-  \item{filename}{raster object, SpatialPixels* object, SpatialGrid* object or file path of raster object stored on the disk (can be read via \link[rgdal]{readGDAL}), for more details see \link[raster]{raster}. The  resolution of object should be the same in x and y direction.
+  \item{rast}{\link[terra]{SpatRaster}, SpatialPixels* object, SpatialGrid* object or file path to raster object stored on the disk (can be read via \link[terra]{rast}), for more details see \link[terra]{SpatRaster}. The resolution of the raster should be the same in x and y direction.
 }
-  \item{tilesize}{tile size in cells in x direction. nx = ny is assumed, total number of tile cells is \code{tilesize} by \code{tilesize}. }
-  \item{overlapping}{overlapping cells in each direction}
-  \item{aspoints}{if TRUE tiles are in form of \code{SpatialPointsDataFrame} }
-  \item{asfiles}{if TRUE tiles are stored on local drive as raster objects}
-  \item{tilename}{prefix given to file names}
-  \item{format}{file format, see \link[raster]{writeRaster} }
-  \item{tiles_folder}{folder to be created for tiles storage}
-  \item{parallel.processing}{if TRUE parralel processing is performed via  \link[snowfall]{snowfall-calculation}, sfLapply function. }
-  \item{cpus}{number of proccesing units}
+  \item{tilesize}{integer or vector; tile size in number of cells. Can be a vector of tilesize in x and y direction. Total number of tile cells is \code{tilesize[1]} x \code{tilesize[2]}.}
+  \item{overlapping}{integer or vector; overlapping in number of cells. Can be a vector of overlapping in x and y direction.}
+  \item{aspoints}{character; Posiible values are \code{sf}, \code{terra} \code{sp}. If specified, tiles are returned in form of points as \link[sf]{sf}, \link[terra]{SpaVector} or \link[sp]{SpatialPointsDataFrame}.}
+  \item{asfiles}{boolean; if TRUE tiles are stored on local drive as raster objects.}
+  \item{tilename}{character; prefix given to file names}
+  \item{tiles_folder}{character; destination folder where tiles will be stored. If doesn't exist, the folder will be created.}
+  \item{parallel.processing}{boolean; if TRUE parralel processing is performed via  \link[snowfall]{snowfall-calculation}, sfLapply function.}
+  \item{cpus}{integer; number of proccesing units.}
+  \item{...}{character; additional arguments for for writing files, see \link[terra]{writeRaster}.}
 }
-\value{ The list of tiles in raster format or in \code{SpatialPointsDataFrame} format if \code{aspoints=TRUE}
+\value{ The list of tiles in \link[terra]{SpatRaster-class} format or in \link[sf]{sf}, \link[terra]{SpaVector} or \link[sp]{SpatialPointsDataFrame} format if \code{aspoints=TRUE}.
 }
 \author{Milan Kilibarda \email{kili@grf.bg.ac.rs}  }
 \seealso{

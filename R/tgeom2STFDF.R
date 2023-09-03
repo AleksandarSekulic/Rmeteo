@@ -37,15 +37,25 @@ tgeom2STFDF <- function(grid,
                         variable='mean',
                         ab=NULL) {
   
-  if(class(grid) == 'SpatialGrid' | class(grid) == 'SpatialGridDataFrame') {
-  grid <- as(grid,'SpatialPixels') }
+  # sf, sftime, SpatVector, SpatRaster
+  
+  if (any(class(grid) == "SpatVector")) {
+    grid <- as(grid, "Spatial")
+  } else if (any(class(grid) == "SpatRaster")) {
+    grid <- as.points(grid, na.rm=F)
+    grid <- as(grid, "Spatial")
+  } else if (any(class(grid) == "sf")) {
+    grid <- as_Spatial(grid)
+  } else if(class(grid) == 'SpatialGrid' | class(grid) == 'SpatialGridDataFrame') {
+    grid <- as(grid,'SpatialPixels')
+  }
   
   if(!is.na(grid@proj4string@projargs )){ grid1 <- spTransform(grid, CRS('+proj=longlat +datum=WGS84') ) } else { grid1 <- grid}
   
   time <- as.POSIXlt(sort(time))
-  day<- as.numeric( strftime(time, format = "%j") )
+  day <- as.numeric( strftime(time, format = "%j") )
   
-  tg<-lapply(day, function(i) temp_geom(i,grid1@coords[,2],variable,ab) )
+  tg<-lapply(day, function(i) temp_geom(i, grid1@coords[,2],variable,ab) )
   tg=do.call('cbind',tg)
   tg=as.vector(tg)
   tg=data.frame(temp_geo=tg)

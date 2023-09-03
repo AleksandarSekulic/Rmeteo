@@ -48,6 +48,9 @@ near.obs <- function(
     }
     if(any(class(knn1$nn.idx)!='integer')) {
       near_o1 <- apply(knn1$nn.idx, 2, function(x) {variable[x]})
+      if (nrow(locations) == 1) {
+        near_o1 <- matrix(near_o1, nrow = 1)
+      }
       near_o1 <- cbind(near_o1)
       nl_df <- cbind(knn1$nn.dists, near_o1)
     } else {
@@ -70,7 +73,11 @@ near.obs <- function(
         nl_df <- cbind(nl_df, rep(NA, nrow(locations)))
       } else {
         if (any(class(knn1$nn.dists) != "numeric")) {
-          idw.w <- t(apply(knn1$nn.dists, 1, function(x) (1/(x)^ip) / sum(1/(x)^ip) ))
+          if (nrow(locations) == 1) {
+            idw.w <- apply(knn1$nn.dists, 1, function(x) (1/(x)^ip) / sum(1/(x)^ip) )
+          } else {
+            idw.w <- t(apply(knn1$nn.dists, 1, function(x) (1/(x)^ip) / sum(1/(x)^ip) ))
+          }
           # wi = 1/d^2 / sum(1/d^2)
           # pred = sum(wi*obs)
           nl_df <- cbind(nl_df, apply(idw.w*near_o1, 1, sum))

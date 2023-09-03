@@ -89,7 +89,7 @@ data.prepare <- function (data,
     if (!is.na(st_crs(data))) {
       s.crs <- st_crs(data)
     }
-  } else if (class(data)[1] == "data.frame") {
+  } else if (any(class(data) == "data.frame")) {
     if (is.null(data.staid.x.y.z)) {
       stop('The argument (new)data.staid.x.y.z must not be empty if class(data) = data.frame!')
     }

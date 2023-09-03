@@ -5,13 +5,15 @@
 \description{Calculate geometrical temperature trend for mean, minimum or maximum temperature.
 }
 \usage{
-tgeom2STFDF(grid, time, variable = "mean",ab=NULL)
+tgeom2STFDF(grid,
+            time,
+            variable = "mean",
+            ab=NULL)
 }
 \arguments{
-  \item{grid}{ object of \link[sp]{Spatial-class} (Points, Grid or Pixels) with associated coordinate reference systems (\link[sp]{CRS-class}). If                       CRS is not defined longitude latitude is assumed. }
-  \item{time}{object holding time information, reasonably it is day (calendar date), or vector of days
-}
-  \item{variable}{ character;\code{'mean'}, \code{'min'} or \code{'max'} ; geometrical temperature trend is calculated for mean, minimum or maximum; \code{'mean'} is default. }
+  \item{grid}{\link[sp]{Spatial-class} (Points, Grid or Pixels), \link[sf]{sf-class}, \link[terra]{SpatVector-class}, \link[terra]{SpatRaster-class}; Locations for which gtt is calculated with associated coordinate reference systems (\link[sp]{CRS-class}). If CRS is not defined longitude latitude is assumed.}
+  \item{time}{date or datetime; Object holding time information, reasonably it is day (calendar date), or vector of days.}
+  \item{variable}{character; Geometrical temperature trend calculated for mean, minimum or maximum temperature; Possible values are \code{'mean'}, \code{'min'} or \code{'max'}. \code{'mean'} is default.}
     \item{ab}{Predefined coefficients to be used instead of incorporated.}
 }
 \value{ \link[spacetime]{STFDF-class} object with calculated \code{temp_geo} geometrical temperature trend. The calculated values are stored in \code{obj@data} slot.
