@@ -21,7 +21,7 @@ The \code{dtempc_ogimet} contains the following columns:
 \author{Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
 \references{
 \itemize{
-\item OGIMET service (\url{https://www.ogimet.com/home.phtml.en})
+\item OGIMET service (\url{https://www.ogimet.com/})
 }
 }
 \examples{

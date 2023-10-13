@@ -38,7 +38,7 @@ near.obs.soil(locations,
 \value{\link[base]{data.frame} object.  Rows represents specific locations. First \code{n.obs} columns are Euclidean distances to \code{n.obs} nearest observations. Next \code{n.obs} columns are observations at \code{n.obs} nearest stations.
 }
 
-\author{Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}, Anatol Helfenstein {anatol.helfenstein@wur.nl}}
+\author{Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}, Anatol Helfenstein \email{anatol.helfenstein@wur.nl}}
 
 \note{The function is intended for soil mapping applications.}
 
