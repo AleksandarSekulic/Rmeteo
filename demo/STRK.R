@@ -9,25 +9,24 @@ library(doParallel)
 library(CAST)
 
 # preparing data
-data(dtempc) # temperature data
-data(stations) # station locations
-data(regdata) # covariates
+data(dtempc) 
+data(stations)
+data(regdata) # covariates, made by mete2STFDF function
+
 regdata@sp@proj4string <- CRS('+proj=longlat +datum=WGS84')
 data(tvgms) # ST variogram models
 data(tregcoef) # MLR coefficients
-regdata.df <- as.data.frame(regdata)
 
-serbia= point.in.polygon(stations$lon, stations$lat, c(18,22.5,22.5,18), c(40,40,46,46))
-st= stations[ serbia!=0, ]
-dtempc <- dtempc[dtempc$staid %in% st$staid, ]
-dtempc <- dtempc[complete.cases(dtempc),]
-summary(dtempc)
-# create data.frame
-stfdf.df <- join(dtempc, st)
-summary(stfdf.df)
+lonmin=18 ;lonmax=22.5 ; latmin=40 ;latmax=46
+serbia = point.in.polygon(stations$lon, stations$lat, c(lonmin,lonmax,lonmax,lonmin), 
+                          c(latmin,latmin,latmax,latmax))
+st = stations[ serbia!=0, ] # stations in Serbia approx.
+crs = CRS('+proj=longlat +datum=WGS84')
+
 # create STFDF
-stfdf <- meteo2STFDF(dtempc,st)
-stfdf@sp@proj4string <- CRS('+proj=longlat +datum=WGS84')
+stfdf <- meteo2STFDF(obs = dtempc,
+                     stations = st,
+                     crs = crs)
 
 #################### pred.strk ####################
 
@@ -38,29 +37,32 @@ stfdf@sp@proj4string <- CRS('+proj=longlat +datum=WGS84')
 results <- pred.strk(data = stfdf, # observations
                      newdata = regdata, # prediction locations with covariates
                      # newdata = regdata[,2,drop=FALSE], # for one day only
-                     output.format = "stfdf",
+                     output.format = "STFDF", # data.frame | sf | sftime | SpatVector | SpatRaster 
                      reg.coef = tregcoef[[1]], # MLR coefficients
                      vgm.model = tvgms[[1]], # STRK variogram model
                      sp.nmax = 20,
                      time.nmax = 2,
                      computeVar=TRUE
 )
-
+class(results)
 # plot prediction
-stplot(results[,,"pred", drop=F], col.regions=bpy.colors())
-stplot(results[,,"var", drop=F], col.regions=bpy.colors())
+results@sp=as(results@sp,'SpatialPixelsDataFrame')
+stplot(results[,,"pred", drop= FALSE], col.regions=bpy.colors())
+stplot(results[,,"var", drop= FALSE], col.regions=bpy.colors())
 
-### Example with data.frames and parallel processing
+### Example with data.frames and parallel processing - SpatRaster output
+# create data.frame
+stfdf.df <- join(dtempc, st)
+summary(stfdf.df)
+regdata.df <- as.data.frame(regdata)
+
 results <- pred.strk(data = stfdf.df,
-                     zcol = 3,
-                     data.staid.x.y.time = c(1,4,5,2),
-                     # obs = stfdf.df, # if used, comment data argument
-                     # obs.staid.time = c(1,2),
-                     # stations = stfdf.df,
-                     # stations.staid.x.y = c(1,4,5),
+                     obs.col = 3,
+                     data.staid.x.y.z = c(1,4,5,2),
                      newdata = regdata.df,
-                     # newdata = regdata.df[regdata.df$time=="2011-07-06", ], # for one day only
-                     newdata.staid.x.y.time = c(3,1,2,4),
+                     newdata.staid.x.y.z = c(3,1,2,4),
+                     crs = CRS("EPSG:4326"),
+                     output.format = "SpatRaster", # STFDF |data.frame | sf | sftime | SpatVector
                      reg.coef = tregcoef[[1]],
                      vgm.model = tvgms[[1]],
                      sp.nmax = 20,
@@ -73,8 +75,8 @@ results <- pred.strk(data = stfdf.df,
 )
 
 # plot prediction
-stplot(results[,,"pred", drop=F], col.regions=bpy.colors())
-stplot(results[,,"var", drop=F], col.regions=bpy.colors())
+plot(results$`2011-07-06`[["pred"]])
+plot(results$`2011-07-06`[["var"]])
 
 #################### cv.strk ####################
 
@@ -110,10 +112,10 @@ for (covar in names_covar){
 for (covar in names_covar){
   # count NAs per stations
   numNA <- apply(matrix(stfdf@data[,covar],
-                        nrow=nrowsp,byrow=F), MARGIN=1,
+                        nrow=nrowsp,byrow= FALSE), MARGIN=1,
                  FUN=function(x) sum(is.na(x)))
   rem <- numNA != length(time)
-  stfdf <-  stfdf[rem,drop=F]
+  stfdf <-  stfdf[rem,drop= FALSE]
 }
 
 # Remove dates out of covariates
@@ -129,7 +131,8 @@ if(!is.null(rm.days)){
 
 ### Example with STFDF and without parallel processing and without refitting of variogram
 results <- cv.strk(data = stfdf,
-                   zcol = 1, # "tempc"
+                   obs.col = 1, # "tempc"
+                   data.staid.x.y.z = c(1,NA,NA,NA), # first column is station ID
                    reg.coef = tregcoef[[1]],
                    vgm.model = tvgms[[1]],
                    sp.nmax = 20,
@@ -152,12 +155,8 @@ acc.metric.fun(results@data$obs, results@data$pred, "CCC")
 ### Example with data.frame, parallel processing, and refit
 stfdf.df <- as.data.frame(stfdf)
 results <- cv.strk(data = stfdf.df,
-                   zcol = "tempc",
-                   data.staid.x.y.time = c("staid","lon","lat","time"),
-                   # obs = stfdf.df, # if used, comment data argument
-                   # obs.staid.time = c("staid","time"),
-                   # stations = stfdf.df,
-                   # stations.staid.x.y = c("staid","lon","lat"),
+                   obs.col = "tempc",
+                   data.staid.x.y.z = c("staid","lon","lat","time"),
                    zero.tol = 0,
                    reg.coef = tregcoef[[1]],
                    vgm.model = tvgms[[1]],
@@ -167,6 +166,7 @@ results <- cv.strk(data = stfdf.df,
                    k = 5,
                    seed = 42,
                    refit = TRUE,
+                   output.format = "STFDF",
                    parallel.processing = TRUE,
                    pp.type = "doParallel", # "snowfall"
                    cpus = detectCores()-1,
@@ -180,3 +180,4 @@ acc.metric.fun(results@data$obs, results@data$pred, "R2")
 acc.metric.fun(results@data$obs, results@data$pred, "RMSE")
 acc.metric.fun(results@data$obs, results@data$pred, "MAE")
 acc.metric.fun(results@data$obs, results@data$pred, "CCC")
+

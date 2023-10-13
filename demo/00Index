@@ -1,0 +1,4 @@
+STRK_help_functions   Examples for meteo2STFDF, tgeom2STFDF, tilling and rm.dupl functions
+STRK   Examples for data preparation and spatio-temporal regression kriging prediction (pred.strk) and cross validation (cv.strk)
+RFSI   Examples for Random Forest Spatial Interpolation model calibration (rfsi), prediction (pred.rfsi), tuning (tune.rfsi), and cross validation (cv.rfsi) and near.obs function for finding the nearest observations
+ST_RFSI   Examples for spatio-temporal interpolation using Random Forest Spatial Interpolation methodology

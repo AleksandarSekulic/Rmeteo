@@ -2,7 +2,7 @@
 [![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
 [![CRAN](http://www.r-pkg.org/badges/version/meteo)](https://cran.r-project.org/package=meteo)
 [![cran checks](https://badges.cranchecks.info/worst/meteo.svg)](https://cran.r-project.org/web/checks/check_results_meteo.html)
-[![Downloads](http://cranlogs.r-pkg.org/badges/meteo?color=brightgreen)](http://www.r-pkg.org/pkg/meteo)
+[![Downloads](http://cranlogs.r-pkg.org/badges/meteo?color=brightgreen)](https://www.r-pkg.org/pkg/meteo)
 
 ## Overview
 `meteo` is an R package for RFSI ang spacetime geostatistical interpolations for meteorological and other enviromental varialbles.
@@ -18,16 +18,20 @@ Main functions:
 
 ## Repositories
 * [Github](https://github.com/AleksandarSekulic/Rmeteo) - up to date!
-* [R-forge](http://meteo.r-forge.r-project.org/)
 * [CRAN](https://cran.r-project.org/package=meteo)
+* [R-forge](http://meteo.r-forge.r-project.org/)
 
-*Note that the latest version is in the Github repository. The R-forge and CRAN repository will updated only with a stabile version.*
+*Note that the latest version is in the Github repository. The R-forge and CRAN repository will updated only with a stable version.*
 
 ## Installation
 Install development versions (the most recent version) from Github with
 ```
 library(devtools)
 install_github("https://github.com/AleksandarSekulic/Rmeteo")
+```
+or from CRAN
+```
+install.packages("meteo")
 ```
 or from R-forge
 ```
@@ -157,7 +161,7 @@ stfdf@sp@proj4string <- CRS('+proj=longlat +datum=WGS84')
 results <- pred.strk(data = stfdf, # observations
                      newdata = regdata, # prediction locations with covariates
                      # newdata = regdata[,2,drop=FALSE], # for one day only
-                     output.format = "stfdf",
+                     output.format = "STFDF",
                      reg.coef = tregcoef[[1]], # MLR coefficients
                      vgm.model = tvgms[[1]], # STRK variogram model
                      sp.nmax = 20,

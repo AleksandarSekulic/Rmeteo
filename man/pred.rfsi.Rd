@@ -13,7 +13,7 @@ pred.rfsi(model,
           data.staid.x.y.z = NULL,
           newdata,
           newdata.staid.x.y.z = NULL,
-          zero.tol = 0,
+          z.value = NULL,
           s.crs = NA,
           newdata.s.crs=NA,
           p.crs = NA,
@@ -28,16 +28,16 @@ pred.rfsi(model,
 
 \arguments{
   \item{model}{ranger; An RFSI model made by \link{rfsi} function.}
-  \item{data}{\link[sf]{sf-class}, \link[sftime]{sftime-class}, \link[terra]{SpatVector-class} or \code{data.frame}; Contains target variable (observations) and covariates used for RFSI prediction. If \code{data.frame} object, it should have next columns: station ID (staid), longitude (x), latitude (y), 3rd component - time, depth, ... (z) of the observation, and observation value (obs).}
+  \item{data}{\link[sf:sf]{sf-class}, \link[sftime:st_sftime]{sftime-class}, \link[terra]{SpatVector-class} or \link[base]{data.frame}; Contains target variable (observations) and covariates used for RFSI prediction. If \link[base]{data.frame} object, it should have next columns: station ID (staid), longitude (x), latitude (y), 3rd component - time, depth, ... (z) of the observation, and observation value (obs).}
   \item{obs.col}{numeric or character; Column name or number showing position of the observation column in the \code{data}. Default is 1.}
-  \item{data.staid.x.y.z}{numeric or character vector; Positions or names of the station ID (staid), longitude (x), latitude (y) and 3rd component (z) columns in data.frame \code{data} object (e.g. c(1,2,3,4)). If \code{data} is \link[sf]{sf-class}, \link[sftime]{sftime-class}, or \link[terra]{SpatVector-class} object, \code{data.staid.x.y.z} is used to point staid and z position. Set z position to NA (e.g. c(1,2,3,NA)) or ommit it (e.g. c(1,2,3)) for spatial interpolation. Default is NULL.}
-  \item{newdata}{\link[sf]{sf-class}, \link[sftime]{sftime-class}, \link[terra]{SpatVector-class}, \link[terra]{SpatRaster-class} or \code{data.frame}; Contains prediction locations and covariates used for RFSI prediction. If \code{data.frame} object, it should have next columns: prediction location ID (staid), longitude (x), latitude (y), 3rd component - time, depth, ... (z), and covariates (cov1, cov2, ...). Covariate names have to be the same as in the \code{model}.}
-  \item{newdata.staid.x.y.z}{numeric or character vector; Positions or names of the prediction location ID (staid), longitude (x), latitude (y) and 3rd component (z) columns in data.frame \code{newdata} object (e.g. c(1,2,3,4)). If \code{newdata} is \link[sf]{sf-class}, \link[sftime]{sftime-class}, \link[terra]{SpatVector-class} or \link[terra]{SpatRaster-class} object, \code{newdata.staid.x.y.z} is used to point staid and z position. Set z position to NA (e.g. c(1,2,3,NA)) or ommit it (e.g. c(1,2,3)) for spatial interpolation. Default is NULL.}
-  \item{zero.tol}{numeric; A distance value below (or equal to) which locations are considered as duplicates. Default is 0. See \link{rm.dupl}.}
-  \item{s.crs}{\link[sf]{crs-class}; Source CRS of \code{data}. If \code{data} contains crs, \code{s.crs} will be overwritten. Default is NA.}
-  \item{newdata.s.crs}{\link[sf]{crs-class}; Source CRS of \code{newdata}. If \code{newdata} contains crs, \code{newdata.s.crs} will be overwritten. Default is NA.}
-  \item{p.crs}{\link[sf]{crs-class}; Projection CRS for \code{data} reprojection. If NA, \code{s.crs} will be used for distance calculation. Note that observations should be in projection for finding nearest observations based on Eucleadean distances (see function \link{near.obs}). Default is NA.}
-  \item{output.format}{character; Format of the output, \code{data.frame} (default), \link[sf]{sf-class}, \link[sftime]{sftime-class}, \link[terra]{SpatVector-class}, or \link[terra]{SpatRaster-class}.}
+  \item{data.staid.x.y.z}{numeric or character vector; Positions or names of the station ID (staid), longitude (x), latitude (y) and 3rd component (z) columns in \link[base]{data.frame} object (e.g. c(1,2,3,4)). If \code{data} is \link[sf:sf]{sf-class}, \link[sftime:st_sftime]{sftime-class}, or \link[terra]{SpatVector-class} object, \code{data.staid.x.y.z} is used to point staid and z position. Set z position to NA (e.g. c(1,2,3,NA)) or ommit it (e.g. c(1,2,3)) for spatial interpolation. Default is NULL.}
+  \item{newdata}{\link[sf:sf]{sf-class}, \link[sftime:st_sftime]{sftime-class}, \link[terra]{SpatVector-class}, \link[terra]{SpatRaster-class} or \link[base]{data.frame}; Contains prediction locations and covariates used for RFSI prediction. If \link[base]{data.frame} object, it should have next columns: prediction location ID (staid), longitude (x), latitude (y), 3rd component - time, depth, ... (z), and covariates (cov1, cov2, ...). Covariate names have to be the same as in the \code{model}.}
+  \item{newdata.staid.x.y.z}{numeric or character vector; Positions or names of the prediction location ID (staid), longitude (x), latitude (y) and 3rd component (z) columns in data.frame \code{newdata} object (e.g. c(1,2,3,4)). If \code{newdata} is \link[sf:sf]{sf-class}, \link[sftime:st_sftime]{sftime-class}, \link[terra]{SpatVector-class} or \link[terra]{SpatRaster-class} object, \code{newdata.staid.x.y.z} is used to point staid and z position. Set z position to NA (e.g. c(1,2,3,NA)) or ommit it (e.g. c(1,2,3)) for spatial interpolation. Default is NULL.}
+  \item{z.value}{vector; A vector of 3rd component - time, depth, ... (z) values if \code{newdata} is \link[terra]{SpatRaster-class}.}
+  \item{s.crs}{\link[sf]{st_crs} or \link[terra]{crs}; Source CRS of \code{data}. If \code{data} contains crs, \code{s.crs} will not be used. Default is NA.}
+  \item{newdata.s.crs}{\link[sf]{st_crs} or \link[terra]{crs}; Source CRS of \code{newdata}. If \code{newdata} contains crs, \code{newdata.s.crs} will not be used. Default is NA.}
+  \item{p.crs}{\link[sf]{st_crs} or \link[terra]{crs}; Projection CRS for \code{data} reprojection. If NA, \code{s.crs} will be used for distance calculation. Note that observations should be in projection for finding nearest observations based on Eucleadean distances (see function \link{near.obs}). Default is NA.}
+  \item{output.format}{character; Format of the output, \link[base]{data.frame} (default), \link[sf:sf]{sf-class}, \link[sftime:st_sftime]{sftime-class}, \link[terra]{SpatVector-class}, or \link[terra]{SpatRaster-class}.}
   \item{cpus}{numeric; Number of processing units. Default is detectCores()-1.}
   \item{progress}{logical; If progress bar is shown. Default is TRUE.}
   \item{soil3d}{logical; If 3D soil modellig is performed and \link{near.obs.soil} function is used for finding n nearest observations and distances to them. In this case, z position of the \code{data.staid.x.y.z} points to the depth column.}
@@ -47,7 +47,7 @@ pred.rfsi(model,
 }
 
 \value{
-A \code{data.frame}, \link[sf]{sf-class}, \link[sftime]{sftime-class}, \link[terra]{SpatVector-class}, or \link[terra]{SpatRaster-class} object (depends on \code{output.format} argument) with prediction - \code{pred} or \code{quantile..X.X} (quantile regression) columns.
+A \link[base]{data.frame}, \link[sf:sf]{sf-class}, \link[sftime:st_sftime]{sftime-class}, \link[terra]{SpatVector-class}, or \link[terra]{SpatRaster-class} object (depends on \code{output.format} argument) with prediction - \code{pred} or \code{quantile..X.X} (quantile regression) columns.
 }
 
 \author{Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
@@ -85,7 +85,6 @@ fm.RFSI <- as.formula("zinc ~ dist + soil + ffreq")
 rfsi_model <- rfsi(formula = fm.RFSI,
                    data = data, # meuse.df (use data.staid.x.y.z)
                    # data.staid.x.y.z = data.staid.x.y.z, # only if class(data) == data.frame
-                   zero.tol = 0,
                    n.obs = 5, # number of nearest observations
                    # s.crs = st_crs(data), # nedded only if the coordinates are lon/lat (WGS84)
                    # p.crs = st_crs(data), # nedded only if the coordinates are lon/lat (WGS84)
@@ -120,9 +119,9 @@ class(newdata)
 rfsi_prediction <- pred.rfsi(model = rfsi_model,
                              data = data, # meuse.df (use data.staid.x.y.z)
                              obs.col = "zinc",
-                             # data.staid.x.y.z = data.staid.x.y.z, # only if class(data) == data.frame
+                             # data.staid.x.y.z = data.staid.x.y.z, # data.frame
                              newdata = newdata, # meuse.grid.df (use newdata.staid.x.y.z)
-                             # newdata.staid.x.y.z = c("id", "x", "y", NA), # only if class(newdata) == data.frame
+                             # newdata.staid.x.y.z = c("id", "x", "y", NA), # data.frame
                              output.format = "SpatRaster", # "sf", # "SpatVector", 
                              zero.tol = 0,
                              # s.crs = st_crs(data), # meuse@proj4string, # NA # st_crs(data)
@@ -137,7 +136,7 @@ class(rfsi_prediction)
 names(rfsi_prediction)
 # head(rfsi_prediction)
 
-plot(rfsi_prediction)
+# plot(rfsi_prediction)
 # plot(rfsi_prediction['pred'])
 # plot(rfsi_prediction['quantile..0.1'])
 # plot(rfsi_prediction['quantile..0.5'])

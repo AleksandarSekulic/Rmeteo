@@ -10,7 +10,6 @@
 rfsi(formula,
      data,
      data.staid.x.y.z = NULL,
-     zero.tol = 0,
      n.obs = 5,
      avg = FALSE,
      increment = 10000,
@@ -24,24 +23,23 @@ rfsi(formula,
      progress = TRUE,
      soil3d = FALSE,
      depth.range = 0.1,
-     no.obs = 'increase'
+     no.obs = 'increase',
      ...)
 }
 
 \arguments{
   \item{formula}{formula; Formula for specifying target variable and covariates (without nearest observations and distances to them). If \code{z~1}, an RFSI model using only nearest obsevrations and distances to them as covariates will be made.}
-  \item{data}{\link[sf]{sf-class}, \link[sftime]{sftime-class}, \link[terra]{SpatVector-class} or \code{data.frame}; Contains target variable (observations) and covariates used for making an RFSI model. If \code{data.frame} object, it should have next columns: station ID (staid), longitude (x), latitude (y), 3rd component - time, depth, ... (z) of the observation, observation value (obs) and covariates (cov1, cov2, ...). If covariates are missing, the RFSI model using only nearest obsevrations and distances to them as covariates (\code{formula=z~1}) will be made.}
-  \item{data.staid.x.y.z}{numeric or character vector; Positions or names of the station ID (staid), longitude (x), latitude (y) and 3rd component (z) columns in data.frame \code{data} object (e.g. c(1,2,3,4)). If \code{data} is \link[sf]{sf-class}, \link[sftime]{sftime-class}, or \link[terra]{SpatVector-class} object, \code{data.staid.x.y.z} is used to point staid and z position. Set z position to NA (e.g. c(1,2,3,NA)) or ommit it (e.g. c(1,2,3)) for spatial interpolation. Default is NULL.}
-  \item{zero.tol}{numeric; A distance value below (or equal to) which locations are considered as duplicates. Default is 0. See \link{rm.dupl}.}
+  \item{data}{\link[sf:sf]{sf-class}, \link[sftime:st_sftime]{sftime-class}, \link[terra]{SpatVector-class} or \link[base]{data.frame}; Contains target variable (observations) and covariates used for making an RFSI model. If \link[base]{data.frame} object, it should have next columns: station ID (staid), longitude (x), latitude (y), 3rd component - time, depth, ... (z) of the observation, observation value (obs) and covariates (cov1, cov2, ...). If covariates are missing, the RFSI model using only nearest obsevrations and distances to them as covariates (\code{formula=z~1}) will be made.}
+  \item{data.staid.x.y.z}{numeric or character vector; Positions or names of the station ID (staid), longitude (x), latitude (y) and 3rd component (z) columns in \link[base]{data.frame} object (e.g. c(1,2,3,4)). If \code{data} is \link[sf:sf]{sf-class}, \link[sftime:st_sftime]{sftime-class}, or \link[terra]{SpatVector-class} object, \code{data.staid.x.y.z} is used to point staid and z position. Set z position to NA (e.g. c(1,2,3,NA)) or ommit it (e.g. c(1,2,3)) for spatial interpolation. Default is NULL.}
   \item{n.obs}{numeric; Number of nearest observations to be used as covariates in RFSI model (see function \link{near.obs}). Note that it cannot be larger than number of obsevrations. Default is 5.}
   \item{avg}{boolean; Averages in circles covariate - will averages in circles with different radiuses be calculated (see function \link{near.obs}). Default is FALSE.}
   \item{increment}{numeric; Increment of radiuses for calculation of averages in circles with different radiuses (see function \link{near.obs}). Units depends on CRS.}
   \item{range}{numeric; Maximum radius for calculation of averages in circles with different radiuses (see function \link{near.obs}). Units depends on CRS.}
   \item{quadrant}{boolean; Nearest observations in quadrants covariate - will nearest observation in quadrants be calculated (see function \link{near.obs}). Default is FALSE.}
-  \item{idw}{boolean; IDW prediction as covariate - will IDW predictions from \code{n.obs} nearest observations be calculated (see function \link{near.obs}). Default is FALSE.}
+  \item{use.idw}{boolean; IDW prediction as covariate - will IDW predictions from \code{n.obs} nearest observations be calculated (see function \link{near.obs}). Default is FALSE.}
   \item{idw.p}{numeric; Exponent parameter for IDW weights (see function \link{near.obs}). Default is 2.}
-  \item{s.crs}{\link[sf]{crs-class}; Source CRS of \code{data}. If \code{data} contains crs, \code{s.crs} will be overwritten. Default is NA.}
-  \item{p.crs}{\link[sf]{crs-class}; Projection CRS for \code{data} reprojection. If NA, \code{s.crs} will be used for distance calculation. Note that observations should be in projection for finding nearest observations based on Eucleadean distances (see function \link{near.obs}). Default is NA.}
+  \item{s.crs}{\link[sf]{st_crs} or \link[terra]{crs}; Source CRS of \code{data}. If \code{data} contains crs, \code{s.crs} will be overwritten. Default is NA.}
+  \item{p.crs}{\link[sf]{st_crs} or \link[terra]{crs}; Projection CRS for \code{data} reprojection. If NA, \code{s.crs} will be used for distance calculation. Note that observations should be in projection for finding nearest observations based on Eucleadean distances (see function \link{near.obs}). Default is NA.}
   \item{cpus}{numeric; Number of processing units. Default is detectCores()-1.}
   \item{progress}{logical; If progress bar is shown. Default is TRUE.}
   \item{soil3d}{logical; If 3D soil modellig is performed and \link{near.obs.soil} function is used for finding n nearest observations and distances to them. In this case, z position of the \code{data.staid.x.y.z} points to the depth column.}
@@ -90,7 +88,6 @@ fm.RFSI <- as.formula("zinc ~ dist + soil + ffreq")
 rfsi_model <- rfsi(formula = fm.RFSI,
                    data = data, # meuse.df (use data.staid.x.y.z)
                    # data.staid.x.y.z = data.staid.x.y.z, # only if class(data) == data.frame
-                   zero.tol = 0,
                    n.obs = 5, # number of nearest observations
                    # s.crs = st_crs(data), # nedded only if the coordinates are lon/lat (WGS84)
                    # p.crs = st_crs(data), # nedded only if the coordinates are lon/lat (WGS84)

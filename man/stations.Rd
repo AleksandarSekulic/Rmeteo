@@ -20,7 +20,7 @@ The \code{stations} contains the following columns:
 \references{
 \itemize{
 \item Global Surface Summary of the day data (\url{ftp://ftp.ncdc.noaa.gov/pub/data/gsod/}) 
-\item European Climate Assessment & Dataset (\url{http://eca.knmi.nl/dailydata/predefinedseries.php}) 
+\item European Climate Assessment & Dataset (\url{https://www.ecad.eu/dailydata/predefinedseries.php}) 
 }
 }
 \examples{
@@ -30,6 +30,6 @@ str(stations)
 library(sp)
 coordinates(stations) <-~ lon +lat
 stations@proj4string <-CRS('+proj=longlat +datum=WGS84')
-plot(stations)
+# plot(stations)
 }
 \keyword{datasets}

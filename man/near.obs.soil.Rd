@@ -22,9 +22,9 @@ near.obs.soil(locations,
 }
 
 \arguments{
-  \item{locations}{data.frame with x and y coordinates and mid depth columns, or \link[sf]{sf-class}, \link[terra]{SpatVector-class} or \link[terra]{SpatRaster-class} object; Locations (FROM) for which n nearest observations are found and distances are calculated.}
+  \item{locations}{data.frame with x and y coordinates and mid depth columns, or \link[sf:sf]{sf-class}, \link[terra]{SpatVector-class} or \link[terra]{SpatRaster-class} object; Locations (FROM) for which n nearest observations are found and distances are calculated.}
   \item{locations.x.y.md}{numeric or character vector; Positions or names of the x, y, and mid depth columns in \code{locations} if data.frame. Default is c(1,2,3).}
-  \item{observations}{data.frame with x, y, mid depth and observation columns, or \link[sf]{sf-class} or \link[terra]{SpatVector-class} object with mid depth and observation columns; Observations (TO).}
+  \item{observations}{data.frame with x, y, mid depth and observation columns, or \link[sf:sf]{sf-class} or \link[terra]{SpatVector-class} object with mid depth and observation columns; Observations (TO).}
   \item{observations.x.y.md}{numeric or character vector; positions or names of the x, y, and mid depth columns in \code{observations} if data.frame. Default is c(1,2,3).}
   \item{obs.col}{numeric or character; Column name or number showing position of the observation column in the \code{observations}. Default is 4.}
   \item{n.obs}{numeric; Number of nearest observations to be found. Note that it cannot be larger than number of obsevrations. Default is 5.}
@@ -35,13 +35,10 @@ near.obs.soil(locations,
   \item{cpus}{numeric; Number of processing units. Default is detectCores()-1.}
 }
 
-\value{ \link[base]{data.frame} object.  Rows represents specific locations. First \code{n.obs} columns are Euclidean distances to \code{n.obs} nearest observations. Next \code{n.obs} columns are observations at \code{n.obs} nearest stations.
+\value{\link[base]{data.frame} object.  Rows represents specific locations. First \code{n.obs} columns are Euclidean distances to \code{n.obs} nearest observations. Next \code{n.obs} columns are observations at \code{n.obs} nearest stations.
 }
 
-\author{ALeksandar Sekulic \email{asekulic@grf.bg.ac.rs}, Anatol Helfenstein {anatol.helfenstein@wur.nl}}
-
-\references{
-}
+\author{Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}, Anatol Helfenstein {anatol.helfenstein@wur.nl}}
 
 \note{The function is intended for soil mapping applications.}
 

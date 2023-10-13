@@ -42,7 +42,6 @@ class(data)
 rfsi_model <- rfsi(formula = fm.RFSI,
                    data = data,
                    # data.staid.x.y.z = data.staid.x.y.z, # only if class(data) == data.frame
-                   zero.tol = 0,
                    n.obs = 5, # number of nearest observations
                    # s.crs = st_crs(data), # nedded only if the coordinates are lon/lat (WGS84)
                    # p.crs = st_crs(data), # nedded only if the coordinates are lon/lat (WGS84)
@@ -80,7 +79,6 @@ rfsi_prediction <- pred.rfsi(model = rfsi_model,
                              newdata = newdata, # meuse.grid.df (use newdata.staid.x.y.z)
                              # newdata.staid.x.y.z = c("id", "x", "y", NA), # only if class(newdata) == data.frame
                              output.format = "SpatRaster", # "sf", # "SpatVector", 
-                             zero.tol = 0,
                              # s.crs = st_crs(data), # NA
                              # newdata.s.crs = st_crs(data), # NA
                              # p.crs = st_crs(data), # NA
@@ -117,7 +115,6 @@ tgrid = expand.grid(min.node.size=min.node.size, num.trees=ntree,
 rfsi_tuned <- tune.rfsi(formula = fm.RFSI,
                         data = data,
                         # data.staid.x.y.z = data.staid.x.y.z, # only if class(data) == data.frame
-                        zero.tol = 0,
                         # s.crs = NA,
                         # p.crs = NA,
                         tgrid = tgrid, # combinations for tuning
@@ -149,7 +146,6 @@ rfsi_tuned$final.model
 rfsi_cv <- cv.rfsi(formula=fm.RFSI, # without nearest obs
                    data = data,
                    # data.staid.x.y.z = c("id", "x", "y", NA), # only if class(data) == data.frame
-                   zero.tol=0,
                    # s.crs=NA,
                    # p.crs=NA,
                    tgrid = tgrid, # combinations for tuning
@@ -171,3 +167,4 @@ acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "R2") # 0.5948994
 acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "RMSE") # 232.2175
 acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "MAE") # 0.3328514
 acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "CCC") # 0.7484076
+

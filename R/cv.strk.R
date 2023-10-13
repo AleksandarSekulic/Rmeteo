@@ -1,10 +1,7 @@
 cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - with covariates
-                     zcol=1,
-                     data.staid.x.y.time = c(1,2,3,4), # if data.frame
-                     obs, # data.frame(id,time,obs,cov)
-                     obs.staid.time = c(1,2),
-                     stations, # data.frame(id,x,y)
-                     stations.staid.x.y = c(1,2,3),
+                     obs.col=1,
+                     data.staid.x.y.z = NULL, # if data.frame
+                     crs = NA, # brisi
                      zero.tol=0,
                      reg.coef, # check coef names
                      vgm.model,
@@ -13,10 +10,9 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
                      type = "LLO", # type of cv - LLO for now, after LTO, LLTO - CAST
                      k = 5, # number of folds
                      seed = 42,
-                     folds, # if user wants to create folds
-                     fold.column, # by which column
+                     folds, # if user want to create folds or column name
                      refit = TRUE,
-                     output.format = "STFDF",
+                     output.format = "STFDF", # data.frame | sf | sftime | SpatVector      dodaj stars
                      parallel.processing = FALSE, # doParallel
                      pp.type = "snowfall", # "doParallel"
                      cpus=detectCores()-1,
@@ -25,140 +21,77 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
   
   # check the input
   print('Preparing data ...')
-  if ((missing(data) & missing(obs) & missing(stations)) | missing(reg.coef) | missing(vgm.model)) {
-    stop('The arguments data (or obs and stations), reg.coef and vgm.model must not be empty!')
+  if (missing(data) | missing(reg.coef) | missing(vgm.model)) {
+    stop('The arguments data, reg.coef and vgm.model must not be empty!')
   }
-  if (!missing(data)){
-    if (class(data) == "data.frame") {
-      # if zcol is character
-      if (is.numeric(zcol)) {
-        zcol.name <- names(data)[zcol]
-      } else {
-        zcol.name <- zcol
-        zcol <- index(names(data))[names(data) == zcol.name]
-      }
-      # if data.staid.x.y.time is character
-      if (!is.numeric(data.staid.x.y.time)) {
-        data.staid.x.y.time <- sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
-      }
-      # to stfdf
-      obs <- cbind(data[, c(data.staid.x.y.time[c(1,4)], zcol)], data[, -c(data.staid.x.y.time[c(1,4)], zcol)])
-      if ('endTime' %in% names(obs)) { obs <- obs[, -which('endTime' == names(obs))] }
-      if ('timeIndex' %in% names(obs)) { obs <- obs[, -which('timeIndex' == names(obs))] }
-      stations <- data[, c(data.staid.x.y.time[1:3])]
-      stations <- unique(stations[complete.cases(stations), ])
-      data <- meteo2STFDF(obs      = obs,
-                          stations = stations,
-                          crs      = CRS("+proj=longlat +datum=WGS84"),
-                          obs.staid.time = c(1,2),
-                          stations.staid.lon.lat = c(1,2,3)
-      )
-      zcol=1
-    } else if (class(data) == "STFDF" | class(data) == "STSDF") { # | class(data) != "STSDF
-      if (is.numeric(zcol)) {
-        zcol.name <- names(data@data)[zcol]
-      } else {
-        zcol.name <- zcol
-        zcol <- index(names(data@data))[names(data@data) == zcol.name]
-      }
+  
+  # prepare data
+  if (class(data) %in% c("STFDF", "STSDF", "STIDF")) {
+    if (is.numeric(obs.col)) {
+      obs.col.name <- names(data@data)[obs.col]
     } else {
-      stop('The argument data must be of STFDF, STSDF or data.frame class!') # "STSDF"
+      obs.col.name <- obs.col
+      obs.col <- index(names(data@data))[names(data@data) == obs.col.name]
     }
-  } else { # obs, stations
-    # if zcol is character
-    if (is.numeric(zcol)) {
-      zcol.name <- names(obs)[zcol]
+    if (is.numeric(data.staid.x.y.z[1])) {
+      staid.name <- names(data@sp)[data.staid.x.y.z[1]]
     } else {
-      zcol.name <- zcol
-      zcol <- index(names(obs))[names(obs) == zcol.name]
+      staid.name <- data.staid.x.y.z[1]
+      data.staid.x.y.z[1] <- index(names(data@sp))[names(data@sp) == staid.name]
     }
-    # if data.staid.x.y.time is character
-    if (!is.numeric(obs.staid.time)) {
-      obs.staid.time <- sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
+    s.crs <- data@sp@proj4string
+  } else {
+    if (!is.numeric(obs.col)) {
+      obs.col.name <- obs.col
+      obs.col <- index(names(data))[names(data) == obs.col.name]
     }
-    # if stations.staid.x.y is character
-    if (!is.numeric(stations.staid.x.y)) {
-      stations.staid.x.y <- sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
-    }
+    data.prep <- data.prepare(data=data, data.staid.x.y.z=data.staid.x.y.z, obs.col=obs.col, s.crs=crs)
+    data.df <- data.prep[["data.df"]]
+    data.staid.x.y.z <- data.prep[["data.staid.x.y.z"]]
+    staid.name <- names(data.df)[data.staid.x.y.z[1]]
+    s.crs <- data.prep[["s.crs"]]
+    if (is.na(s.crs)) {s.crs <- CRS(as.character(NA))}
+    # obs.col.name <- data.prep[["obs.col"]]
     # to stfdf
-    obs <- cbind(obs[, c(obs.staid.time, zcol)], obs[, -c(obs.staid.time, zcol)])
+    obs <- cbind(data.df[, c(data.staid.x.y.z[c(1,4)], obs.col)], data.df[, -c(data.staid.x.y.z[c(1:4)], obs.col)])
     if ('endTime' %in% names(obs)) { obs <- obs[, -which('endTime' == names(obs))] }
     if ('timeIndex' %in% names(obs)) { obs <- obs[, -which('timeIndex' == names(obs))] }
-    stations <- stations[, c(stations.staid.x.y)]
+    stations <- data.df[, c(data.staid.x.y.z[c(1:3)])]
     stations <- unique(stations[complete.cases(stations), ])
     data <- meteo2STFDF(obs      = obs,
                         stations = stations,
-                        crs      = CRS("+proj=longlat +datum=WGS84"),
+                        crs      = s.crs, # CRS("+proj=longlat +datum=WGS84"),
                         obs.staid.time = c(1,2),
                         stations.staid.lon.lat = c(1,2,3)
     )
-    zcol=1
-  }
-
-  time <- index(data@time)
-  data.df <- as.data.frame(data)
-  names_covar <- names(reg.coef)[-1]
-  
-  c.dif <- setdiff(names_covar, names(data.df))
-  
-  # if covariate names doesn't exist in data - do ordinary kriging
-  if (!identical(c.dif, character(0))) {
-    # if covariates - do overlay
-    warning(paste('The covariate(s) ', paste(c.dif, collapse = ", "), ' - missing from data!', sep = ""))
-    warning('Trend is set to 0, performing space-time ordinary kriging cross-validation.')
-    # data$tlm<-0 
-    # data$tres <- data@data[,zcol]
-    names_covar <- names(data@data[zcol])[1]
+    obs.col=1
   }
   
-  # set folds
-  if (missing(fold.column)){
-    if (missing(folds)) {
-      # create folds
-      space_id <- rep(1:length(data@sp), length(time))
-      time_id <- rep(1:length(time), each = length(data@sp))
-      st_df <- cbind(space_id, time_id)
-      # if (type == "LLO") {
-        spacevar <- "space_id"
-        timevar <- NA
-      # TO DO LTO and LLTO
-      # } else if (type == "LTO") {
-      #   spacevar <- NA
-      #   timevar <- "time_id"
-      # } else if (type == "LLTO") {
-      #   spacevar <- "space_id"
-      #   timevar <- "time_id"
-      # }
-      indices <- CreateSpacetimeFolds(st_df, spacevar = spacevar, timevar = timevar,
-                                      k=k, seed = seed)
-      folds <- c()
-      for (f in 1:length(indices$indexOut)) {
-        folds[indices$indexOut[[f]]] <- f
-      }
-    }
-    data$folds <- folds
-    fold.column <- "folds"
+  if (!inherits(data, "STFDF")) {
+    data <- as(data, "STFDF")
   }
   
   # remove duplicates
-  data <- rm.dupl(data, zcol, zero.tol)
+  data <- rm.dupl(data, obs.col, zero.tol)
   
+  names_covar <- names(reg.coef)[-1]
   # remove the stations where covariate is missing
   nrowsp <- length(data@sp)
   for (covar in names_covar){
     # count NAs per stations
     if (covar %in% names(data@data)) {
       numNA <- apply(matrix(data@data[,covar],
-                            nrow=nrowsp,byrow=F), MARGIN=1,
+                            nrow=nrowsp,byrow= FALSE), MARGIN=1,
                      FUN=function(x) sum(is.na(x)))
       # Remove stations out of covariates
       rem <- numNA != length(time)
-      data <-  data[rem,drop=F]
+      data <-  data[rem,drop= FALSE]
     } else {
       data@sp <- data@sp[!is.na(data@sp@data[, covar]), ]
     }
   }
   
+  time <- index(data@time)
   # Remove dates out of covariates
   rm.days <- c()
   for (t in 1:length(time)) {
@@ -170,7 +103,69 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
     data <- data[,-rm.days]
   }
   
+  time <- index(data@time)
   data.df <- as.data.frame(data)
+  
+  c.dif <- setdiff(names_covar, names(data.df))
+  
+  # if covariate names doesn't exist in data - do ordinary kriging
+  if (!identical(c.dif, character(0))) {
+    # if covariates - do overlay
+    warning(paste('The covariate(s) ', paste(c.dif, collapse = ", "), ' - missing from data!', sep = ""))
+    warning('Trend is set to 0, performing space-time ordinary kriging cross-validation.')
+    # data$tlm<-0 
+    # data$tres <- data@data[,obs.col]
+    names_covar <- names(data@data[obs.col])[1]
+  }
+  
+  # set folds
+  if (missing(folds)) {
+    # create folds
+    
+    # check if time?
+    
+    # space_id <- rep(1:length(data@sp), length(time))
+    # time_id <- rep(1:length(time), each = length(data@sp))
+    # st_df <- cbind(space_id, time_id)
+    # if (type == "LLO") {
+    spacevar <- staid.name # names(data.df)[data.staid.x.y.z[1]] # "space_id"
+    timevar <- NA
+    # TO DO LTO and LLTO
+    # } else if (type == "LTO") {
+    #   spacevar <- NA
+    #   timevar <- "time_id"
+    # } else if (type == "LLTO") {
+    #   spacevar <- "space_id"
+    #   timevar <- "time_id"
+    # }
+    indices <- CreateSpacetimeFolds(data.df, spacevar = spacevar, timevar = timevar,
+                                    k=k, seed = seed)
+    folds <- c()
+    for (f in 1:length(indices$indexOut)) {
+      folds[indices$indexOut[[f]]] <- f
+    }
+    data$folds <- folds
+    data.df$folds <- folds
+    fold.column <- "folds"
+  } else if (class(folds) %in% c("numeric", "character", "integer")) {
+    # outer folds
+    if (length(folds) == 1) { # column
+      fold.column <- folds
+      if (class(fold.column) %in% c("numeric", "integer")) {
+        fold.column <- names(data)[fold.column]
+      } else if (inherits(fold.column, "character")) {
+        if (!fold.column %in% names(data)){
+          stop(paste0('Colum with name "', fold.column, '" does not exist in data'))
+        }
+      }
+      print(paste0("Fold column: ", fold.column))
+    } else if (length(folds) == nrow(data.df)){ # vector
+      data.df$folds <- folds
+      fold.column <- "folds"
+    } else {
+      stop('length(folds) != nrow(data).')
+    }
+  }
   
   if(nrow(data.df[complete.cases(data.df), ]) == 0){
     stop('The data does not have complete cases!')
@@ -178,7 +173,7 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
     print(paste(nrow(data.df[complete.cases(data.df), ]), " observations complete cases (", length(data@sp), " stations x ", length(data@time), " days) used for cross-validation.", sep=""))
   }
   
-  # do CV
+  # doing CV
   print('Doing CV ...')
   pred <- c()
   vgm.model.init <- vgm.model
@@ -196,8 +191,8 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
     # dev_df = data.df[data.df$folds!=val_fold, ]
     # val_df = data.df[data.df$folds==val_fold, ]
     
-    fcv <- paste(zcol.name, " ~ ", paste(names_covar, collapse = " + "), sep="")
-    dev_df <- dev_df[, c(zcol.name, names_covar)]
+    fcv <- paste(obs.col.name, " ~ ", paste(names_covar, collapse = " + "), sep="")
+    dev_df <- dev_df[, c(obs.col.name, names_covar)]
     dev_df$completed = complete.cases(dev_df)
     
     if(refit) {
@@ -218,7 +213,7 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
         }
       }
       dev$lm_trend = lm_trend
-      dev$lm_res = dev@data[, zcol] - dev$lm_trend
+      dev$lm_res = dev@data[, obs.col] - dev$lm_trend
       
       # rescale varigram distance
       var = variogramST(lm_res ~ 1, dev) #, ...) # , tlags = 0:5, cutoff = 300, width = 10, na.omit=T) # tunit="days"
@@ -256,7 +251,7 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
     
     # validation #
     val_stfdf <- pred.strk(data = dev, # stfdf.df
-                           zcol = zcol.name,
+                           obs.col = obs.col.name,
                            newdata = val, # regdata.df
                            output.format = "STSDF", # df
                            zero.tol = zero.tol,
@@ -272,35 +267,51 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
                            ...
     )
     
-    val_df <- as.data.frame(val)[, c(names(val_df)[1:4], fold.column, zcol.name)]
+    val_df <- as.data.frame(val)[, c(names(val_df)[1:4], staid.name, fold.column, obs.col.name)]
     val_df$pred <- val_stfdf$pred
     pred <- rbind(pred, val_df)
   }
-  names(pred)[names(pred) == zcol.name] <- "obs"
+  names(pred)[names(pred) == obs.col.name] <- "obs"
   
   # return
-  if (output.format == "data.frame") {
-    print("Done!")
-    return(pred)
-  } else {
-    sta <- pred[, c(3,1,2)]
+  if (output.format %in% c("sf", "sftime","SpatVector")) {
+    sf = st_as_sf(pred, coords = c(1,2), crs = s.crs, agr = "constant") # sf
+    if (output.format == "sf") {
+      if (progress) print("Done!")
+      return(sf)
+    } else if (output.format == "sftime") {
+      sftime <- st_sftime(sf)
+      if (progress) print("Done!")
+      return(sftime)
+    } else if (output.format == "SpatVector") {
+      sv <- vect(as(sf, "Spatial"))
+      if (progress) print("Done!")
+      return(sv)
+    }
+  } else if (output.format %in% c("STFDF", "STSDF", "STIDF")) {
+    staid.index <- index(names(pred))[names(pred) == staid.name]
+    sta <- pred[, c(staid.index,1,2)]
     sta <- sta[!duplicated(sta), ]
-    obs <- pred[, 3:length(pred)]
+    obs <- pred[, c(staid.index, (4:length(pred))[which(4:length(pred) != staid.index)])] # 
     stfdf <- meteo2STFDF(obs      = obs,
                          stations = sta,
-                         crs      = CRS("+proj=longlat +datum=WGS84"),
+                         crs      = s.crs, # CRS("+proj=longlat +datum=WGS84"),
                          obs.staid.time = c(1,2),
                          stations.staid.lon.lat = c(1,2,3)
     )
     if (output.format == "STSDF") {
-    print("Done!")
-    return(as(stfdf, "STSDF"))
+      if (progress) print("Done!")
+      return(as(stfdf, "STSDF"))
+    } else if (output.format == "STIDF") {
+      if (progress) print("Done!")
+      return(as(stfdf, "STIDF"))
     } else { #  (output.format == "STFDF")
-      print("Done!")
+      if (progress) print("Done!")
       return(stfdf)
     }
+  } else {
+    if (progress) print("Done!")
+    return(pred)
   }
-  
   ##########
-  
 }

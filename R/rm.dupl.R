@@ -11,7 +11,7 @@ rm.dupl <- function(obj,
     
     # count NAs per stations
     numNA <- apply(matrix(obj@data[,zcol],
-                          nrow=length(obj@sp),byrow=F), MARGIN=1,
+                          nrow=length(obj@sp),byrow= FALSE), MARGIN=1,
                    FUN=function(x) sum(is.na(x)))
     
     # remove stations with less observation, zs corection based on number of obs.
@@ -20,7 +20,7 @@ rm.dupl <- function(obj,
         zs[i]=zerod[i,1] }
     }
     
-    res = obj[-zs,drop=F]
+    res = obj[-zs,drop= FALSE]
     row.names(res@sp)=1:nrow(res@sp)
   } else { 
     res= obj

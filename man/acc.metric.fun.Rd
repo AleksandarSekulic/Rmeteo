@@ -60,6 +60,7 @@ mtry <- 3:(2+2*max(n.obs))
 tgrid = expand.grid(min.node.size=min.node.size, num.trees=ntree,
                     mtry=mtry, n.obs=n.obs, sample.fraction=sample.fraction)
 
+\dontrun{
 # do cross-validation
 rfsi_cv <- cv.rfsi(formula=fm.RFSI, # without nearest obs
                    data = data,
@@ -83,5 +84,6 @@ acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "NRMSE")
 acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "MAE")
 acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "NMAE")
 acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "CCC")
+}
 }
 

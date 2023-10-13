@@ -1,14 +1,18 @@
 \name{rfilltimegaps}
 \alias{rfilltimegaps}
 \title{Disaggregation in the time dimension through the use of splines for each pixel}
-\description{The function creates an object of \link[spacetime]{STFDF-class} class, spatio-temporal data with full space-time grid, from another \link[spacetime]{STFDF-class} and fills attribute data for missing dates using splines. }
-\usage{ rfilltimegaps(stfdf,tunits="day",attrname=1, ...)
+\description{The function creates an object of \link[spacetime]{STFDF-class} class, spatio-temporal data with full space-time grid, from another \link[spacetime]{STFDF-class} and fills attribute data for missing values in time using splines.}
+\usage{
+rfilltimegaps(stfdf,
+              tunits="day",
+              attrname=1,
+              ...)
 }
 \arguments{
-\item{stfdf}{\link[spacetime]{STFDF-class} object with time information of minimum length 2, and gap between}
-\item{tunits}{increment of the sequence used to generete time infromation for temporal gap. See 'Details'}
-\item{attrname}{varible from \link[spacetime]{STFDF-class} to be splined}
-\item{...}{ arguments passed to \link[stats]{splinefun}, function spline }
+\item{stfdf}{\link[spacetime]{STFDF-class}; object with time information of minimum length 2, and gap in time dimension.}
+\item{tunits}{\code{character}; increment of the sequence used to generete time infromation for temporal gap. See 'Details'.}
+\item{attrname}{\code{integer} or \code{character}; varible from \link[spacetime]{STFDF-class} to be splined in time.}
+\item{...}{arguments passed to \link[stats]{splinefun}, function spline.}
 }
 \details{
 \code{tunits} can be specified in several ways:
@@ -19,7 +23,7 @@
 }
 The difference between \code{"day"} and \code{"DSTday"} is that the former ignores changes to/from daylight savings time and the latter takes the same clock time each day. (\code{"week"} ignores DST (it is a period of 144 hours), but \code{"7 DSTdays"}) can be used as an alternative. \code{"month"} and \code{"year"} allow for DST.)
 }
-\value{ \link[spacetime]{STFDF-class} object}
+\value{\link[spacetime]{STFDF-class} object with filled temporal gaps.}
 \author{Milan Kilibarda \email{kili@grf.bg.ac.rs}}
 \references{
 Kilibarda, M., T. Hengl, G. B. M. Heuvelink, B. Graeler, E. Pebesma, M. Percec Tadic, and B. Bajat (2014), Spatio-temporal interpolation of daily temperatures for global land areas at 1 km resolution, J. Geophys. Res. Atmos., 119, 2294-2313, doi:10.1002/2013JD020803;
@@ -33,12 +37,13 @@ Kilibarda M., M. Percec Tadic, T. Hengl, J. Lukovic, B. Bajat - Spatial Statisti
 \examples{
   data(nlmodis20110704)
   data(nlmodis20110712)
+  data(NLpol)
 
-  
   # fill spatial gaps
   library(raster)
-  NLpol <- as(extent(5, 6, 51.5, 52), 'SpatialPolygons')
   NLpol@proj4string <- nlmodis20110704@proj4string
+  
+  \dontrun{
   nlmodis20110704 <- rfillspgaps(nlmodis20110704,NLpol)
   nlmodis20110712 <- rfillspgaps(nlmodis20110712,NLpol)
   
@@ -60,5 +65,6 @@ Kilibarda M., M. Percec Tadic, T. Hengl, J. Lukovic, B. Bajat - Spatial Statisti
   # stplot(stMODIS, col.regions=bpy.colors())
   stMODIS <- rfilltimegaps(stMODIS)
   # stplot(stMODIS, col.regions=bpy.colors())
+  }
 }
 

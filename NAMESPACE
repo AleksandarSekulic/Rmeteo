@@ -1,22 +1,26 @@
-#
-#import(methods)
 importFrom("methods", "as")
-importFrom("stats", "as.formula", "reshape", "spline")
+importFrom("stats", "as.formula", "reshape", "spline", "qnorm", "var", "sd", "cor")
 importFrom("utils", "setTxtProgressBar", "txtProgressBar")
 importFrom("stats", "coefficients", "complete.cases", "lm")
+importFrom("caret", "confusionMatrix")
+importFrom("dplyr", "filter", "where")
+importFrom("data.table", "data.table")
+importFrom("DescTools", "CCC")
 import(sp,
   spacetime,
+  parallel,
+  foreach,
   snowfall,
   doParallel,
   gstat,
   plyr,
+  units,
   nabor,
   CAST,
   ranger,
-  caret,
-  DescTools,
   sf,
   sftime,
+  raster,
   terra)
-export(meteo2STFDF, temp_geom, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk.old, pred.strk, pred.strk1, cv.strk, data.prepare, acc.metric.fun, near.obs, near.obs.soil, rfsi, pred.rfsi, tune.rfsi, cv.rfsi, get_meteo)
+export(meteo2STFDF, temp_geom, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk, cv.strk, data.prepare, acc.metric.fun, near.obs, near.obs.soil, rfsi, pred.rfsi, tune.rfsi, cv.rfsi, get_meteo)
 

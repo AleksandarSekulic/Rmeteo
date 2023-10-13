@@ -1,7 +1,6 @@
 cv.rfsi <- function (formula, # without nearest obs
                      data, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
                      data.staid.x.y.z = NULL, # if data.frame
-                     zero.tol = 0,
                      use.idw = FALSE,
                      # avg = FALSE,
                      # increment, # avg(nearest point dist)
@@ -16,7 +15,6 @@ cv.rfsi <- function (formula, # without nearest obs
                      seed = 42,
                      out.folds, # if user want to create outer folds or column name
                      in.folds, # if user want to create innner folds or column name
-                     # fold.column, # columns of outer folds and inner folds
                      acc.metric, # for tuning on inner folds
                      output.format = "data.frame", #"STFDF", # brisi - koristi kao data
                      cpus=detectCores()-1,
@@ -90,7 +88,7 @@ cv.rfsi <- function (formula, # without nearest obs
       out.fold.column <- out.folds
       if (class(out.fold.column) %in% c("numeric", "integer")) {
         out.fold.column <- names(data)[out.fold.column]
-      } else if (class(out.fold.column) == "character") {
+      } else if (inherits(out.fold.column, "character")) {
         if (!out.fold.column %in% names(data)){
           stop(paste0('Colum with name "', out.fold.column, '" does not exist in data'))
         }
@@ -110,7 +108,7 @@ cv.rfsi <- function (formula, # without nearest obs
         in.fold.column <- in.folds
         if (class(in.fold.column) %in% c("numeric", "integer")) {
           in.fold.column <- names(data)[in.fold.column]
-        } else if (class(in.fold.column) == "character") {
+        } else if (inherits(in.fold.column, "character")) {
           if (!in.fold.column %in% names(data)){
             stop(paste0('Colum with name "', in.fold.column, '" does not exist in data'))
           }
@@ -144,7 +142,6 @@ cv.rfsi <- function (formula, # without nearest obs
     tuned_model <- tune.rfsi(formula, # without nearest obs
                              data=dev.df, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
                              data.staid.x.y.z = data.staid.x.y.z, # if data.frame
-                             zero.tol=zero.tol,
                              # n.obs=n.obs, # nearest obs
                              # time.nmax, # use all if not specified
                              s.crs=s.crs,
@@ -157,8 +154,8 @@ cv.rfsi <- function (formula, # without nearest obs
                              tgrid.n=tgrid.n,
                              tune.type = tune.type, # type of cv - LLO for now, after LTO, LLTO - CAST
                              k = k, # number of folds
-                             # folds=in.folds, # if user wants to create folds
-                             fold.column=in.fold.column, # by which column
+                             folds=in.folds, # if user wants to create folds or column name
+                             # fold.column=in.fold.column, # by which column
                              acc.metric = acc.metric,
                              cpus=cpus, # for near.obs
                              progress=ifelse(progress==2, T, F),
@@ -177,7 +174,6 @@ cv.rfsi <- function (formula, # without nearest obs
                                  newdata=val.df, # data.frame(x,y,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
                                  newdata.staid.x.y.z = data.staid.x.y.z, # if data.frame
                                  output.format = "data.frame",
-                                 zero.tol=zero.tol,
                                  # n.obs=10, # nearest obs 3 vidi iz modela
                                  # time.nmax, # use all if not specified
                                  s.crs=s.crs,

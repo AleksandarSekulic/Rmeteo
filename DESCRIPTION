@@ -1,14 +1,25 @@
 Package: meteo
+Version: 2.0-2
+Date: 2023-10-09
 Type: Package
 Encoding: UTF-8
-Title: RFSI and spacetime geostatistical interpolations for meteorological and other enviromental varialbles
-Version: 2.0-2
-Date: 2015-09-22
-Author: Milan Kilibarda, Aleksandar Sekulić, Tomislav Hengl, Edzer Pebesma, Benedikt Graeler
-Maintainer: Aleksandar Sekulić <asekulic@grf.bg.ac.rs>, Milan Kilibarda <kili@grf.bg.ac.rs>
+Title: RFSI and Spacetime Geostatistical Interpolations for Meteorological and Other Enviromental Varialbles
+Authors@R: c(person("Milan", "Kilibarda", role = c("aut"), email = "kili@grf.bg.ac.rs", comment = c(ORCID = "0000-0002-2930-3596")),
+             person("Aleksandar", "Sekulić", role = c("aut", "cre"), email = "asekulic@grf.bg.ac.rs", comment = c(ORCID = "0000-0002-5515-2779")),
+             person("Tomislav", "Hengl", role = c("ctb")),
+             person("Edzer", "Pebesma", role = c("ctb")),
+             person("Benedikt", "Graeler", role = c("ctb")))
+Author: Milan Kilibarda [aut] (<https://orcid.org/0000-0002-2930-3596>),
+        Aleksandar Sekulić [aut, cre] (<https://orcid.org/0000-0002-5515-2779>),
+        Tomislav Hengl [ctb],
+        Edzer Pebesma [ctb],
+        Benedikt Graeler [ctb]
+Maintainer: Aleksandar Sekulić <asekulic@grf.bg.ac.rs>
+Depends: R (>= 4.0.0)
 Description: RFSI and spacetime geostatistical interpolations for meteorological and other enviromental varialbles. Global spatio-temporal models calculated using publicly available data are stored in package.
 License: GPL (>= 2.0) | file LICENCE
-URL: http://meteo.r-forge.r-project.org/
+URL: https://www.r-pkg.org/pkg/meteo, https://r-forge.r-project.org/projects/meteo/, https://github.com/AleksandarSekulic/Rmeteo
 LazyLoad: yes
-Depends: R (>= 4.0.0)
-Imports: methods, utils, stats, sp, spacetime, gstat, snowfall, doParallel, plyr, nabor, CAST, ranger, caret, DescTools, sf, sftime, terra
+Imports: methods, utils, stats, DescTools, caret, data.table, dplyr, sp, spacetime, gstat, foreach, parallel, snowfall, doParallel, plyr, units, nabor, CAST, ranger, sf, sftime, raster, terra
+BugReports: https://github.com/AleksandarSekulic/Rmeteo/issues
+RoxygenNote: 7.2.3

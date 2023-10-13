@@ -8,7 +8,7 @@
 \format{
 The \code{dslp} contains the following columns:
   \describe{
-  \item{\code{staid}}{character; station ID from GSOD or ECA\&D data set}
+  \item{\code{staid}}{character; station ID from GSOD or ECA&D data set}
   \item{\code{time}}{Date; day of the measurement}
   \item{\code{slp}}{numeric; mean sea level pressure amount in hPa}
 }
@@ -18,7 +18,7 @@ The \code{dslp} contains the following columns:
 \references{
 \itemize{
 \item Global Surface Summary of the day data (\url{ftp://ftp.ncdc.noaa.gov/pub/data/gsod/}) 
-\item European Climate Assessment & Dataset (\url{http://eca.knmi.nl/dailydata/predefinedseries.php}) 
+\item European Climate Assessment & Dataset (\url{https://www.ecad.eu/dailydata/predefinedseries.php}) 
 }
 }
 \examples{

@@ -6,10 +6,10 @@ meteo2STFDF <- function(obs,
                         delta=NULL
                         ) {
  
-  if (class(stations.staid.lon.lat) == "character") {
+  if (inherits(stations.staid.lon.lat, "character")) {
     stations.staid.lon.lat <- match(stations.staid.lon.lat, names(stations))
   }
-  if (class(obs.staid.time) == "character") {
+  if (inherits(obs.staid.time, "character")) {
     obs.staid.time <- match(obs.staid.time, names(obs))
   }
   ids <- sort(unique(stations[,stations.staid.lon.lat[1]]))
@@ -67,12 +67,12 @@ meteo2STFDF <- function(obs,
   bools2 <- c()
   for (i in 1:ncol(stfdf@data)){
     bools2 <- cbind(bools2, apply(matrix(stfdf@data[, i],
-                           nrow=length(stfdf@sp),byrow=F), MARGIN=1,
+                           nrow=length(stfdf@sp),byrow= FALSE), MARGIN=1,
                     FUN=function(x) sum(is.na(x))))
   }
   bools2 <- apply(bools2, 1, sum)
   # remove all NA
-  stfdf=stfdf[bools2!=(nt*ncol(stfdf@data)), ,drop=F]
+  stfdf=stfdf[bools2!=(nt*ncol(stfdf@data)), ,drop= FALSE]
   
   row.names(stfdf@sp) <- 1:nrow(stfdf@sp)
   

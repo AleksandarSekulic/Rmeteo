@@ -1,7 +1,6 @@
 rfsi <- function (formula, # without nearest obs
                   data, # sf | sftime | SpatVector | data.frame(x,y,obs,time,ec1,ec2,...)
                   data.staid.x.y.z = NULL, # = c(1,2,3,4), # if data.frame # time = mid.depth
-                  zero.tol = 0,
                   n.obs = 5, # nearest obs
                   # time.nmax, # use all if not specified
                   avg = FALSE,

@@ -1,12 +1,10 @@
 pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - with covariates
-                       zcol=1,
-                       data.staid.x.y.time = c(1,2,3,4), # if data.frame
-                       obs, # data.frame(id,time,obs,cov)
-                       obs.staid.time = c(1,2),
-                       stations, # data.frame(id,x,y)
-                       stations.staid.x.y = c(1,2,3),
+                       obs.col=1,
+                       data.staid.x.y.z = NULL, # c(1,2,3,4), # if data.frame
                        newdata, # data.frame(x,y,time,ec1,ec2,...) | STFDF - with covariates
-                       newdata.staid.x.y.time = c(1,2,3), # if data.frame
+                       newdata.staid.x.y.z = NULL, # c(1,2,3), # if data.frame
+                       z.value = NULL,
+                       crs = NA, # brisi
                        zero.tol=0,
                        reg.coef, # check coef names
                        vgm.model,
@@ -15,108 +13,83 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
                        by='time', # 'station'
                        tiling= FALSE,
                        ntiles=64,
-                       output.format = "STFDF",
+                       output.format = "STFDF", # data.frame | sf | sftime | SpatVector | SpatRaster      dodaj stars
                        parallel.processing = FALSE, # doParallel
                        pp.type = "snowfall", # "doParallel"
                        cpus=detectCores()-1,
                        computeVar=FALSE,
                        progress=TRUE,
                        ...){
+  i <- NULL # to supress Warning
   # check the input
-  print('Preparing data ...')
-  if ((missing(data) & missing(obs) & missing(stations)) | missing(newdata) | missing(reg.coef) | missing(vgm.model)) {
-    stop('The arguments data (or obs and stations), newdata, reg.coef and vgm.model must not be empty!')
+  if (progress) print('Preparing data ...')
+  if ((missing(data)) | missing(newdata) | missing(reg.coef) | missing(vgm.model)) {
+    stop('The arguments data, newdata, reg.coef and vgm.model must not be empty!')
   }
-  if (!missing(data)){
-    if (class(data) == "data.frame") {
-      # if zcol is character
-      if (is.numeric(zcol)) {
-        zcol.name <- names(data)[zcol]
-      } else {
-        zcol.name <- zcol
-        zcol <- index(names(data))[names(data) == zcol.name]
-      }
-      # if data.staid.x.y.time is character
-      if (!is.numeric(data.staid.x.y.time)) {
-        data.staid.x.y.time <- sapply(data.staid.x.y.time, function(i) index(names(data))[names(data) == i])
-      }
-      # to stfdf
-      obs <- cbind(data[, c(data.staid.x.y.time[c(1,4)], zcol)], data[, -c(data.staid.x.y.time[c(1,4)], zcol)])
-      if ('endTime' %in% names(obs)) { obs <- obs[, -which('endTime' == names(obs))] }
-      if ('timeIndex' %in% names(obs)) { obs <- obs[, -which('timeIndex' == names(obs))] }
-      stations <- data[, c(data.staid.x.y.time[1:3])]
-      stations <- unique(stations[complete.cases(stations), ])
-      data <- meteo2STFDF(obs      = obs,
-                          stations = stations,
-                          crs      = CRS("+proj=longlat +datum=WGS84"),
-                          obs.staid.time = c(1,2),
-                          stations.staid.lon.lat = c(1,2,3)
-      )
-      zcol=1
-    } else if (class(data) == "STFDF" | class(data) == "STSDF") { # | class(data) != "STSDF
-      if (is.numeric(zcol)) {
-        zcol.name <- names(data@data)[zcol]
-      } else {
-        zcol.name <- zcol
-        zcol <- index(names(data@data))[names(data@data) == zcol.name]
-      }
+  
+  # prepare data
+  if (class(data) %in% c("STFDF", "STSDF", "STIDF")) {
+    if (is.numeric(obs.col)) {
+      obs.col.name <- names(data@data)[obs.col]
     } else {
-      stop('The argument data must be of STFDF, STSDF or data.frame class!') # "STSDF"
+      obs.col.name <- obs.col
+      obs.col <- index(names(data@data))[names(data@data) == obs.col.name]
     }
-  } else { # obs, stations
-    # if zcol is character
-    if (is.numeric(zcol)) {
-      zcol.name <- names(obs)[zcol]
-    } else {
-      zcol.name <- zcol
-      zcol <- index(names(obs))[names(obs) == zcol.name]
+  } else {
+    if (!is.numeric(obs.col)) {
+      obs.col.name <- obs.col
+      obs.col <- index(names(data))[names(data) == obs.col.name]
     }
-    # if obs.staid.time is character
-    if (!is.numeric(obs.staid.time)) {
-      obs.staid.time <- sapply(obs.staid.time, function(i) index(names(obs))[names(obs) == i])
-    }
-    # if stations.staid.x.y is character
-    if (!is.numeric(stations.staid.x.y)) {
-      stations.staid.x.y <- sapply(stations.staid.x.y, function(i) index(names(stations))[names(stations) == i])
-    }
+    data.prep <- data.prepare(data=data, data.staid.x.y.z=data.staid.x.y.z, obs.col=obs.col, s.crs=crs)
+    data.df <- data.prep[["data.df"]]
+    data.staid.x.y.z <- data.prep[["data.staid.x.y.z"]]
+    s.crs <- data.prep[["s.crs"]]
+    if (is.na(s.crs)) {s.crs <- CRS(as.character(NA))}
+    obs.col.name <- data.prep[["obs.col"]]
     # to stfdf
-    obs <- cbind(obs[, c(obs.staid.time, zcol)], obs[, -c(obs.staid.time, zcol)])
+    obs <- cbind(data.df[, c(data.staid.x.y.z[c(1,4)], obs.col)], data.df[, -c(data.staid.x.y.z[c(1:4)], obs.col)])
     if ('endTime' %in% names(obs)) { obs <- obs[, -which('endTime' == names(obs))] }
     if ('timeIndex' %in% names(obs)) { obs <- obs[, -which('timeIndex' == names(obs))] }
-    stations <- stations[, c(stations.staid.x.y)]
+    stations <- data.df[, c(data.staid.x.y.z[c(1:3)])]
     stations <- unique(stations[complete.cases(stations), ])
     data <- meteo2STFDF(obs      = obs,
                         stations = stations,
-                        crs      = CRS("+proj=longlat +datum=WGS84"),
+                        crs      = s.crs, # CRS("+proj=longlat +datum=WGS84"),
                         obs.staid.time = c(1,2),
                         stations.staid.lon.lat = c(1,2,3)
     )
-    zcol=1
+    obs.col=1
   }
   
-  if (class(newdata) == "data.frame") {
-    # if newdata.staid.x.y.time is character
-    if (!is.numeric(newdata.staid.x.y.time)) {
-      newdata.staid.x.y.time <- sapply(newdata.staid.x.y.time, function(i) index(names(newdata))[names(newdata) == i])
-    }
+  # prepare newdata
+  if (class(newdata) %in% c("STFDF", "STSDF", "STIDF")) {
+    newdata.s.crs <- newdata@sp@proj4string
+  } else {
+    newdata.prep <- data.prepare(data=newdata, data.staid.x.y.z=newdata.staid.x.y.z, s.crs=crs)
+    newdata.df <- newdata.prep[["data.df"]]
+    newdata.staid.x.y.z <- newdata.prep[["data.staid.x.y.z"]]
+    newdata.s.crs <- newdata.prep[["s.crs"]]
+    if (is.na(newdata.s.crs)) {newdata.s.crs <- CRS(as.character(NA))}
     # to stsdf
-    obs <- cbind(newdata[, c(newdata.staid.x.y.time[c(1,4)], zcol)], newdata[, -c(newdata.staid.x.y.time[c(1,4)], zcol)])
+    obs <- cbind(newdata.df[, c(newdata.staid.x.y.z[c(1,4)])], newdata.df[, -c(newdata.staid.x.y.z[c(1:4)])])
     if ('endTime' %in% names(obs)) { obs <- obs[, -which('endTime' == names(obs))] }
     if ('timeIndex' %in% names(obs)) { obs <- obs[, -which('timeIndex' == names(obs))] }
-    stations <- newdata[, c(newdata.staid.x.y.time[1:3])]
+    stations <- newdata.df[, c(newdata.staid.x.y.z[1:3])]
     stations <- unique(stations[complete.cases(stations), ])
     newdata <- meteo2STFDF(obs      = obs,
                            stations = stations,
-                           crs      = CRS("+proj=longlat +datum=WGS84"),
+                           crs      = newdata.s.crs, # CRS("+proj=longlat +datum=WGS84"),
                            obs.staid.time = c(1,2),
                            stations.staid.lon.lat = c(1,2,3)
     )
-  } else if (class(newdata) != "STFDF" & class(newdata) != "STSDF") { # | class(data) != "STSDF
-    stop('The argument newdata must be of STFDF, STSDF or data.frame class!') # "STSDF"
   }
   
-  data <- as(data, "STFDF")
-  newdata <- as(newdata, "STFDF")
+  if (!inherits(data, "STFDF")) {
+    data <- as(data, "STFDF")
+  }
+  if (!inherits(newdata, "STFDF")) {
+    newdata <- as(newdata, "STFDF")
+  }
   
   # check if data@time and newdata@time are of same class
   if (class(index(data@time)) != class(index(newdata@time))){
@@ -126,7 +99,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
   names_covar <- names(reg.coef)[-1]
   
   # remove duplicates
-  data <- rm.dupl(data, zcol, zero.tol)
+  data <- rm.dupl(data, obs.col, zero.tol)
   newdata <- rm.dupl(newdata, 1, zero.tol)
   
   # DO OVERLAY !!!
@@ -138,7 +111,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
   if (!identical(c.dif, character(0))) {
     stop(paste('The covariate(s) ', paste(c.dif, collapse = ", "), ' - missing from newdata!', sep = ""))
   }
-  newdata$tlm <- reg.coef[1] + as.matrix(newdata.df[, names(reg.coef)[-1]])  %*%  reg.coef[-1] #regression model-trend
+  newdata$tlm <- reg.coef[1] + as.matrix(newdata.df[, names(reg.coef)[-1]])  %*%  reg.coef[-1] # regression model-trend
   newdata$tlm <- as.vector(newdata$tlm)
   
   # remove the stations where covariate is missing
@@ -147,11 +120,11 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
     # count NAs per stations
     if (covar %in% names(newdata@data)) {
       numNA <- apply(matrix(newdata@data[,covar],
-                            nrow=nrowsp,byrow=F), MARGIN=1,
+                            nrow=nrowsp,byrow= FALSE), MARGIN=1,
                      FUN=function(x) sum(is.na(x)))
       # Remove stations out of covariates
       rem <- numNA != length(newdata@time)
-      newdata <-  newdata[rem,drop=F]
+      newdata <-  newdata[rem,drop= FALSE]
     } else {
       newdata@sp <- newdata@sp[!is.na(newdata@sp@data[, covar]), ]
     }
@@ -165,18 +138,18 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
     }
   }
   if(!is.null(rm.days)){
-    newdata <- newdata[,-rm.days, drop=F]
+    newdata <- newdata[,-rm.days, drop= FALSE]
   }
   
   time <- newdata@time
   newdata.df <- as.data.frame(newdata)
   
   # newdata regression
-  print('Do regression ...')
+  print('Doing regression ...')
   if(nrow(newdata.df[complete.cases(newdata.df), ]) == 0){
     warning('The argument newdata does not have complete cases! Trend is set to 0, performing space-time ordinary kriging.')
     newdata$tlm<-0 
-    data$tres <- data@data[,zcol]
+    data$tres <- data@data[, obs.col]
   } else {
     # data regression
     c.dif <- setdiff(names(reg.coef)[-1], names(data.df))
@@ -192,7 +165,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
       }
       t1 <- which(as.character(index(time[1])) == as.character(index(data@time)))
       t2 <- which(as.character(index(time[length(time)])) == as.character(index(data@time)))
-      data <- data[,t1:t2, drop=F] # take only newdata days
+      data <- data[,t1:t2, drop= FALSE] # take only newdata days
       data$tlm <- ov
       
     } else {
@@ -200,14 +173,14 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
       data$tlm <- as.vector(data$tlm)
     }
     
-    data$tres <- data@data[,zcol]- data$tlm #residuals
+    data$tres <- data@data[, obs.col]- data$tlm #residuals
     # count NAs per stations
     numNA <- apply(matrix(data@data[,'tres'],
-                          nrow=nrowsp,byrow=F), MARGIN=1,
+                          nrow=nrowsp,byrow= FALSE), MARGIN=1,
                    FUN=function(x) sum(is.na(x)))
     # Remove stations out of covariates
     rem <- numNA != length(index(data@time))
-    data <-  data[rem,drop=F]
+    data <-  data[rem,drop= FALSE]
     
     # Remove dates out of covariates
     rm.days <- c()
@@ -217,7 +190,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
       }
     }
     if(!is.null(rm.days)){
-      data <- data[,-rm.days, drop=F]
+      data <- data[,-rm.days, drop= FALSE]
     }
     
   } # end of regression
@@ -236,8 +209,8 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
   # ip1[ip1>length(time)] <- length(time)
   
   # prediction
-  print('Do space-time kriging ...')
-  print(paste('Do for each loop by ', by, " ...", sep=""))
+  print('Doing space-time kriging ...')
+  print(paste('Doing for each loop by ', by, " ...", sep=""))
   newdata@sp=as(newdata@sp,'SpatialPointsDataFrame')
   newdata@sp$index=1:nrow(newdata@sp)
   # row.names(newdata@sp) = 1:nrow(newdata@sp)
@@ -270,7 +243,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
   }
   
   if (!tiling) {
-    temp.local<-data[,,'tres',drop=F]
+    temp.local<-data[,,'tres',drop= FALSE]
     if (progress)   pb <- txtProgressBar(style = 3,char= sprintf("pred krigeST ") , max=length(time) )
     if(parallel.processing & pp.type == "snowfall") {
       sfExport("temp.local" )
@@ -286,27 +259,27 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
         st$dist=spDists(temp.local@sp, newdata@sp[i, ])
         tmp_st<-st[ order(st$dist) ,]
         local_t= row.names(tmp_st[1:sp.nmax,])
-        obs=temp.local[local_t, ,'tres', drop=F]
+        obs=temp.local[local_t, ,'tres', drop= FALSE]
         if (length(obs)<5){
           ret <- NA
         }
         # count NAs per stations
         numNA <- apply(matrix(obs@data[,'tres'],
-                              nrow=length(obs@sp),byrow=F), MARGIN=1,
+                              nrow=length(obs@sp),byrow= FALSE), MARGIN=1,
                        FUN=function(x) sum(is.na(x)))
         # Remove stations out of covariates
         rem <- !numNA > 0
-        obs <-  obs[rem,drop=F]
+        obs <-  obs[rem,drop= FALSE]
         
         # If there are less than 5 observations
         if (length(obs)<5){
           ret <- NA
         } else {
-          # nn <- newdata[i, , drop=F]
+          # nn <- newdata[i, , drop= FALSE]
           # index(nn@time) <- as.POSIXlt(index(nn@time))
           ret <- krigeST(as.formula("tres~1"),
-                         data=as(obs, "STSDF"), 
-                         newdata= newdata[1,, drop=F],
+                         data=as(obs, "STIDF"), 
+                         newdata= newdata[1,, drop= FALSE],
                          modelList=vgm.model,
                          computeVar=T,
                          ...)@data[,pred.var]
@@ -330,24 +303,24 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
         ############# as.POSIXlt - maybe should be fixed !!!!!!!! #########
         
         sub_time <- sub_time[as.POSIXlt(sub_time) %in% as.POSIXlt(index(temp.local@time))]
-        obs=temp.local[,as.POSIXlt(index(temp.local@time)) %in% as.POSIXlt(sub_time),'tres', drop=F]
+        obs=temp.local[,as.POSIXlt(index(temp.local@time)) %in% as.POSIXlt(sub_time),'tres', drop= FALSE]
         if (length(obs)<5){
           ret <- NA
         }
         # count NAs per stations
         numNA <- apply(matrix(obs@data[,'tres'],
-                              nrow=length(obs@sp),byrow=F), MARGIN=1,
+                              nrow=length(obs@sp),byrow= FALSE), MARGIN=1,
                        FUN=function(x) sum(is.na(x)))
         # Remove stations out of covariates
         rem <- !numNA > 0
-        obs <-  obs[rem,drop=F]
+        obs <-  obs[rem,drop= FALSE]
 
         # If there are less than 5 observations
         if (length(obs)<5){
           ret <- NA
         } else {
           ret <- krigeST(as.formula("tres~1"),
-                         data=as(obs, "STSDF"),
+                         data=as(obs, "STIDF"),
                          newdata=STF(as(newdata@sp,"SpatialPoints"),
                                      temp.local@time[i],
                                      temp.local@endTime[i]),
@@ -379,7 +352,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
     res = do.call(rbind, xxx)
     res <- res[order(res$t_index, res$s_index), ]
     
-  }else{
+  } else {
     # tiling
     print('Do tiling ...')
     dimnames(newdata@sp@coords)[[2]] <- c('x','y')
@@ -415,7 +388,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
     } else {
       Mpts <- lapply (g_list, function(i) {mpts_fun(i)})
     }
-    temp.local <-data[ , ,'tres',drop=F]
+    temp.local <-data[ , ,'tres',drop= FALSE]
     
     if(parallel.processing & pp.type == "snowfall") {
       sfExport( "temp.local" )
@@ -442,26 +415,26 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
       for( ii in 1:length(time) ) {
         sub_time <- index(newdata@time[i]) - (0:(time.nmax-1))*(index(newdata@time)[2] - index(newdata@time)[1])
         sub_time <- sub_time[as.POSIXlt(sub_time) %in% as.POSIXlt(index(temp.local@time))]
-        # # obs = temp.local[local_t, i_1[ii]:ip1[ii],'tres',drop=F]
-        # obs = temp.local[, i_1[ii]:ip1[ii],'tres',drop=F]
-        obs=temp.local[local_t, as.POSIXlt(index(temp.local@time)) == as.POSIXlt(sub_time),'tres', drop=F]
+        # # obs = temp.local[local_t, i_1[ii]:ip1[ii],'tres',drop= FALSE]
+        # obs = temp.local[, i_1[ii]:ip1[ii],'tres',drop= FALSE]
+        obs=temp.local[local_t, as.POSIXlt(index(temp.local@time)) == as.POSIXlt(sub_time),'tres', drop= FALSE]
         if (length(obs)<5){
           xxx[[ii]] <- NA
         }
 
         # count NAs per stations
         numNA <- apply(matrix(obs@data[,'tres'],
-                              nrow=length(obs@sp),byrow=F), MARGIN=1,
+                              nrow=length(obs@sp),byrow= FALSE), MARGIN=1,
                        FUN=function(x) sum(is.na(x)))
         # Remove stations out of covariates
         rem <- !numNA > 0
-        obs <-  obs[rem,drop=F]
+        obs <-  obs[rem,drop= FALSE]
         # If there are less than 5 observations
         if (length(obs)<5){
           xxx[[ii]] <- NA
         } else {
           xxx[[ii]] <- krigeST(as.formula("tres~1"),
-                               data=as(obs, "STSDF"), 
+                               data=as(obs, "STIDF"), 
                                newdata=STF(as(g_list[[i]],"SpatialPoints"),
                                            temp.local@time[ii],  
                                            temp.local@endTime[ii]),     
@@ -495,12 +468,12 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
   # add results to stfdf
   resid <- as.numeric(res[, 1])
   newdata$pred <- resid + newdata$tlm
-  stfdf <- newdata[,, c("pred", "tlm"), drop=F]
+  stfdf <- newdata[ , , c("pred", "tlm"), drop= FALSE]
   if (computeVar) {
     p.var <- as.numeric(res[, 2])
     stfdf$var <- p.var
   }
-
+  
   if (parallel.processing){
     if (pp.type == "doParallel"){
       stopImplicitCluster()
@@ -510,22 +483,59 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
   }
   
   # return
-  if (output.format == "data.frame") {
-    stfdf@sp <- as(stfdf@sp, "SpatialPoints")
-    stfdf <- as.data.frame(as(stfdf, "STSDF"))
-    stfdf <- stfdf[, c(1:4, 7:(length(stfdf)))]
-    print("Done!")
+  if (output.format == "STFDF") {
+    if (progress) print("Done!")
     return(stfdf)
+  } else if (output.format == "STIDF") {
+    if (progress) print("Done!")
+    return(as(stfdf, "STIDF"))
   } else if (output.format == "STSDF") {
-    print("Done!")
+    if (progress) print("Done!")
     return(as(stfdf, "STSDF"))
-  } else { #  (output.format == "STFDF")
-    print("Done!")
-    return(stfdf)
+  } else if (output.format == "sftime") {
+    sftime = st_as_sftime(as(stfdf, "STIDF"))
+    if (progress) print("Done!")
+    return(sftime)
+  } else if (output.format == "sf") {
+    sftime <- st_as_sftime(as(stfdf, "STIDF"))
+    sf <- sftime
+    sf <- st_drop_time(sf)
+    sf$time <- sftime$time
+    if (progress) print("Done!")
+    return(sf)
+  } else if (output.format == "SpatVector") {
+    sftime <- st_as_sftime(as(stfdf, "STIDF"))
+    sf <- sftime
+    sf <- st_drop_time(sf)
+    sf$time <- sftime$time
+    sv <- vect(as(sf, "Spatial"))
+    if (progress) print("Done!")
+    return(sv)
+  } else { # data.frame or SpatRaster
+    result = stfdf
+    result@sp <- as(result@sp, "SpatialPoints")
+    result <- as.data.frame(as(result, "STIDF"))
+    result <- result[, c(3,1:2,4, 7:(length(result)))]
+    if (output.format == "data.frame") {
+      if (progress) print("Done!")
+      return(result)
+    } else if (output.format == "SpatRaster") {
+      if (!is.na(newdata.s.crs)) {newdata.s.crs <- st_crs(newdata.s.crs)$wkt}
+      df <- result
+      names(df)[4] <- "time"
+      unique_times <- unique(df$time)
+      f <- function(x) terra::rast(df[df$time == x, c(2:3,5:length(df))], type="xyz", crs = newdata.s.crs)
+      sr <- sapply(unique_times, f)
+      # sr <- rast(sr) # raster stack
+      names(sr) <- unique_times # paste("pred_", unique_times, sep="")
+      if (progress) print("Done!")
+      return(sr)
+    } else { #  (output.format == "data.frame")
+      if (progress) print("Done!")
+      return(result)
+    }
   }
- 
   ##########
- 
 }
   
   

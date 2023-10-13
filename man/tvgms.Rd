@@ -22,7 +22,7 @@ Variograms of residuals from multiple linear regression of mean, minimum, maximu
    
   }
 }
-\author{Milan Kilibarda \email{kili@grf.bg.ac.rs}, ALeksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
+\author{Milan Kilibarda \email{kili@grf.bg.ac.rs}, Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
 \references{
 Kilibarda, M., T. Hengl, G. B. M. Heuvelink, B. Graeler, E. Pebesma, M. Percec Tadic, and B. Bajat (2014), Spatio-temporal interpolation of daily temperatures for global land areas at 1 km resolution, J. Geophys. Res. Atmos., 119, 2294-2313, doi:10.1002/2013JD020803.
 }

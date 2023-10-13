@@ -1,7 +1,6 @@
 tune.rfsi <- function (formula, # without nearest obs
                        data, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
                        data.staid.x.y.z=  NULL, # if data.frame
-                       zero.tol=0,
                        # avg = FALSE,
                        # increment, # avg(nearest point dist)
                        # range, # bbox smaller(a, b) / 2
@@ -15,7 +14,6 @@ tune.rfsi <- function (formula, # without nearest obs
                        k = 5, # number of folds
                        seed = 42,
                        folds, # if user want to create folds or column name
-                       # fold.column, # by which column
                        acc.metric, # caret parameters - RMSE, MAE, R2, ...
                        fit.final.model = TRUE,
                        cpus=detectCores()-1,
@@ -97,7 +95,7 @@ tune.rfsi <- function (formula, # without nearest obs
       fold.column <- folds
       if (class(folds) %in% c("numeric", "integer")) {
         fold.column <- names(data)[fold.column]
-      } else if (class(fold.column) == "character") {
+      } else if (inherits(fold.column, "character")) {
         if (!fold.column %in% names(data)){
           stop(paste0('Colum with name "', fold.column, '" does not exist in data'))
         }
@@ -185,7 +183,6 @@ tune.rfsi <- function (formula, # without nearest obs
       fold_model <- rfsi(formula, # without nearest obs
                          data=dev.df, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
                          data.staid.x.y.z = data.staid.x.y.z, # if data.frame
-                         zero.tol=zero.tol,
                          n.obs=n.obs, # nearest obs
                          # time.nmax, # use all if not specified
                          s.crs=s.crs,
@@ -212,7 +209,6 @@ tune.rfsi <- function (formula, # without nearest obs
                                    newdata=val.df, # data.frame(x,y,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
                                    newdata.staid.x.y.z = data.staid.x.y.z, # if data.frame
                                    output.format = "data.frame",
-                                   zero.tol=zero.tol,
                                    # n.obs=10, # nearest obs 3 vidi iz modela
                                    # time.nmax, # use all if not specified
                                    s.crs=s.crs,
@@ -263,7 +259,6 @@ tune.rfsi <- function (formula, # without nearest obs
     final.model <- rfsi(formula, # without nearest obs
                         data=data.df, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
                         data.staid.x.y.z = data.staid.x.y.z, # if data.frame
-                        zero.tol=zero.tol,
                         n.obs=dev_parameters$n.obs, # nearest obs
                         # time.nmax, # use all if not specified
                         s.crs=s.crs,

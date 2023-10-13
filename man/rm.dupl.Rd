@@ -20,6 +20,7 @@ This function finds point pairs with equal spatial coordinates from \link[spacet
 \code{\link{pred.strk}}
 }
 \examples{
+library(sp)
 # load observation - data frame
 data(dtempc) 
 # load stations - data frame
@@ -27,8 +28,10 @@ data(stations)
 
 str(dtempc)
 str(stations)
+
+\dontrun{
 # create STFDF - from 2 data frames
-temp <- meteo2STFDF(dtempc[, c(1,6,7,10,11,12)],
+temp <- meteo2STFDF(dtempc,
                     stations,
                     crs = CRS('+proj=longlat +datum=WGS84'))
 
@@ -36,6 +39,7 @@ nrow(temp@sp) # number of stations before removing dupl.
 
 temp2 <-rm.dupl(temp, zcol = 1, zero.tol = 50) # 50 km
 nrow(temp2@sp) # number of stations after
+}
 }
 
 

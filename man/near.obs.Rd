@@ -24,9 +24,9 @@ near.obs(locations,
 }
 
 \arguments{
-  \item{locations}{data.frame with x and y coordinates columns, or \link[sf]{sf-class}, \link[terra]{SpatVector-class} or \link[terra]{SpatRaster-class} object; Locations (FROM) for which n nearest observations are found and distances are calculated.}
+  \item{locations}{data.frame with x and y coordinates columns, or \link[sf:sf]{sf-class}, \link[terra]{SpatVector-class} or \link[terra]{SpatRaster-class} object; Locations (FROM) for which n nearest observations are found and distances are calculated.}
   \item{locations.x.y}{numeric or character vector; Positions or names of the x and y columns in \code{locations} if data.frame. Default is c(1,2).}
-  \item{observations}{data.frame with x, y and observation columns, or \link[sf]{sf-class} or \link[terra]{SpatVector-class} object with an observation column; Observations (TO).}
+  \item{observations}{data.frame with x, y and observation columns, or \link[sf:sf]{sf-class} or \link[terra]{SpatVector-class} object with an observation column; Observations (TO).}
   \item{observations.x.y}{numeric or character vector; Positions or names of the x and y columns in \code{observations} if data.frame. Default is c(1,2).}
   \item{obs.col}{numeric or character; Column name or number showing position of the observation column in the \code{observations}. Default is 3.}
   \item{n.obs}{numeric; Number of nearest observations to be found. Note that it cannot be larger than number of obsevrations. Default is 10.}
@@ -42,7 +42,7 @@ near.obs(locations,
 \value{ \link[base]{data.frame} object.  Rows represents specific locations. First \code{n.obs} columns are Euclidean distances to \code{n.obs} nearest observations. Next \code{n.obs} columns are observations at \code{n.obs} nearest stations. The following columns are averages in circles with different radiuses if \code{avg} is set to TRUE. The following columns are nearest observation in quadrants if \code{direct} is set to TRUE. The following columns are IDW prediction from nearest observation if \code{idw} is set to TRUE.
 }
 
-\author{ALeksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
+\author{Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
 
 \references{
 Sekulić, A., Kilibarda, M., Heuvelink, G. B., Nikolić, M. & Bajat, B. Random Forest Spatial Interpolation. Remote. Sens. 12, 1687, https://doi.org/10.3390/rs12101687 (2020).
@@ -74,7 +74,7 @@ nearest_obs <- near.obs(locations = locations, # from
                         observations = observations, # to
                         obs.col = "zinc",
                         n.obs = 5, # number of nearest observations
-                        rm.dupl = TRUE) # if TRUE, the observations themself will be excluded from spatial covariates 
+                        rm.dupl = TRUE) 
 str(nearest_obs)
 summary(nearest_obs)
 }

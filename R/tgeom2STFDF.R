@@ -42,11 +42,11 @@ tgeom2STFDF <- function(grid,
   if (any(class(grid) == "SpatVector")) {
     grid <- as(grid, "Spatial")
   } else if (any(class(grid) == "SpatRaster")) {
-    grid <- as.points(grid, na.rm=F)
+    grid <- as.points(grid, na.rm= FALSE)
     grid <- as(grid, "Spatial")
   } else if (any(class(grid) == "sf")) {
     grid <- as_Spatial(grid)
-  } else if(class(grid) == 'SpatialGrid' | class(grid) == 'SpatialGridDataFrame') {
+  } else if(inherits(grid, 'SpatialGrid') | inherits(grid, 'SpatialGridDataFrame')) {
     grid <- as(grid,'SpatialPixels')
   }
   

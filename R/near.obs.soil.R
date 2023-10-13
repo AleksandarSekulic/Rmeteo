@@ -12,6 +12,7 @@ near.obs.soil <- function(
   cpus = detectCores()-1
 )
 {
+  l <- NULL # to supress Warning
   ### PREPARE DATA ###
   ### input data preparation
   if (any(class(locations) == "SpatVector")) {
@@ -19,7 +20,7 @@ near.obs.soil <- function(
     locations <- as.data.frame(cbind(crds(locations), mid.depth))
   } else if (any(class(locations) == "SpatRaster")) {
     mid.depth <- values(locations[[locations.x.y.md[3]]])
-    locations <- as.data.frame(cbind(crds(locations, na.rm=F), mid.depth))
+    locations <- as.data.frame(cbind(crds(locations, na.rm= FALSE), mid.depth))
   } else if (any(class(locations) == "sf")) {
     mid.depth <- locations[[locations.x.y.md[3]]]
     locations <- as.data.frame(cbind(st_coordinates(locations), mid.depth))

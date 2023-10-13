@@ -10,10 +10,12 @@ tiling <- function(rast="", # path to grid file in SAGA format / raster formats
                    ...) # filetype="GTiff", overwrite = T, datatype = "INT2S"
 {
   
-  if(class(rast) == "SpatialPixelsDataFrame") {
+  if(inherits(rast, "SpatialPixelsDataFrame")) {
     r=rast(rast)
-  } else if (class(rast) == "SpatRaster"){
+    ext(r) <- c(bbox(rast)[1,1], bbox(rast)[1,2], bbox(rast)[2,1], bbox(rast)[2,2])
+  } else if (inherits(rast, "SpatRaster")){
     # do nothing
+    r <- rast
   } else {r= rast(rast)}
   
   if (length(tilesize) == 1) {
@@ -36,9 +38,6 @@ tiling <- function(rast="", # path to grid file in SAGA format / raster formats
   step_y=tilesize[2]*cel2 + overlapping[2]*cel2
   nlon=ceiling(diff(bb[,1]) / step_x )
   nlat=ceiling(diff(bb[,2]) / step_y )
-  
-  
-  
   
   p.l <- expand.grid(KEEP.OUT.ATTRS=FALSE,
                      lonmin=seq(bb[1,1],bb[1,1]+(nlon-1)*step_x, by=step_x),

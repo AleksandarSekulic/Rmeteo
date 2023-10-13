@@ -8,14 +8,14 @@ near.obs.batimetry <- function(
   n.obs = 10,
   rm.dupl = TRUE
 ){
-  if (class(locations) == "SpatialPoints" ||
-      class(locations) == "SpatialPointsDataFrame" ||
-      class(locations) == "SpatialPixelsDataFrame") {
+  if (inherits(locations, "SpatialPoints") ||
+      inherits(locations, "SpatialPointsDataFrame") ||
+      inherits(locations, "SpatialPixelsDataFrame")) {
     locations <- coordinates(locations)
   } else {
     locations <- locations[, c(locations.x.y, IHP, zcol)]
   }
-  if (class(observations) == "SpatialPoints" || class(observations) == "SpatialPointsDataFrame") {
+  if (inherits(observations, "SpatialPoints") || inherits(observations, "SpatialPointsDataFrame")) {
     variable <- observations[[IHP]]
     observations <- coordinates(observations)
   } else {

@@ -28,7 +28,7 @@ data.prepare <- function (data,
       s.crs <- st_crs(data)
     }
   } else if (any(class(data) == "SpatRaster")) { # new data only
-    data.df = crds(data, df=T, na.rm=F)
+    data.df = crds(data, df=T, na.rm= FALSE)
     # if (is.null(data.staid.x.y.z)) {
     data.df$staid <- 1:nrow(data.df)
     data.staid.x.y.z <- c(3,1,2,NA)

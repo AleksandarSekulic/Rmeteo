@@ -18,7 +18,7 @@ The \code{dtempc} contains the following columns:
 \references{
 \itemize{
 \item Global Surface Summary of the day data (\url{ftp://ftp.ncdc.noaa.gov/pub/data/gsod/}) 
-\item European Climate Assessment & Dataset (\url{http://eca.knmi.nl/dailydata/predefinedseries.php}) 
+\item European Climate Assessment & Dataset (\url{https://www.ecad.eu/dailydata/predefinedseries.php})  
 }
 }
 \examples{

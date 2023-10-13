@@ -23,7 +23,7 @@ meteo2STFDF(obs,
 
 }
 \value{ \link[spacetime]{STFDF-class} object}
-\author{Milan Kilibarda \email{kili@grf.bg.ac.rs}, ALeksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
+\author{Milan Kilibarda \email{kili@grf.bg.ac.rs}, Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
 \note{The function is intended for conversion of meteorological data to \link[spacetime]{STFDF-class} object, but can be used for similar spatio temporal data stored in two separated tables.}
 \seealso{
 \code{\link{tgeom2STFDF}},
@@ -33,7 +33,6 @@ meteo2STFDF(obs,
 # prepare data
 # load observation - data.frame of mean temperatures
 data(dtempc) 
-dtempc = dtempc[, c(1,6,7,10,11,12)]
 # str(dtempc)
 data(stations)
 # str(stations)

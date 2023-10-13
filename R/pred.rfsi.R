@@ -5,7 +5,6 @@ pred.rfsi <- function (model, # RFSI model
                        newdata, # sf | sftime | SpatVector | SpatRaster | data.frame(x,y,z,ec1,ec2,...)      dodaj stars
                        newdata.staid.x.y.z = NULL, # if data.frame
                        z.value = NULL,
-                       zero.tol=0,
                        # time.nmax, # use all if not specified
                        s.crs = NA, # brisi
                        newdata.s.crs = NA, # brisi
@@ -265,7 +264,7 @@ pred.rfsi <- function (model, # RFSI model
         # prediction
         if (progress) print('Doing RFSI predictions ...')
         pf <- function(model, ...) {
-          library(ranger)
+          # library(ranger)
           predict(model, ..., num.threads = 1)$predictions
         }
         pred <- terra::predict(
@@ -382,7 +381,7 @@ pred.rfsi <- function (model, # RFSI model
         # prediction
         if (progress) print('Doing RFSI predictions ...')
         pf <- function(model, ...) {
-          library(ranger)
+          # library(ranger)
           predict(model, ..., num.threads = 1)$predictions
         }
         pred <- terra::predict(
@@ -446,7 +445,7 @@ pred.rfsi <- function (model, # RFSI model
       # if (use.tps) {
       #   if (progress) print('Calculating TPS ...')
       #   m <- Tps(dev_day_df[, x.y], dev_day_df[, obs.col.name],# lon.lat = T,
-      #            # lambda = tps.lambda) #, GCV=F)
+      #            # lambda = tps.lambda) #, GCV= FALSE)
       #            df=tps.df)
       #   tps_pred <- predict.Krig(m, day_df[, newdata.x.y])
       #   newdata.df[, tps.var] <- as.vector(tps_pred)
@@ -455,7 +454,7 @@ pred.rfsi <- function (model, # RFSI model
       # prediction
       if (progress) print('Doing RFSI predictions ...')
       pf <- function(model, ...) {
-        library(ranger)
+        # library(ranger)
         predict(model, ..., num.threads = 1)$predictions
       }
       pred <- terra::predict(
@@ -537,7 +536,7 @@ pred.rfsi <- function (model, # RFSI model
       #       tps.df.day <- tps.df
       #     }
       #     m <- Tps(dev_day_df[, x.y], dev_day_df[, obs.col.name],# lon.lat = T,
-      #              # lambda = tps.lambda) #, GCV=F)
+      #              # lambda = tps.lambda) #, GCV= FALSE)
       #              df=tps.df.day)
       #     tps_pred <- cbind(day_df[, names(newdata.df)[newdata.staid.x.y.z[c(1,4)]]],
       #                       predict.Krig(m, day_df[, newdata.x.y]))
@@ -594,7 +593,7 @@ pred.rfsi <- function (model, # RFSI model
       # if (use.tps) {
       #   if (progress) print('Calculating TPS ...')
       #   m <- Tps(dev_day_df[, x.y], dev_day_df[, obs.col.name],# lon.lat = T,
-      #            # lambda = tps.lambda) #, GCV=F)
+      #            # lambda = tps.lambda) #, GCV= FALSE)
       #            df=tps.df)
       #   tps_pred <- predict.Krig(m, day_df[, newdata.x.y])
       #   newdata.df[, tps.var] <- as.vector(tps_pred)
@@ -654,7 +653,7 @@ pred.rfsi <- function (model, # RFSI model
       }
       sr <- sapply(unique_times, f)
       # sr <- rast(sr) # raster stack
-      # names(sr) <- paste("pred_", unique_times, sep="")
+      names(sr) <- unique_times # paste("pred_", unique_times, sep="")
     } else {
       if (exists("old.newdata.x.y")) {
         sr <- terra::rast(result[, c(2:3,6:length(result))], type="xyz", crs = final.crs)

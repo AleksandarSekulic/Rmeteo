@@ -11,7 +11,7 @@ tgeom2STFDF(grid,
             ab=NULL)
 }
 \arguments{
-  \item{grid}{\link[sp]{Spatial-class} (Points, Grid or Pixels), \link[sf]{sf-class}, \link[terra]{SpatVector-class}, \link[terra]{SpatRaster-class}; Locations for which gtt is calculated with associated coordinate reference systems (\link[sp]{CRS-class}). If CRS is not defined longitude latitude is assumed.}
+  \item{grid}{\link[sp]{Spatial-class} (Points, Grid or Pixels), \link[sf:sf]{sf-class}, \link[terra]{SpatVector-class}, \link[terra]{SpatRaster-class}; Locations for which gtt is calculated with associated coordinate reference systems (\link[sp]{CRS-class}). If CRS is not defined longitude latitude is assumed.}
   \item{time}{date or datetime; Object holding time information, reasonably it is day (calendar date), or vector of days.}
   \item{variable}{character; Geometrical temperature trend calculated for mean, minimum or maximum temperature; Possible values are \code{'mean'}, \code{'min'} or \code{'max'}. \code{'mean'} is default.}
     \item{ab}{Predefined coefficients to be used instead of incorporated.}
@@ -21,7 +21,7 @@ tgeom2STFDF(grid,
 \references{
 Kilibarda, M., T. Hengl, G. B. M. Heuvelink, B. Graeler, E. Pebesma, M. Percec Tadic, and B. Bajat (2014), Spatio-temporal interpolation of daily temperatures for global land areas at 1 km resolution, J. Geophys. Res. Atmos., 119, 2294-2313, doi:10.1002/2013JD020803.
 }
-\author{Milan Kilibarda \email{kili@grf.bg.ac.rs}, ALeksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
+\author{Milan Kilibarda \email{kili@grf.bg.ac.rs}, Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
 \examples{
 library(sp)
 library(spacetime)
@@ -34,12 +34,12 @@ tg1
 ## temp_geom for the 2011 at pos location
 tg365<- tgeom2STFDF(pos,time = seq(as.POSIXct("2011-01-01"), as.POSIXct("2011-12-31"), 
                     by="day") ) 
-stplot(tg365, mode='ts')
+# stplot(tg365, mode='ts')
 
 data(regdata) 
 ## DEM and TWI data for Serbia at 1 km resolution
 # str(regdata@sp)
-spplot(regdata@sp, zcol='dem', col.regions=bpy.colors() )
+# spplot(regdata@sp, zcol='dem', col.regions=bpy.colors() )
 
 ## temp_geom for Serbia 1st and 2nd Jully 2011
 tgSrb<- tgeom2STFDF(regdata@sp,time = seq(as.POSIXct("2011-07-01"), 
