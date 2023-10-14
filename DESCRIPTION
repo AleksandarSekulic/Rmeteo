@@ -3,7 +3,7 @@ Version: 2.0-2
 Date: 2023-10-09
 Type: Package
 Encoding: UTF-8
-Title: RFSI and Spatio-temporal Geostatistical Interpolation for Meteorological and Other Environmental Variables
+Title: RFSI and Spatio-Temporal Geostatistical Interpolation for Meteorological and Other Environmental Variables
 Authors@R: c(person("Milan", "Kilibarda", role = c("aut"), email = "kili@grf.bg.ac.rs", comment = c(ORCID = "0000-0002-2930-3596")),
              person("Aleksandar", "Sekulić", role = c("aut", "cre"), email = "asekulic@grf.bg.ac.rs", comment = c(ORCID = "0000-0002-5515-2779")),
              person("Tomislav", "Hengl", role = c("ctb")),
