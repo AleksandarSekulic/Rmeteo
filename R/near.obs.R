@@ -35,7 +35,8 @@ near.obs <- function(
   
   if (nrow(observations) < (n.obs+1)) {
     # return NA
-    nl_df <- matrix(NA, nrow = nrow(locations), ncol = (2*n.obs))
+    stop("Number of observations must be > n.obs")
+    # nl_df <- matrix(NA, nrow = nrow(locations), ncol = (2*n.obs))
   } else {
     if (rm.dupl){
       knn1 <- nabor::knn(observations, locations, k=n.obs+1)
@@ -50,6 +51,7 @@ near.obs <- function(
       near_o1 <- apply(knn1$nn.idx, 2, function(x) {variable[x]})
       if (nrow(locations) == 1) {
         near_o1 <- matrix(near_o1, nrow = 1)
+        knn1$nn.dists <- matrix(knn1$nn.dists, nrow = 1)
       }
       near_o1 <- cbind(near_o1)
       nl_df <- cbind(knn1$nn.dists, near_o1)

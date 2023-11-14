@@ -24,7 +24,7 @@ nearest_obs <- near.obs(locations = locations, # from
                         observations.x.y=c("x","y"),
                         obs.col = "zinc",
                         n.obs = 10, # number of nearest observations
-                        rm.dupl = TRUE) # uif TRUE, the observations themself will be excluded from spatial covariates 
+                        rm.dupl = TRUE) # if TRUE, the observations themselves will be excluded from spatial covariates 
 str(nearest_obs)
 summary(nearest_obs)
 
