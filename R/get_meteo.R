@@ -42,6 +42,9 @@ get_meteo <- function(loc,
   if (missing(time) & (missing(from) | missing(to))) {
     stop("The argument time or arguments from/to are missing")
   }
+  if (missing(api_key)) {
+    stop("The argument api_key is missing")
+  }
   # Construct the URL for the dailymeteo.com API endpoint
   url <- "https://api.dailymeteo.com/meteo/pq/"
   # Set query parameters
