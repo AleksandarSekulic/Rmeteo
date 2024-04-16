@@ -41,21 +41,21 @@ install.packages("meteo", repos="http://R-Forge.R-project.org")
 ## Examples
 ### Get daily meteorological data for specific locations and dates
 ```
-library(terra)
+loc <- get_coordinates("Belgrade")
+loc <- rbind(coords, get_coordinates("Kopaonik"))
+loc
 
-loc <- c(21, 45)
-# loc <- as.data.frame(rbind(c(21, 45),
-#                            c(21,45.5),
-#                            c(21.5,45),
-#                            c(21.5,45.5)))
+api_key <- "" # get API key from DailyMeteo portal (https://app.dailymeteo.com/)
 
-dates <- as.Date("2020-12-25")
-# dates <- seq(as.Date("2020-12-25"), as.Date("2020-12-31"), by="day")
-
-tmean <- get_meteo(loc,
-                   dates,
-                   var = "tmean", # "tmax" "tmin" "prcp" "slp"
-                   source = "MeteoEurope1km")
+result <- get_meteo(loc = loc,
+                    var = "tmean", # "tmax" "tmin" "prcp" "slp"
+                    agg_level = "agg", # "ltm"
+                    time_scale = "day", # "mon" "ann"
+                    from = "2020-01-01",
+                    to = "2020-01-02",
+                    # time = c("2020-01-01", "2020-01-02"),
+                    api_key = api_key)
+result
 ```
 ### RFSI example
 Complete RFSI examples (including tune.rfsi and cv.rfsi) can be found in the [demo](demo) folder.

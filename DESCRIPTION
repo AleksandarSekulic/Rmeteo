@@ -1,6 +1,6 @@
 Package: meteo
-Version: 2.0-2
-Date: 2023-10-09
+Version: 2.0-3
+Date: 2024-04-16
 Type: Package
 Encoding: UTF-8
 Title: RFSI and Spatio-Temporal Geostatistical Interpolation for Meteorological and Other Environmental Variables
@@ -20,6 +20,6 @@ Description: RFSI and spatio-temporal geostatistical interpolation for meteorolo
 License: GPL (>= 2.0) | file LICENCE
 URL: https://www.r-pkg.org/pkg/meteo, https://r-forge.r-project.org/projects/meteo/, https://github.com/AleksandarSekulic/Rmeteo
 LazyLoad: yes
-Imports: methods, utils, stats, DescTools, caret, data.table, dplyr, sp, spacetime, gstat, foreach, parallel, snowfall, doParallel, plyr, units, nabor, CAST, ranger, sf, sftime, raster, terra
+Imports: methods, utils, stats, DescTools, caret, data.table, dplyr, sp, spacetime, gstat, foreach, parallel, snowfall, doParallel, plyr, units, nabor, CAST, ranger, sf, sftime, raster, terra, jsonlite
 BugReports: https://github.com/AleksandarSekulic/Rmeteo/issues
 RoxygenNote: 7.2.3
