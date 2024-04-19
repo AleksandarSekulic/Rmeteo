@@ -100,7 +100,7 @@ stations.staid.lon.lat = c(1,2,3)
 crs = CRS('+proj=longlat +datum=WGS84')
 delta = NULL
 
-\dontrun{
+\donttest{
 # create STFDF
 stfdf <- meteo2STFDF(obs = dtempc,
                      stations = st,
@@ -125,13 +125,14 @@ results <- pred.strk(data = stfdf, # observations
 )
 class(results)
 # plot prediction
-# results@sp=as(results@sp,'SpatialPixelsDataFrame')
-# stplot(results[,,"pred", drop= FALSE], col.regions=bpy.colors())
-# stplot(results[,,"var", drop= FALSE], col.regions=bpy.colors())
+results@sp=as(results@sp,'SpatialPixelsDataFrame')
+stplot(results[,,"pred", drop= FALSE], col.regions=bpy.colors())
+stplot(results[,,"var", drop= FALSE], col.regions=bpy.colors())
 }
 
-\dontrun{
-### Example with data.frames and parallel processing - SpatRaster output
+
+# Example with data.frames and parallel processing - SpatRaster output
+\donttest{
 library(terra)
 library(doParallel)
 # create data.frame
@@ -151,13 +152,13 @@ results <- pred.strk(data = stfdf.df,
                      time.nmax = 2,
                      parallel.processing = TRUE,
                      pp.type = "doParallel", # "snowfall"
-                     cpus = 1, # detectCores()-1,
+                     cpus = 2, # detectCores()-1,
                      computeVar = TRUE,
                      progress = TRUE
 )
 # plot prediction
-# plot(results$`2011-07-06`[["pred"]])
-# plot(results$`2011-07-06`[["var"]])
+plot(results$`2011-07-06`[["pred"]])
+plot(results$`2011-07-06`[["var"]])
 }
 }
 

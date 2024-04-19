@@ -39,9 +39,13 @@ Kilibarda M., M. Percec Tadic, T. Hengl, J. Lukovic, B. Bajat - Spatial Statisti
    # # sf
    # NLpol <- st_as_sf(NLpol) #, crs = st_crs(4326))
    
-   # plot(nlmodis20110712)
+   \donttest{
+   plot(nlmodis20110712)
+   }
    # fill spatial gaps
    r=rfillspgaps(nlmodis20110712,NLpol)
-   # plot(r)
+   \donttest{
+   plot(r)
+   }
   
 }

@@ -16,7 +16,9 @@ get_coordinates(location_name = "Belgrade")
 \code{\link{get_meteo}}
 }
 \examples{
-# coords <- get_coordinates("Belgrade")
-# coords
+\donttest{
+coords <- get_coordinates("Belgrade")
+str(coords)
+}
 }
 

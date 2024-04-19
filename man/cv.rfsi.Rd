@@ -85,11 +85,6 @@ library(meteo)
 demo(meuse, echo=FALSE)
 meuse <- meuse[complete.cases(meuse@data),]
 data = st_as_sf(meuse, coords = c("x", "y"), crs = 28992, agr = "constant")
-# data = terra::vect(meuse)
-# data.frame
-# data <- as.data.frame(meuse)
-# data$id = 1:nrow(data)
-# data.staid.x.y.z <- c(15,"x","y",NA)
 fm.RFSI <- as.formula("zinc ~ dist + soil + ffreq")
 
 # making tgrid
@@ -101,13 +96,10 @@ ntree <- 250 # 500
 mtry <- 3:(2+2*max(n.obs))
 tgrid = expand.grid(min.node.size=min.node.size, num.trees=ntree,
                     mtry=mtry, n.obs=n.obs, sample.fraction=sample.fraction)
-\dontrun{
+\donttest{
 # Cross-validation of RFSI
 rfsi_cv <- cv.rfsi(formula=fm.RFSI, # without nearest obs
                    data = data,
-                   # data.staid.x.y.z = c("id", "x", "y", NA), # only if class(data) == data.frame
-                   # s.crs=NA,
-                   # t.crs=NA,
                    tgrid = tgrid, # combinations for tuning
                    tgrid.n = 2, # number of randomly selected combinations from tgrid for tuning
                    tune.type = "LLO", # Leave-Location-Out CV
@@ -115,14 +107,14 @@ rfsi_cv <- cv.rfsi(formula=fm.RFSI, # without nearest obs
                    seed = 42,
                    acc.metric = "RMSE", # R2, CCC, MAE
                    output.format = "sf", # "data.frame", # "SpatVector",
-                   cpus=detectCores()-1,
+                   cpus=2, # detectCores()-1,
                    progress=1,
                    importance = "impurity") # ranger parameter
 
 summary(rfsi_cv)
 rfsi_cv$dif <- rfsi_cv$obs - rfsi_cv$pred
-# plot(rfsi_cv["dif"])
-# spplot(rfsi_cv[, , "obs"])
+plot(rfsi_cv["dif"])
+plot(rfsi_cv[, , "obs"])
 acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "R2")
 acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "RMSE")
 acc.metric.fun(rfsi_cv$obs, rfsi_cv$pred, "MAE")

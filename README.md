@@ -1,13 +1,13 @@
-# `meteo`: RFSI and Spatio-Temporal Geostatistical Interpolation for Meteorological and Other Environmental Variables
+# `meteo`: RFSI & STRK Interpolation for Meteo and Environmental Variables
 [![License](http://img.shields.io/badge/license-GPL%20%28%3E=%202%29-brightgreen.svg?style=flat)](http://www.gnu.org/licenses/gpl-2.0.html)
 [![CRAN](http://www.r-pkg.org/badges/version/meteo)](https://cran.r-project.org/package=meteo)
 [![cran checks](https://badges.cranchecks.info/worst/meteo.svg)](https://cran.r-project.org/web/checks/check_results_meteo.html)
 [![Downloads](http://cranlogs.r-pkg.org/badges/meteo?color=brightgreen)](https://www.r-pkg.org/pkg/meteo)
 
 ## Overview
-`meteo` is an R package for RFSI and Spatio-Temporal Geostatistical Interpolation for Meteorological and Other Environmental Variables.
+`meteo` is an R package for Random Forest Spatial Interpolation (RFSI) and Spatio-Temporal Geostatistical Interpolation for Meteorological and Other Environmental Variables.
 Main functions:
-* `rfsi` - Random Forest Spatial Interpolation (RFSI) model (Sekulić et al. 2020b)
+* `rfsi` - RFSI model (Sekulić et al. 2020b)
 * `tune.rfsi` - tuning of RFSI model (Sekulić et al. 2020b)
 * `pred.rfsi` - RFSI prediction (Sekulić et al. 2020b)
 * `cv.rfsi` - nested k-fold cross-validation for RFSI (Sekulić et al. 2020b)

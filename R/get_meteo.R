@@ -52,7 +52,7 @@ get_meteo <- function(loc,
   data <- c()
   
   for (r in 1:nrow(loc)) {
-    print(paste0("Location ", r))
+    message(paste0("Location ", r))
     
     query <- list(
       var = var,
@@ -79,8 +79,8 @@ get_meteo <- function(loc,
     # Check if request was successful
     if (inherits(response, "error")) {
       # Print error message if request was not successful
-      print("Error: Failed to retrieve data from the API.")
-      break
+      warning("Error: Failed to retrieve data from the API.")
+      next
     } else {
       # Read the response and parse JSON
       response_content <- readLines(response, warn = FALSE)
@@ -91,8 +91,8 @@ get_meteo <- function(loc,
         row_data <- cbind(loc=r, row_data)
         data <- rbind(data, row_data)
       } else {
-        print("Error: No data returned from the API.")
-        break
+        warning("Error: No data returned from the API.")
+        next
       }
     }
   }

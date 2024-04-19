@@ -77,21 +77,13 @@ library(meteo)
 demo(meuse, echo=FALSE)
 meuse <- meuse[complete.cases(meuse@data),]
 data = st_as_sf(meuse, coords = c("x", "y"), crs = 28992, agr = "constant")
-# data = terra::vect(meuse)
-# data.frame
-# data <- as.data.frame(meuse)
-# data$id = 1:nrow(data)
-# data.staid.x.y.z <- c(15,"x","y",NA)
 fm.RFSI <- as.formula("zinc ~ dist + soil + ffreq")
 
 # fit the RFSI model
 rfsi_model <- rfsi(formula = fm.RFSI,
                    data = data, # meuse.df (use data.staid.x.y.z)
-                   # data.staid.x.y.z = data.staid.x.y.z, # only if class(data) == data.frame
                    n.obs = 5, # number of nearest observations
-                   # s.crs = st_crs(data), # nedded only if the coordinates are lon/lat (WGS84)
-                   # p.crs = st_crs(data), # nedded only if the coordinates are lon/lat (WGS84)
-                   cpus = detectCores()-1,
+                   cpus = 2, # detectCores()-1,
                    progress = TRUE,
                    # ranger parameters
                    importance = "impurity",

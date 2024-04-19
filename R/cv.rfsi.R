@@ -24,7 +24,7 @@ cv.rfsi <- function (formula, # without nearest obs
                      ...){ # fixed ranger parameters
   
   # check the input
-  if (progress %in% 1:3) print('Preparing data ...')
+  if (progress %in% 1:3) message('Preparing data ...')
   if ((missing(data)) | missing(formula) | missing(tgrid)) {
     stop('The arguments data, formula and tgrid must not be empty!')
   }
@@ -93,7 +93,7 @@ cv.rfsi <- function (formula, # without nearest obs
           stop(paste0('Colum with name "', out.fold.column, '" does not exist in data'))
         }
       }
-      print(paste0("Outer fold column: ", out.fold.column))
+      message(paste0("Outer fold column: ", out.fold.column))
     } else if (length(out.folds) == nrow(data.df)){ # vector
       data.df$out.folds <- out.folds
       out.fold.column <- "out.folds"
@@ -113,7 +113,7 @@ cv.rfsi <- function (formula, # without nearest obs
             stop(paste0('Colum with name "', in.fold.column, '" does not exist in data'))
           }
         }
-        print(paste0("Inner fold column: ", out.fold.column))
+        message(paste0("Inner fold column: ", out.fold.column))
       } else if (length(in.folds) == nrow(data.df)){ # vector
         data.df$in.folds <- in.folds
         in.fold.column <- "in.folds"
@@ -129,15 +129,15 @@ cv.rfsi <- function (formula, # without nearest obs
   }
   
   # do CV
-  if (progress %in% 1:3) print('Doing CV ...')
+  if (progress %in% 1:3) message('Doing CV ...')
   pred <- c()
   # for val_fold in outer folds
   for (val_fold in sort(unique(data.df[, out.fold.column]))) {
-    if (progress %in% 1:3) print(paste('### Main fold ', val_fold, " ###", sep=""))
+    if (progress %in% 1:3) message(paste('### Main fold ', val_fold, " ###", sep=""))
     # tune RFSI model
     dev.df <- data.df[data.df[, out.fold.column] != val_fold, ]
     val.df <- data.df[data.df[, out.fold.column] == val_fold, ]
-    if (progress %in% 1:3) print('Tuning RFSI model ...')
+    if (progress %in% 1:3) message('Tuning RFSI model ...')
     # tune.rfsi
     tuned_model <- tune.rfsi(formula, # without nearest obs
                              data=dev.df, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
@@ -166,7 +166,7 @@ cv.rfsi <- function (formula, # without nearest obs
                              # seed = seed,
                              ...)
     # validate
-    if (progress %in% 1:3) print('Validation ...')
+    if (progress %in% 1:3) message('Validation ...')
     fold_prediction <- pred.rfsi(tuned_model$final.model, # RFSI model iz rfsi ili tune rfsi funkcije
                                  data=dev.df, # data.frame(x,y,obs,time) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
                                  obs.col=obs.col.name,
@@ -196,7 +196,7 @@ cv.rfsi <- function (formula, # without nearest obs
     }
     val.df <- join(val.df, fold_prediction)
     pred <- rbind(pred, val.df)
-    if (progress %in% 1:3) print(paste(acc.metric, ": ", acc.metric.fun(val.df[, obs.col.name], val.df$pred, acc.metric), sep=""))
+    if (progress %in% 1:3) message(paste(acc.metric, ": ", acc.metric.fun(val.df[, obs.col.name], val.df$pred, acc.metric), sep=""))
   }
   names(pred)[names(pred) == obs.col.name] <- "obs"
   pred <- pred[complete.cases(pred), ]
@@ -208,19 +208,19 @@ cv.rfsi <- function (formula, # without nearest obs
     sf <- st_as_sf(sf, coords = names(sf)[2:3], crs = s.crs, agr = "constant")
     # sf$time <- Sys.time()
     sftime <- st_sftime(sf)
-    if (progress %in% 1:3) print("Done!")
+    if (progress %in% 1:3) message("Done!")
     return(sftime)
   } else if (output.format == "sf") {
     sf <- st_as_sf(pred, coords = names(pred)[2:3], crs = s.crs, agr = "constant")
-    if (progress %in% 1:3) print("Done!")
+    if (progress %in% 1:3) message("Done!")
     return(sf)
   } else if (output.format == "SpatVector") {
     if (!is.na(s.crs)) {s.crs <- s.crs$wkt}
     sv <- terra::vect(pred, geom = names(pred)[2:3], crs = s.crs)
-    if (progress %in% 1:3) print("Done!")
+    if (progress %in% 1:3) message("Done!")
     return(sv)
   } else { #  (output.format == "df")
-    if (progress %in% 1:3) print("Done!")
+    if (progress %in% 1:3) message("Done!")
     return(pred)
   }
 }

@@ -22,7 +22,7 @@ The \code{dtempc} contains the following columns:
 }
 }
 \examples{
-## load data 
+# load data 
 data(dtempc)
 str(dtempc)
 }

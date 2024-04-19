@@ -10,7 +10,7 @@ tiling(rast,
        aspoints= NA, 
        asfiles=FALSE,
        tilename="tile",
-       tiles_folder=paste(getwd(),'tiles',sep='/'),
+       tiles_folder='tiles',
        parallel.processing=FALSE,
        cpus=6,
        ...)
@@ -47,9 +47,11 @@ tiles = tiling(rast,
 # number of tiles
 length(tiles)
 
-# plot(rast)
-# plot(tiles[[1]] , pch='-' ,col ='green', add=T)
-# plot(tiles[[2]], pch='.', add=T)
+\donttest{
+plot(rast)
+plot(tiles[[1]] , pch='-' ,col ='green', add=TRUE)
+plot(tiles[[2]], pch='.', add=TRUE)
+}
 
 str(tiles[[1]])
 

@@ -22,7 +22,7 @@ The \code{dwdsp} contains the following columns:
 }
 }
 \examples{
-## load data 
+# load data 
 data(dwdsp)
 str(dwdsp)
 }

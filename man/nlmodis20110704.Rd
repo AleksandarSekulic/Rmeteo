@@ -9,8 +9,11 @@
 \author{Milan Kilibarda \email{kili@grf.bg.ac.rs}}
 \references{Wan, Z., Y. Zhang, Q. Zhang, and Z.-L. Li (2004), Quality assessment and validation of the MODIS global land surface temperature, Int. J. Remote Sens., 25(1), 261-274}
 \examples{
+library(sp)
 data(nlmodis20110704)
-# spplot(nlmodis20110704)
+\donttest{
+spplot(nlmodis20110704)
+}
 }
 \keyword{datasets}
 

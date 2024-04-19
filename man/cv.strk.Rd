@@ -169,7 +169,9 @@ results <- cv.strk(data = stfdf,
                    progress = TRUE
 )
 
-# stplot(results[,,"pred"])
+\donttest{
+stplot(results[,,"pred"])
+}
 summary(results)
 # accuracy
 acc.metric.fun(results@data$obs, results@data$pred, "R2")

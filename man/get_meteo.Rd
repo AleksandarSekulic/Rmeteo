@@ -30,18 +30,18 @@ get_meteo(loc,
 \code{\link{get_coordinates}}
 }
 \examples{
-# loc <- get_coordinates("Belgrade")
-# loc <- rbind(coords, get_coordinates("Kopaonik"))
-# loc
-# api_key <- "" # get API key from DailyMeteo portal (https://app.dailymeteo.com/)
-# result <- get_meteo(loc = loc,
-#                     var = "tmean",
-#                     agg_level = "agg",
-#                     time_scale = "day",
-#                     from = "2020-01-01",
-#                     to = "2020-01-02",
-#                     # time = c("2020-01-01", "2020-01-02"),
-#                     api_key = api_key)
+\dontrun{
+loc <- get_coordinates("Belgrade")
+loc <- rbind(loc, get_coordinates("Kopaonik"))
+loc
+api_key <- "" # get API key from DailyMeteo portal (https://app.dailymeteo.com/)
+result <- get_meteo(loc = loc,
+                   var = "tmean",
+                   agg_level = "agg",
+                   time_scale = "day",
+                   from = "2020-01-01",
+                   to = "2020-01-02", # or use time = c("2020-01-01", "2020-01-02"),
+                   api_key = api_key)
 # result
 #   loc  timestamp value
 # 1   1 2020-01-01   0.7
@@ -50,5 +50,6 @@ get_meteo(loc,
 # 4   2 2020-01-02  -8.6
 # 5   3 2020-01-01  -9.2
 # 6   3 2020-01-02  -8.6
+}
 }
 

@@ -14,8 +14,7 @@ get_coordinates <- function(location_name = "Belgrade") {
   response <- url(full_url)
   # Check if request was successful
   if (inherits(response, "error")) {
-    print("Error: Failed to retrieve coordinates.")
-    return(NULL)
+    stop("Error: Failed to retrieve coordinates.")
   } else {
     # Parse JSON response
     response_content <- readLines(response, warn = FALSE)
@@ -27,8 +26,7 @@ get_coordinates <- function(location_name = "Belgrade") {
       lon <- as.numeric(data[1, ]$lon)
       return(c(lon, lat))
     } else {
-      print("Error: Location not found.")
-      return(NULL)
+      stop("Error: Location not found.")
     }
   }
 }

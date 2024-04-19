@@ -24,12 +24,14 @@ The \code{stations} contains the following columns:
 }
 }
 \examples{
-## load data:
+# load data:
 data(stations)
 str(stations)
 library(sp)
 coordinates(stations) <-~ lon +lat
 stations@proj4string <-CRS('+proj=longlat +datum=WGS84')
-# plot(stations)
+\donttest{
+plot(stations)
+}
 }
 \keyword{datasets}

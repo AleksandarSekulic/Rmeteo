@@ -22,7 +22,7 @@ The \code{dslp} contains the following columns:
 }
 }
 \examples{
-## load data
+# load data
 data(dslp)
 str(dslp)
 }

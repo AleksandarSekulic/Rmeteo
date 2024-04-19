@@ -23,7 +23,7 @@ tune.rfsi <- function (formula, # without nearest obs
                        ...){ # ranger parameters
   
   # check the input
-  if (progress) print('Preparing data ...')
+  if (progress) message('Preparing data ...')
   if ((missing(data)) | missing(formula) | missing(tgrid)) {
     stop('The arguments data, formula and tgrid must not be empty!')
   }
@@ -100,7 +100,7 @@ tune.rfsi <- function (formula, # without nearest obs
           stop(paste0('Colum with name "', fold.column, '" does not exist in data'))
         }
       }
-      print(paste0("Fold column: ", fold.column))
+      message(paste0("Fold column: ", fold.column))
     } else if (length(folds) == nrow(data.df)){ # vector
       data.df$folds <- folds
       fold.column <- "folds"
@@ -159,8 +159,8 @@ tune.rfsi <- function (formula, # without nearest obs
   
   for (tg in 1:nrow(tgrid)) {
     comb <- tgrid[tg, ]
-    if (progress) print(paste("combination ", tg, ": ", sep=""))
-    if (progress) print(comb)
+    if (progress) message(paste("combination ", tg, ": ", sep=""))
+    if (progress) message(comb)
     
     # parameters
     min.node.size=comb$min.node.size
@@ -175,11 +175,11 @@ tune.rfsi <- function (formula, # without nearest obs
     # fold_obs <- list()
     fold_pred <- c()
     for (val_fold in sort(unique(data.df[, fold.column]))) {
-      if (progress) print(paste('Fold ', val_fold, sep=""))
+      if (progress) message(paste('Fold ', val_fold, sep=""))
       # fit RF model
       dev.df <- data.df[data.df[, fold.column] != val_fold, ]
       val.df <- data.df[data.df[, fold.column] == val_fold, ]
-      if (progress) print('Fitting RFSI model ...')
+      if (progress) message('Fitting RFSI model ...')
       fold_model <- rfsi(formula, # without nearest obs
                          data=dev.df, # data.frame(x,y,obs,time,ec1,ec2,...) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
                          data.staid.x.y.z = data.staid.x.y.z, # if data.frame
@@ -201,7 +201,7 @@ tune.rfsi <- function (formula, # without nearest obs
                          min.node.size = min.node.size,  sample.fraction = sample.fraction,
                          ...)
       # predict 
-      if (progress) print('Prediction ...')
+      if (progress) message('Prediction ...')
       fold_prediction <- pred.rfsi(model=fold_model, # RFSI model iz rfsi ili tune rfsi funkcije
                                    data=dev.df, # data.frame(x,y,obs,time) | STFDF - with covariates | SpatialPointsDataFrame | SpatialPixelsDataFrame
                                    obs.col=obs.col.name,
@@ -237,22 +237,22 @@ tune.rfsi <- function (formula, # without nearest obs
     }
     fold_pred <- fold_pred[complete.cases(fold_pred), ]
     acc.metric.vector[tg] <- acc.metric.fun(fold_pred[, obs.col.name], fold_pred[, "pred"], acc.metric)
-    if (progress) print(paste(acc.metric, ": ", acc.metric.vector[tg], sep=""))
-    if (progress) print("")
+    if (progress) message(paste(acc.metric, ": ", acc.metric.vector[tg], sep=""))
+    if (progress) message("")
     gc(); gc()
   }
   tgrid <- cbind(tgrid, acc.metric.vector)
   names(tgrid)[length(tgrid)] <- acc.metric
   
-  if (progress) print('Done!')
+  if (progress) message('Done!')
   
   if (acc.metric %in% c("RMSE", "NRMSE", "MAE", "NMAE", "ME", "AccuracyPValue", "McnemarPValue")) {
     dev_parameters <- tgrid[which.min(acc.metric.vector), ]
   } else {
     dev_parameters <- tgrid[which.max(acc.metric.vector), ]
   }
-  if (progress) print('Final parameters: ')
-  if (progress) print(dev_parameters)
+  if (progress) message('Final parameters: ')
+  if (progress) message(dev_parameters)
   
   results <- list(combinations=tgrid, tuned.parameters=dev_parameters)
   if (fit.final.model) {

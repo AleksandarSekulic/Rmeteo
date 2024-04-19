@@ -60,7 +60,7 @@ mtry <- 3:(2+2*max(n.obs))
 tgrid = expand.grid(min.node.size=min.node.size, num.trees=ntree,
                     mtry=mtry, n.obs=n.obs, sample.fraction=sample.fraction)
 
-\dontrun{
+\donttest{
 # do cross-validation
 rfsi_cv <- cv.rfsi(formula=fm.RFSI, # without nearest obs
                    data = data,
@@ -72,7 +72,7 @@ rfsi_cv <- cv.rfsi(formula=fm.RFSI, # without nearest obs
                    seed = 42,
                    acc.metric = "RMSE", # R2, CCC, MAE
                    output.format = "data.frame",
-                   cpus=detectCores()-1,
+                   cpus=2, # detectCores()-1,
                    progress=1,
                    importance = "impurity")
 summary(rfsi_cv)

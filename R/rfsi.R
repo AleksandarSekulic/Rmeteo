@@ -24,7 +24,7 @@ rfsi <- function (formula, # without nearest obs
                         # sample.fraction,
   
   # check the input
-  if (progress) print('Preparing data ...')
+  if (progress) message('Preparing data ...')
   if ((missing(data)) | missing(formula)) {
     stop('The arguments data (or obs and stations) and formula must not be empty!')
   }
@@ -48,18 +48,18 @@ rfsi <- function (formula, # without nearest obs
   if (is.na(s.crs)) {
     warning('Source CRS is NULL! Using given coordinates for Euclidean distances calculation.')
   } else if (is.na(p.crs)) {
-    if (progress) print('Projection CRS is NULL. Using source CRS for Euclidean distances calculation:')
-    if (progress) print(s.crs$input)
+    if (progress) warning('Projection CRS is NULL. Using source CRS for Euclidean distances calculation:')
+    if (progress) message(s.crs$input)
   } else if (identical(s.crs, p.crs)) {
-    if (progress) print('s.crs==p.crs')
+    if (progress) message('s.crs==p.crs')
   } else {
-    if (progress) print('Using projection CRS for Euclidean distances calculation.')
+    if (progress) message('Using projection CRS for Euclidean distances calculation.')
     prj_print <- try(paste('Do reprojection from: ', s.crs$input, ' to ', p.crs$input, sep=""), silent = TRUE)
     if(inherits(prj_print, "try-error")) {
       prj_print <- paste('Do reprojection from: ', s.crs@projargs, ' to ', p.crs@projargs, sep="")
     }
-    if (progress) print(prj_print)
-    # if (progress) print(paste('Do reprojection from: ', s.crs$input, ' to ', p.crs$input, sep=""))
+    if (progress) message(prj_print)
+    # if (progress) message(paste('Do reprojection from: ', s.crs$input, ' to ', p.crs$input, sep=""))
     # reproject data coordinates
     data.coord <- data.df[, data.staid.x.y.z[2:3]]
     data.coord <- st_as_sf(data.coord, coords = names(data.coord), crs = s.crs, agr = "constant")
@@ -85,8 +85,8 @@ rfsi <- function (formula, # without nearest obs
     daysNum = length(time)
     
     # calculate obs and dist
-    if (progress) print('Space-time process ...')
-    if (progress) print('Calculating distances to the nearest observations ...')
+    if (progress) message('Space-time process ...')
+    if (progress) message('Calculating distances to the nearest observations ...')
     registerDoParallel(cores=cpus)
     nearest_obs <- foreach (t = time, .export = c("near.obs")) %dopar% {
       
@@ -115,7 +115,7 @@ rfsi <- function (formula, # without nearest obs
     
     # calculate TPS
     # if (use.tps) {
-    #   if (progress) print('Calculating TPS ...')
+    #   if (progress) message('Calculating TPS ...')
     #   registerDoParallel(cores=cpus)
     #   tps_fit <- foreach (t = time) %dopar% {
     #     day_df <- data.df[data.df[, data.staid.x.y.z[4]]==t, c(x.y, obs.col.name)]
@@ -139,8 +139,8 @@ rfsi <- function (formula, # without nearest obs
   } else if (!is.na(data.staid.x.y.z[4]) & soil3d) { # soil 3D
     # calculate obs and dist
     day_df <- data.df[, c(x.y, depth.name, obs.col.name)]
-    if (progress) print('Soil 3D process ...')
-    if (progress) print('Calculating distances to the nearest observations (profiles) ...')
+    if (progress) message('Soil 3D process ...')
+    if (progress) message('Calculating distances to the nearest observations (profiles) ...')
     nearest_obs <- near.obs.soil(
       locations = day_df,
       # locations.x.y.md = c(1,2,3),
@@ -158,8 +158,8 @@ rfsi <- function (formula, # without nearest obs
   } else { # if spatial
     # calculate obs and dist
     day_df <- data.df[, c(x.y, obs.col.name)]
-    if (progress) print('Spatial process ...')
-    if (progress) print('Calculating distances to the nearest observations ...')
+    if (progress) message('Spatial process ...')
+    if (progress) message('Calculating distances to the nearest observations ...')
     nearest_obs <- near.obs(
       locations = day_df,
       # locations.x.y = c(1,2),
@@ -177,7 +177,7 @@ rfsi <- function (formula, # without nearest obs
     
     # # calculate TPS
     # if (use.tps) {
-    #   if (progress) print('Calculating TPS ...')
+    #   if (progress) message('Calculating TPS ...')
     #   m <- Tps(day_df[, x.y], day_df[, obs.col.name],# lon.lat = T,
     #            # lambda = tps.lambda) #, GCV=F)
     #            df=tps.df)
@@ -204,13 +204,13 @@ rfsi <- function (formula, # without nearest obs
   rm(nearest_obs)
   
   # fit RF model
-  if (progress) print('Fitting RFSI model ...')
+  if (progress) message('Fitting RFSI model ...')
   rfsi_model <- ranger(formula, data = data.df, ...)
   # rfsi_model <- ranger(formula, data = data.df, importance = importance, seed = seed,
   # num.trees = num.trees, mtry = mtry, splitrule = "variance",
   # min.node.size = min.node.size,  sample.fraction = sample.fraction,
   # quantreg = quantreg)
-  if (progress) print('Done!')
+  if (progress) message('Done!')
   
   return(rfsi_model)
   # dodaj formulu

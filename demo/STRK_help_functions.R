@@ -70,7 +70,7 @@ overlapping=5 # in cells
 aspoints= "sf" # "sp", "terra" # NA
 asfiles=TRUE # FALSE                   
 tilename="tile" # prexif to be given to tile names
-tiles_folder=paste(getwd(),'tiles',sep='/') # resulting folder
+tiles_folder='tiles' # resulting folder
 parallel.processing=FALSE
 cpus=6
 filetype="GTiff"

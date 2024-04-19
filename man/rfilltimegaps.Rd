@@ -43,7 +43,7 @@ Kilibarda M., M. Percec Tadic, T. Hengl, J. Lukovic, B. Bajat - Spatial Statisti
   library(raster)
   NLpol@proj4string <- nlmodis20110704@proj4string
   
-  \dontrun{
+  \donttest{
   nlmodis20110704 <- rfillspgaps(nlmodis20110704,NLpol)
   nlmodis20110712 <- rfillspgaps(nlmodis20110712,NLpol)
   
@@ -62,9 +62,9 @@ Kilibarda M., M. Percec Tadic, T. Hengl, J. Lukovic, B. Bajat - Spatial Statisti
                   time= as.Date(c('2011-07-04','2011-07-12')), 
                   data.frame(modis=df[,'modis']))
   
-  # stplot(stMODIS, col.regions=bpy.colors())
+  stplot(stMODIS, col.regions=bpy.colors())
   stMODIS <- rfilltimegaps(stMODIS)
-  # stplot(stMODIS, col.regions=bpy.colors())
+  stplot(stMODIS, col.regions=bpy.colors())
   }
 }
 

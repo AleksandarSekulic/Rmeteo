@@ -22,7 +22,7 @@ The \code{dtemp_minc} contains the following columns:
 }
 }
 \examples{
-## load data
+# load data
 data(dtemp_minc)
 str(dtemp_minc)
 }

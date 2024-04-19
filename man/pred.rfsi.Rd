@@ -74,21 +74,13 @@ library(meteo)
 demo(meuse, echo=FALSE)
 meuse <- meuse[complete.cases(meuse@data),]
 data = st_as_sf(meuse, coords = c("x", "y"), crs = 28992, agr = "constant")
-# data = terra::vect(meuse)
-# data.frame
-# data <- as.data.frame(meuse)
-# data$id = 1:nrow(data)
-# data.staid.x.y.z <- c("id","x","y",NA)
 fm.RFSI <- as.formula("zinc ~ dist + soil + ffreq")
 
 # fit the RFSI model
 rfsi_model <- rfsi(formula = fm.RFSI,
                    data = data, # meuse.df (use data.staid.x.y.z)
-                   # data.staid.x.y.z = data.staid.x.y.z, # only if class(data) == data.frame
                    n.obs = 5, # number of nearest observations
-                   # s.crs = st_crs(data), # nedded only if the coordinates are lon/lat (WGS84)
-                   # p.crs = st_crs(data), # nedded only if the coordinates are lon/lat (WGS84)
-                   cpus = detectCores()-1,
+                   cpus = 2, # detectCores()-1,
                    progress = TRUE,
                    # ranger parameters
                    importance = "impurity",
@@ -108,38 +100,27 @@ sort(rfsi_model$variable.importance)
 sum("obs" == substr(rfsi_model$forest$independent.variable.names, 1, 3))
 
 # Make RFSI prediction
-# data.frame
-# newdata <- as.data.frame(meuse.grid)
-# newdata$id <- 1:nrow(newdata)
-# newdata <- meuse.grid
 newdata <- terra::rast(meuse.grid)
 class(newdata)
 
 # prediction
+\donttest{
 rfsi_prediction <- pred.rfsi(model = rfsi_model,
                              data = data, # meuse.df (use data.staid.x.y.z)
                              obs.col = "zinc",
-                             # data.staid.x.y.z = data.staid.x.y.z, # data.frame
                              newdata = newdata, # meuse.grid.df (use newdata.staid.x.y.z)
-                             # newdata.staid.x.y.z = c("id", "x", "y", NA), # data.frame
                              output.format = "SpatRaster", # "sf", # "SpatVector", 
                              zero.tol = 0,
-                             # s.crs = st_crs(data), # meuse@proj4string, # NA # st_crs(data)
-                             # newdata.s.crs = st_crs(data), # meuse@proj4string, # NA
-                             # p.crs = st_crs(data), # meuse@proj4string, # NA
-                             cpus = 1, # detectCores()-1,
+                             cpus = 2, # detectCores()-1,
                              progress = TRUE,
                              # type = "quantiles", # for quantile regression
                              # quantiles = c(0.1, 0.5, 0.9) # for quantile regression
 )
 class(rfsi_prediction)
 names(rfsi_prediction)
-# head(rfsi_prediction)
-
-# plot(rfsi_prediction)
-# plot(rfsi_prediction['pred'])
-# plot(rfsi_prediction['quantile..0.1'])
-# plot(rfsi_prediction['quantile..0.5'])
-# plot(rfsi_prediction['quantile..0.9'])
+head(rfsi_prediction)
+plot(rfsi_prediction)
+plot(rfsi_prediction['pred'])
+}
 }
 

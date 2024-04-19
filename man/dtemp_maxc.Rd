@@ -22,7 +22,7 @@ The \code{dtemp_maxc} contains the following columns:
 }
 }
 \examples{
-## load data 
+# load data 
 data(dtemp_maxc)
 str(dtemp_maxc)
 }

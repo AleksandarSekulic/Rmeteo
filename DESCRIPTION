@@ -3,7 +3,7 @@ Version: 2.0-3
 Date: 2024-04-16
 Type: Package
 Encoding: UTF-8
-Title: RFSI and Spatio-Temporal Geostatistical Interpolation for Meteorological and Other Environmental Variables
+Title: RFSI & STRK Interpolation for Meteo and Environmental Variables
 Authors@R: c(person("Milan", "Kilibarda", role = c("aut"), email = "kili@grf.bg.ac.rs", comment = c(ORCID = "0000-0002-2930-3596")),
              person("Aleksandar", "Sekulić", role = c("aut", "cre"), email = "asekulic@grf.bg.ac.rs", comment = c(ORCID = "0000-0002-5515-2779")),
              person("Tomislav", "Hengl", role = c("ctb")),
@@ -16,7 +16,7 @@ Author: Milan Kilibarda [aut] (<https://orcid.org/0000-0002-2930-3596>),
         Benedikt Graeler [ctb]
 Maintainer: Aleksandar Sekulić <asekulic@grf.bg.ac.rs>
 Depends: R (>= 4.0.0)
-Description: RFSI and spatio-temporal geostatistical interpolation for meteorological and other environmental variables. Global spatio-temporal models calculated using publicly available data are stored in package.
+Description: Random Forest Spatial Interpolation (RFSI, Sekulić et al. (2020) <doi:10.3390/rs12101687>) and spatio-temporal geostatistical (spatio-temporal regression Kriging (STRK)) interpolation for meteorological (Kilibarda et al. (2014) <doi:10.1002/2013JD020803>, Sekulić et al. (2020) <doi:10.1007/s00704-019-03077-3>) and other environmental variables. Contains global spatio-temporal models calculated using publicly available data.
 License: GPL (>= 2.0) | file LICENCE
 URL: https://www.r-pkg.org/pkg/meteo, https://r-forge.r-project.org/projects/meteo/, https://github.com/AleksandarSekulic/Rmeteo
 LazyLoad: yes

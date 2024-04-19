@@ -29,7 +29,7 @@ The \code{dtempc_ogimet} contains the following columns:
 }
 }
 \examples{
-## load data 
+# load data 
 data(dtempc_ogimet)
 str(dtempc)
 }

@@ -22,7 +22,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
                        ...){
   i <- NULL # to supress Warning
   # check the input
-  if (progress) print('Preparing data ...')
+  if (progress) message('Preparing data ...')
   if ((missing(data)) | missing(newdata) | missing(reg.coef) | missing(vgm.model)) {
     stop('The arguments data, newdata, reg.coef and vgm.model must not be empty!')
   }
@@ -145,7 +145,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
   newdata.df <- as.data.frame(newdata)
   
   # newdata regression
-  print('Doing regression ...')
+  message('Doing regression ...')
   if(nrow(newdata.df[complete.cases(newdata.df), ]) == 0){
     warning('The argument newdata does not have complete cases! Trend is set to 0, performing space-time ordinary kriging.')
     newdata$tlm<-0 
@@ -209,8 +209,8 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
   # ip1[ip1>length(time)] <- length(time)
   
   # prediction
-  print('Doing space-time kriging ...')
-  print(paste('Doing for each loop by ', by, " ...", sep=""))
+  message('Doing space-time kriging ...')
+  message(paste('Doing for each loop by ', by, " ...", sep=""))
   newdata@sp=as(newdata@sp,'SpatialPointsDataFrame')
   newdata@sp$index=1:nrow(newdata@sp)
   # row.names(newdata@sp) = 1:nrow(newdata@sp)
@@ -222,7 +222,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
   }
   
   if(parallel.processing) {
-    print(paste("Do parallel processing with", pp.type, "..."), sep="")
+    message(paste("Do parallel processing with", pp.type, "..."), sep="")
     if (pp.type == "doParallel") {
       registerDoParallel(cores=cpus)  
       cl <- makeCluster(cpus, type="SOCK")
@@ -354,7 +354,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
     
   } else {
     # tiling
-    print('Do tiling ...')
+    message('Do tiling ...')
     dimnames(newdata@sp@coords)[[2]] <- c('x','y')
     xy=as.data.frame(newdata@sp)
     # xy= xy[row.names(newdata@sp),] # ???
@@ -484,24 +484,24 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
   
   # return
   if (output.format == "STFDF") {
-    if (progress) print("Done!")
+    if (progress) message("Done!")
     return(stfdf)
   } else if (output.format == "STIDF") {
-    if (progress) print("Done!")
+    if (progress) message("Done!")
     return(as(stfdf, "STIDF"))
   } else if (output.format == "STSDF") {
-    if (progress) print("Done!")
+    if (progress) message("Done!")
     return(as(stfdf, "STSDF"))
   } else if (output.format == "sftime") {
     sftime = st_as_sftime(as(stfdf, "STIDF"))
-    if (progress) print("Done!")
+    if (progress) message("Done!")
     return(sftime)
   } else if (output.format == "sf") {
     sftime <- st_as_sftime(as(stfdf, "STIDF"))
     sf <- sftime
     sf <- st_drop_time(sf)
     sf$time <- sftime$time
-    if (progress) print("Done!")
+    if (progress) message("Done!")
     return(sf)
   } else if (output.format == "SpatVector") {
     sftime <- st_as_sftime(as(stfdf, "STIDF"))
@@ -509,7 +509,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
     sf <- st_drop_time(sf)
     sf$time <- sftime$time
     sv <- vect(as(sf, "Spatial"))
-    if (progress) print("Done!")
+    if (progress) message("Done!")
     return(sv)
   } else { # data.frame or SpatRaster
     result = stfdf
@@ -517,7 +517,7 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
     result <- as.data.frame(as(result, "STIDF"))
     result <- result[, c(3,1:2,4, 7:(length(result)))]
     if (output.format == "data.frame") {
-      if (progress) print("Done!")
+      if (progress) message("Done!")
       return(result)
     } else if (output.format == "SpatRaster") {
       if (!is.na(newdata.s.crs)) {newdata.s.crs <- st_crs(newdata.s.crs)$wkt}
@@ -528,10 +528,10 @@ pred.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF -
       sr <- sapply(unique_times, f)
       # sr <- rast(sr) # raster stack
       names(sr) <- unique_times # paste("pred_", unique_times, sep="")
-      if (progress) print("Done!")
+      if (progress) message("Done!")
       return(sr)
     } else { #  (output.format == "data.frame")
-      if (progress) print("Done!")
+      if (progress) message("Done!")
       return(result)
     }
   }

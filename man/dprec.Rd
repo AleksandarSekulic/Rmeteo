@@ -22,7 +22,7 @@ The \code{dprec} contains the following columns:
 }
 }
 \examples{
-## load data 
+# load data 
 data(dprec)
 str(dprec)
 }

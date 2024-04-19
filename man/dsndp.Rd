@@ -22,7 +22,7 @@ The \code{dsndp} contains the following columns:
 }
 }
 \examples{
-## load data 
+# load data 
 data(dsndp)
 str(dsndp)
 }

@@ -22,8 +22,10 @@ str(regdata)
 library(sp) # spplot
 library(spacetime) # stplot
 
-# stplot(regdata[,,'modis']) # plot modis data
-# spplot(regdata@sp,zcol='twi', col.regions = bpy.colors() ) # plot TWI
-# spplot(regdata@sp,zcol='dem', col.regions = bpy.colors() ) # plot dem
+\donttest{
+stplot(regdata[,,'modis']) # plot modis data
+spplot(regdata@sp,zcol='twi', col.regions = bpy.colors() ) # plot TWI
+spplot(regdata@sp,zcol='dem', col.regions = bpy.colors() ) # plot dem
+}
 }
 \keyword{datasets}

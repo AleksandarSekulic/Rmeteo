@@ -20,7 +20,7 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
                      ...){
   
   # check the input
-  print('Preparing data ...')
+  message('Preparing data ...')
   if (missing(data) | missing(reg.coef) | missing(vgm.model)) {
     stop('The arguments data, reg.coef and vgm.model must not be empty!')
   }
@@ -158,7 +158,7 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
           stop(paste0('Colum with name "', fold.column, '" does not exist in data'))
         }
       }
-      print(paste0("Fold column: ", fold.column))
+      message(paste0("Fold column: ", fold.column))
     } else if (length(folds) == nrow(data.df)){ # vector
       data.df$folds <- folds
       fold.column <- "folds"
@@ -170,15 +170,15 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
   if(nrow(data.df[complete.cases(data.df), ]) == 0){
     stop('The data does not have complete cases!')
   } else {
-    print(paste(nrow(data.df[complete.cases(data.df), ]), " observations complete cases (", length(data@sp), " stations x ", length(data@time), " days) used for cross-validation.", sep=""))
+    message(paste(nrow(data.df[complete.cases(data.df), ]), " observations complete cases (", length(data@sp), " stations x ", length(data@time), " days) used for cross-validation.", sep=""))
   }
   
   # doing CV
-  print('Doing CV ...')
+  message('Doing CV ...')
   pred <- c()
   vgm.model.init <- vgm.model
   for (val_fold in sort(unique(data.df[, fold.column]))) {
-    print(paste('Fold ', val_fold, sep=""))
+    message(paste('Fold ', val_fold, sep=""))
     
     dev <- data
     dev@data[dev$folds==val_fold & !is.na(dev$folds), ] <- NA
@@ -277,15 +277,15 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
   if (output.format %in% c("sf", "sftime","SpatVector")) {
     sf = st_as_sf(pred, coords = c(1,2), crs = s.crs, agr = "constant") # sf
     if (output.format == "sf") {
-      if (progress) print("Done!")
+      if (progress) message("Done!")
       return(sf)
     } else if (output.format == "sftime") {
       sftime <- st_sftime(sf)
-      if (progress) print("Done!")
+      if (progress) message("Done!")
       return(sftime)
     } else if (output.format == "SpatVector") {
       sv <- vect(as(sf, "Spatial"))
-      if (progress) print("Done!")
+      if (progress) message("Done!")
       return(sv)
     }
   } else if (output.format %in% c("STFDF", "STSDF", "STIDF")) {
@@ -300,17 +300,17 @@ cv.strk <- function (data, # data.frame(id,x,y,time,obs,ec1,ec2,...) | STFDF - w
                          stations.staid.lon.lat = c(1,2,3)
     )
     if (output.format == "STSDF") {
-      if (progress) print("Done!")
+      if (progress) message("Done!")
       return(as(stfdf, "STSDF"))
     } else if (output.format == "STIDF") {
-      if (progress) print("Done!")
+      if (progress) message("Done!")
       return(as(stfdf, "STIDF"))
     } else { #  (output.format == "STFDF")
-      if (progress) print("Done!")
+      if (progress) message("Done!")
       return(stfdf)
     }
   } else {
-    if (progress) print("Done!")
+    if (progress) message("Done!")
     return(pred)
   }
   ##########

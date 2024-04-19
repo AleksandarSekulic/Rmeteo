@@ -10,7 +10,10 @@
 \usage{data(nlmodis20110712)}
 
 \examples{
+library(sp)
 data(nlmodis20110712)
-# spplot(nlmodis20110712)
+\donttest{
+spplot(nlmodis20110712)
+}
 }
 \keyword{datasets}

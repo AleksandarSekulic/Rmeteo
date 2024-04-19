@@ -15,7 +15,7 @@ The \code{dem_twi_srb} contains the following layers:
 \author{Aleksandar Sekulic \email{asekulic@grf.bg.ac.rs}}
 \examples{
 library(terra)
-## load data 
+# load data 
 data(dem_twi_srb)
 terra::unwrap(dem_twi_srb)
 }

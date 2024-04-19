@@ -83,11 +83,6 @@ library(meteo)
 demo(meuse, echo=FALSE)
 meuse <- meuse[complete.cases(meuse@data),]
 data = st_as_sf(meuse, coords = c("x", "y"), crs = 28992, agr = "constant")
-# data = terra::vect(meuse)
-# data.frame
-# data <- as.data.frame(meuse)
-# data$id = 1:nrow(data)
-# data.staid.x.y.z <- c(15,"x","y",NA)
 fm.RFSI <- as.formula("zinc ~ dist + soil + ffreq")
 
 # making tgrid
@@ -100,7 +95,7 @@ mtry <- 3:(2+2*max(n.obs))
 tgrid = expand.grid(min.node.size=min.node.size, num.trees=ntree,
                     mtry=mtry, n.obs=n.obs, sample.fraction=sample.fraction)
 
-\dontrun{
+\donttest{
 # Tune RFSI model
 rfsi_tuned <- tune.rfsi(formula = fm.RFSI,
                         data = data,
@@ -114,7 +109,7 @@ rfsi_tuned <- tune.rfsi(formula = fm.RFSI,
                         seed = 42,
                         acc.metric = "RMSE", # R2, CCC, MAE
                         fit.final.model = TRUE,
-                        cpus = detectCores()-1,
+                        cpus = 2, # detectCores()-1,
                         progress = TRUE,
                         importance = "impurity") # ranger parameter
 

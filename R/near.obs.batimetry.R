@@ -55,7 +55,7 @@ near.obs.batimetry <- function(
       colnames(nearmat)[i] <- distcol
     } else {
       k <- i-n.obs
-      #print(k)
+      #message(k)
       obscol <- paste("obs", k, sep = "")
       colnames(nearmat)[i] <- obscol  }
   }
@@ -65,10 +65,10 @@ near.obs.batimetry <- function(
   
   #filling of nearmat dataframe
   for (r1 in 1:nrow(locations1)){
-    #print(paste("r:",r1))
+    #message(paste("r:",r1))
     
     ref <-locations1[[IHP]][r1]
-    print(paste("refrence depth:",ref))
+    message(paste("refrence depth:",ref))
     mask <- dplyr::filter(locations2, IHP > ref) #selecting all the stations that lie "higher" than station
     #first version line above:mask <- dplyr::filter(locations2, IHP >= ref): problem with the >= it chooses
     #the station itself as well (and we get NAs from the distance matrix), and I wasn't able to get rid of the station itself in locations2 before doing filtering (
@@ -78,8 +78,8 @@ near.obs.batimetry <- function(
     #height to the same height....
     
     if (nrow(mask) >= n.obs) { # enough observations in mask in order to fill nearmat for respective station
-      #print(paste("obs mask:", nrow(mask), "nn:", n.obs))
-      print("deep water")
+      #message(paste("obs mask:", nrow(mask), "nn:", n.obs))
+      message("deep water")
       vect<- mask$ind
       dis <- distmat[r1,vect]
       dis2 <-dis %>% 
@@ -101,8 +101,8 @@ near.obs.batimetry <- function(
     
     else { # chances are high station is close to coast in shallow water and there is not 
       #enough stations for the set n.obs that lie higher then the respective station
-      #print(paste("obs mask:", nrow(mask), "nn:", n.obs))
-      print("shallow water")
+      #message(paste("obs mask:", nrow(mask), "nn:", n.obs))
+      message("shallow water")
       dis <- distmat[r1,]
       dis2 <-dis %>% 
         select(where(~!any(is.na(.))))

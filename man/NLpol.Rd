@@ -7,7 +7,10 @@
 }
 \usage{data(NLpol)}
 \examples{
+library(sp)
 data(NLpol)
-##  plot(NLpol) ...
+\donttest{
+plot(NLpol)
+}
 }
 \keyword{datasets}

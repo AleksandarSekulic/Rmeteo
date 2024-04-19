@@ -29,7 +29,7 @@ data(stations)
 str(dtempc)
 str(stations)
 
-\dontrun{
+\donttest{
 # create STFDF - from 2 data frames
 temp <- meteo2STFDF(dtempc,
                     stations,
