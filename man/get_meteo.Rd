@@ -3,23 +3,25 @@
 \title{Get daily, monthly, or annual; aggregated or long-term means meteorological data for specific location(s) and date(s).}
 \description{The function gives back daily, monthly, or annual and aggregated or long-term means metorological data for specific location(s) and date(s) for entire World for 1961-2020 period from DailyMeteo portal (https://app.dailymeteo.com/).}
 \usage{
-get_meteo(loc,
-          var = "tmean",
+get_meteo(var = "tmean",
           agg_level = "agg",
           time_scale = "day",
-          time,
           from,
           to,
+          time,
+          lat,
+          lon,
           api_key)
 }
 \arguments{
-\item{loc}{\code{sf}, \code{SpatVector}, \link[base]{data.frame}, \code{matrix}, \code{numeric} or \code{integer}; Location(s) in WGS84 (EPSG:4326). If \link[base]{data.frame} or \code{matrix} columns are lon/lat. See \code{\link{get_coordinates}}.}
 \item{var}{\code{character}; Meteorological variable. Possible values are: \code{"tmean"} (mean temperature, default), \code{"tmax"} (maximum temperature), \code{"tmin"} (minimum temperature), \code{"prcp"} (total precipitation), or \code{"slp"} (sea-level pressure).}
 \item{agg_level}{\code{character}; Aggregation level. Possible values are: \code{"agg"} (aggregated, default) or \code{"ltm"} (long-term mean).}
 \item{time_scale}{\code{character}; Time scale. Possible values are: \code{"day"} (daily, default), \code{"mon"} (monthly), or \code{"ann"} (annual).}
-\item{time}{\code{character}; Vector of time references. If specified, ignore \code{from} and \code{to}. If \code{time_scale="day"} then format is \code{'YYYY-MM-DD'}. If \code{time_scale="mon"} then the format is \code{'YYYY-MM'}. If \code{time_scale="ann"} then format is \code{'YYYY'} (e.g. if \code{time_scale="day"} then \code{c('2020-01-01,2020-01-02')}; if \code{time_scale="mon"} then \code{c('2020-01,2020-02')}; if \code{time_scale="ann"} then \code{c('2020,2019')}).}
 \item{from}{\code{character}; Time reference from. Format is the same as for the parameter \code{time}}
 \item{to}{\code{character}; Time reference to. Format is the same as for the parameter \code{time}}
+\item{time}{\code{character}; Vector of time references. If specified, ignore \code{from} and \code{to}. If \code{time_scale="day"} then format is \code{'YYYY-MM-DD'}. If \code{time_scale="mon"} then the format is \code{'YYYY-MM'}. If \code{time_scale="ann"} then format is \code{'YYYY'} (e.g. if \code{time_scale="day"} then \code{c('2020-01-01,2020-01-02')}; if \code{time_scale="mon"} then \code{c('2020-01,2020-02')}; if \code{time_scale="ann"} then \code{c('2020,2019')}).}
+\item{lat}{\code{numeric}; Latitude in WGS84 (EPSG:4326).}
+\item{lon}{\code{numeric}; Longitude in WGS84 (EPSG:4326).}
 \item{api_key}{\code{character}; API key. Check DailyMeteo portal (https://app.dailymeteo.com/)}
 }
 

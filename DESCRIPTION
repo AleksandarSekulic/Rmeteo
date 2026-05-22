@@ -1,6 +1,6 @@
 Package: meteo
-Version: 2.0-3
-Date: 2024-04-16
+Version: 2.0-5
+Date: 2026-05-22
 Type: Package
 Encoding: UTF-8
 Title: RFSI & STRK Interpolation for Meteo and Environmental Variables
@@ -21,5 +21,6 @@ License: GPL (>= 2.0) | file LICENCE
 URL: https://www.r-pkg.org/pkg/meteo, https://r-forge.r-project.org/projects/meteo/, https://github.com/AleksandarSekulic/Rmeteo
 LazyLoad: yes
 Imports: methods, utils, stats, DescTools, caret, data.table, dplyr, sp, spacetime, gstat, foreach, parallel, snowfall, doParallel, plyr, units, nabor, CAST, ranger, sf, sftime, raster, terra, jsonlite
+Suggests: xts
 BugReports: https://github.com/AleksandarSekulic/Rmeteo/issues
 RoxygenNote: 7.2.3

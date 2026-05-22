@@ -1,4 +1,4 @@
-get_meteo <- function(var, agg_level, time_scale, from=NULL, to=NULL, time=NULL, lat, lon, api_key=NULL) {
+get_meteo <- function(var = "tmean", agg_level = "agg", time_scale = "day", from=NULL, to=NULL, time=NULL, lat, lon, api_key=NULL) {
   if (is.null(api_key)) {stop("api_key parameter is missing")}
   if (is.null(var)) {stop("var parameter is missing")}
   if (is.null(agg_level)) {stop("agg_level parameter is missing")}

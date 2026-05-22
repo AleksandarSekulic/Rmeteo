@@ -1,3 +1,29 @@
+near.obs.format_df <- function(nl_df, dist_names, obs_names, variable, all_names) {
+  nl_df <- as.data.frame(nl_df, stringsAsFactors = FALSE)
+  names(nl_df) <- all_names
+  for (nm in dist_names) {
+    if (nm %in% names(nl_df)) {
+      nl_df[[nm]] <- as.numeric(nl_df[[nm]])
+    }
+  }
+  for (nm in obs_names) {
+    if (nm %in% names(nl_df)) {
+      if (is.factor(variable)) {
+        nl_df[[nm]] <- factor(nl_df[[nm]], levels = levels(variable))
+      } else {
+        nl_df[[nm]] <- as.numeric(nl_df[[nm]])
+      }
+    }
+  }
+  extra_cols <- setdiff(all_names, c(dist_names, obs_names))
+  for (nm in extra_cols) {
+    if (nm %in% names(nl_df)) {
+      nl_df[[nm]] <- as.numeric(nl_df[[nm]])
+    }
+  }
+  nl_df
+}
+
 near.obs <- function(
   locations,
   locations.x.y = c(1,2),
@@ -57,7 +83,10 @@ near.obs <- function(
       nl_df <- cbind(knn1$nn.dists, near_o1)
     } else {
       near_o1 <- variable[knn1$nn.idx]
-      nl_df <- t(c(knn1$nn.dists, near_o1))
+      if (is.null(dim(near_o1))) {
+        near_o1 <- matrix(near_o1, nrow = nrow(knn1$nn.dists), ncol = n.obs, byrow = TRUE)
+      }
+      nl_df <- cbind(knn1$nn.dists, near_o1)
     }
   }
   name1 <- c()
@@ -161,9 +190,13 @@ near.obs <- function(
     name3 <- paste("dir_dist", seq(1, 4, 1), sep="")
     all_names <- c(all_names, name3)
   }
-  nl_df <- as.data.frame(nl_df)
-  names(nl_df) <- all_names
-  return(nl_df)
+  dist_names <- name1
+  obs_names <- name2
+  if (quadrant) {
+    obs_names <- c(obs_names, paste0("dir", 1:4))
+    dist_names <- c(dist_names, paste0("dir_dist", 1:4))
+  }
+  near.obs.format_df(nl_df, dist_names, obs_names, variable, all_names)
 }
 
 

@@ -17,7 +17,7 @@ The \code{dtemp_minc} contains the following columns:
 \author{Milan Kilibarda and Tomislav Hengl}
 \references{
 \itemize{
-\item Global Surface Summary of the day data (\url{ftp://ftp.ncdc.noaa.gov/pub/data/gsod/}) 
+\item Global Surface Summary of the day data (\url{https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00516}) 
 \item European Climate Assessment & Dataset (\url{https://www.ecad.eu/dailydata/predefinedseries.php}) 
 }
 }

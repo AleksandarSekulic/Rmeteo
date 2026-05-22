@@ -1,4 +1,4 @@
-get_coordinates <- function(location_name) {
+get_coordinates <- function(location_name = "Belgrade") {
   # Construct the URL for the Nominatim API endpoint
   nominatim_url <- "https://nominatim.openstreetmap.org/search"
   location_name <- gsub(", ", ",", location_name)

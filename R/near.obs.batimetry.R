@@ -30,8 +30,10 @@ near.obs.batimetry <- function(
   
   #create matrix with euclidian distances between stations
   mat <- sf::st_distance(locations1_sf, locations2_sf, by_element=FALSE)
-  locations_df <- as.data.frame(mat)%>%
-  units::drop_units() # get rid of "m" 
+  # locations_df <- as.data.frame(mat)%>%
+  # units::drop_units() # get rid of "m" 
+  locations_df <- as.data.frame(mat)
+  locations_df <- units::drop_units(locations_df)
   locations_df[locations_df==0] <- NA # distance to station itself replaced by NA
   
   # create matrix with differences in bathymetric depth between stations
@@ -82,8 +84,9 @@ near.obs.batimetry <- function(
       message("deep water")
       vect<- mask$ind
       dis <- distmat[r1,vect]
-      dis2 <-dis %>% 
-        select(where(~!any(is.na(.))))      
+      # dis2 <-dis %>% 
+      #   select(where(~!any(is.na(.))))      
+      dis2 <- dis[, colSums(is.na(dis)) == 0]
       tempmat <- rbind(dis2,vect)
       tempmat2 <-data.table::data.table(t(tempmat))
       colnames(tempmat2) <- c("V1", "V2")
@@ -104,8 +107,9 @@ near.obs.batimetry <- function(
       #message(paste("obs mask:", nrow(mask), "nn:", n.obs))
       message("shallow water")
       dis <- distmat[r1,]
-      dis2 <-dis %>% 
-        select(where(~!any(is.na(.))))
+      # dis2 <-dis %>% 
+      #   select(where(~!any(is.na(.))))
+      dis2 <- dis[, colSums(is.na(dis)) == 0]
       #browser()
       index <- 1:ncol(dis2)
       tempmat <- rbind(dis2,index)
