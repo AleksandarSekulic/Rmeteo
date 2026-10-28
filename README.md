@@ -13,6 +13,8 @@ Main functions:
 * `cv.rfsi` - nested k-fold cross-validation for RFSI (Sekulić et al. 2020b)
 * `pred.strk` - spatio-temporal regression kriging prediction (Kilibarda et al. 2014)
 * `cv.strk` - k-fold cross-validation for spatio-temporal regression kriging (Kilibarda et al. 2014)
+* `get_meteo` - daily, monthly, or annual meteorological data for a location from the [DailyMeteo](https://app.dailymeteo.com/) portal
+* `get_meteoeurope1km` - download of the MeteoEurope1km gridded dataset for Europe, 1961-2020 (Sekulić & Kilibarda 2026)
 
 ***Note that Out-of-bag (OOB) error statistics from RFSI model are biased and should not be considered as accuracy metrics (they do not show spatial accuracy)! The proper way to assess accuaracy of the RFSI model is by using the nested k-fold cross-validation (`cv.rfsi` function, Sekulić et al. 2020b).***
 
@@ -39,16 +41,16 @@ install.packages("meteo", repos="http://R-Forge.R-project.org")
 ```
 
 ## Examples
-### Get daily meteorological data for specific locations and dates
+### Get daily meteorological data for a specific location and dates
 ```
-loc <- get_coordinates("Belgrade")
-loc <- rbind(coords, get_coordinates("Kopaonik"))
+loc <- get_coordinates("Belgrade") # c(lat, lon)
 loc
 
 api_key <- "" # get API key from DailyMeteo portal (https://app.dailymeteo.com/)
 
-result <- get_meteo(loc = loc,
-                    var = "tmean", # "tmax" "tmin" "prcp" "slp"
+result <- get_meteo(lat = loc[1],
+                    lon = loc[2],
+                    var = "tmean", # "tmax" "tmin" "prcp"
                     agg_level = "agg", # "ltm"
                     time_scale = "day", # "mon" "ann"
                     from = "2020-01-01",
@@ -56,6 +58,19 @@ result <- get_meteo(loc = loc,
                     # time = c("2020-01-01", "2020-01-02"),
                     api_key = api_key)
 result
+```
+### Download the MeteoEurope1km gridded dataset
+Daily gridded TMAX, TMIN, TMEAN, PRCP and SLP for Europe at 1 km, 1961-2020, with monthly and annual aggregates and climate normals, are published on Zenodo ([10.5281/zenodo.23264155](https://doi.org/10.5281/zenodo.23264155)).
+```
+# list the archives (one ZIP per year with daily Cloud-Optimized GeoTIFFs)
+meteoeurope1km_files(var = "tmean", product = "day", years = 2001:2002)
+
+# download, verify MD5 and unzip
+get_meteoeurope1km(var = "tmean", product = "day", years = 2001:2002,
+                   dest_dir = "meteoeurope1km", unzip = TRUE)
+
+# other products: "mon", "ann", "ltm_day", "ltm_mon_ann", "ltm_diff"
+get_meteoeurope1km(var = "prcp", product = "ltm_diff", dest_dir = "meteoeurope1km")
 ```
 ### RFSI example
 Complete RFSI examples (including tune.rfsi and cv.rfsi) can be found in the [demo](demo) folder.
@@ -180,5 +195,6 @@ stplot(results[,,"var", drop=F], col.regions=bpy.colors())
 * Kilibarda, M., Tadić, M. P., Hengl, T., Luković, J., & Bajat, B. (2015). Global geographic and feature space coverage of temperature data in the context of spatio-temporal interpolation. Spatial Statistics, 14, 22–38. https://doi.org/10.1016/j.spasta.2015.04.005
 * Sekulić, A., Kilibarda, M., Protić, D., Tadić, M. P., & Bajat, B. (2020a). Spatio-temporal regression kriging model of mean daily temperature for Croatia. Theoretical and Applied Climatology, 140(1–2), 101–114. https://doi.org/10.1007/s00704-019-03077-3
 * Sekulić, A., Kilibarda, M., Heuvelink, G. B., Nikolić, M. & Bajat, B. Random Forest Spatial Interpolation.Remote. Sens. 12, 1687, https://doi.org/10.3390/rs12101687 (2020b).
+* Sekulić, A., & Kilibarda, M. (2026). MeteoEurope1km (1961-2020): daily gridded meteorological dataset for Europe at a 1-km spatial resolution. Zenodo. https://doi.org/10.5281/zenodo.23264155
 * Sekulić, A., Kilibarda, M., Protić, D. et al. A high-resolution daily gridded meteorological dataset for Serbia made by Random Forest Spatial Interpolation. Sci Data 8, 123 (2021). https://doi.org/10.1038/s41597-021-00901-2
 

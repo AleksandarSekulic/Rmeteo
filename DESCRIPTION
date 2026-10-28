@@ -20,7 +20,7 @@ Description: Random Forest Spatial Interpolation (RFSI, Sekulić et al. (2020) <
 License: GPL (>= 2.0) | file LICENCE
 URL: https://www.r-pkg.org/pkg/meteo, https://r-forge.r-project.org/projects/meteo/, https://github.com/AleksandarSekulic/Rmeteo
 LazyLoad: yes
-Imports: methods, utils, stats, DescTools, caret, data.table, dplyr, sp, spacetime, gstat, foreach, parallel, snowfall, doParallel, plyr, units, nabor, CAST, ranger, sf, sftime, raster, terra, jsonlite
+Imports: methods, utils, stats, DescTools, caret, data.table, dplyr, sp, spacetime, gstat, foreach, parallel, snowfall, doParallel, plyr, units, nabor, CAST, ranger, sf, sftime, raster, terra, jsonlite, tools
 Suggests: xts
 BugReports: https://github.com/AleksandarSekulic/Rmeteo/issues
 RoxygenNote: 7.2.3
