@@ -1,7 +1,7 @@
 \name{get_meteo}
 \alias{get_meteo}
-\title{Get daily, monthly, or annual; aggregated or long-term means meteorological data for specific location(s) and date(s).}
-\description{The function gives back daily, monthly, or annual and aggregated or long-term means metorological data for specific location(s) and date(s) for entire World for 1961-2020 period from DailyMeteo portal (https://app.dailymeteo.com/).}
+\title{Get daily, monthly, or annual; aggregated or long-term means meteorological data for a specific location and date(s).}
+\description{The function gives back daily, monthly, or annual and aggregated or long-term means metorological data for a specific location and date(s) for the entire World from 1961 to the present from DailyMeteo portal (https://app.dailymeteo.com/). Gridded data for Europe for 1961-2020 can be downloaded with \code{\link{get_meteoeurope1km}}.}
 \usage{
 get_meteo(var = "tmean",
           agg_level = "agg",
@@ -14,7 +14,7 @@ get_meteo(var = "tmean",
           api_key)
 }
 \arguments{
-\item{var}{\code{character}; Meteorological variable. Possible values are: \code{"tmean"} (mean temperature, default), \code{"tmax"} (maximum temperature), \code{"tmin"} (minimum temperature), \code{"prcp"} (total precipitation), or \code{"slp"} (sea-level pressure).}
+\item{var}{\code{character}; Meteorological variable. Possible values are: \code{"tmean"} (mean temperature, default), \code{"tmax"} (maximum temperature), \code{"tmin"} (minimum temperature), \code{"prcp"} (total precipitation).}
 \item{agg_level}{\code{character}; Aggregation level. Possible values are: \code{"agg"} (aggregated, default) or \code{"ltm"} (long-term mean).}
 \item{time_scale}{\code{character}; Time scale. Possible values are: \code{"day"} (daily, default), \code{"mon"} (monthly), or \code{"ann"} (annual).}
 \item{from}{\code{character}; Time reference from. Format is the same as for the parameter \code{time}}
@@ -25,19 +25,19 @@ get_meteo(var = "tmean",
 \item{api_key}{\code{character}; API key. Check DailyMeteo portal (https://app.dailymeteo.com/)}
 }
 
-\value{\link[base]{data.frame} object with columns \code{loc} (location index from \code{loc} argument), \code{timestamp} (time reference), and \code{value} (meteorological value).}
+\value{\link[base]{data.frame} object with columns \code{timestamp} (time reference) and \code{value} (meteorological value).}
 \author{Aleksandar Sekulić \email{asekulic@grf.bg.ac.rs}}
 
 \seealso{
-\code{\link{get_coordinates}}
+\code{\link{get_coordinates}}, \code{\link{get_meteoeurope1km}}
 }
 \examples{
 \dontrun{
-loc <- get_coordinates("Belgrade")
-loc <- rbind(loc, get_coordinates("Kopaonik"))
+loc <- get_coordinates("Belgrade") # c(lat, lon)
 loc
 api_key <- "" # get API key from DailyMeteo portal (https://app.dailymeteo.com/)
-result <- get_meteo(loc = loc,
+result <- get_meteo(lat = loc[1],
+                   lon = loc[2],
                    var = "tmean",
                    agg_level = "agg",
                    time_scale = "day",

@@ -23,5 +23,5 @@ import(sp,
   raster,
   terra,
   jsonlite)
-export(meteo2STFDF, temp_geom, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk, cv.strk, data.prepare, acc.metric.fun, near.obs, near.obs.soil, rfsi, pred.rfsi, tune.rfsi, cv.rfsi, get_meteo, get_coordinates)
+export(meteo2STFDF, temp_geom, tgeom2STFDF, tiling, rfillspgaps, rfilltimegaps, rm.dupl, pred.strk, cv.strk, data.prepare, acc.metric.fun, near.obs, near.obs.soil, rfsi, pred.rfsi, tune.rfsi, cv.rfsi, get_meteo, get_coordinates, get_meteoeurope1km, meteoeurope1km_files)
 

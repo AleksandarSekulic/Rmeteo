@@ -1,7 +1,7 @@
 \name{get_coordinates}
 \alias{get_coordinates}
-\title{Get lon/lat coordinates for a specific location name.}
-\description{The function gives back lon/lat coordinates for a specific location name using Nominatim (https://nominatim.org/) service.}
+\title{Get lat/lon coordinates for a specific location name.}
+\description{The function gives back lat/lon coordinates for a specific location name using Nominatim (https://nominatim.org/) service.}
 \usage{
 get_coordinates(location_name = "Belgrade")
 }
@@ -9,7 +9,7 @@ get_coordinates(location_name = "Belgrade")
 \item{location_name}{\code{character}; Location name (e.g. "Belgrade").}
 }
 
-\value{\code{numeric} vector with lon/lat values for a specific location name.}
+\value{\code{numeric} vector with latitude and longitude (WGS84) for a specific location name, in that order.}
 \author{Aleksandar Sekulić \email{asekulic@grf.bg.ac.rs}}
 
 \seealso{
